@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="js/jquery-1.6.4.min.js"></script>
+<script src="js/fapi.js"></script>
+<script src="js/fafail.js"></script>
+</head>
+<body>
+    <a id="link" href="#" onclick="getFA(); return false;">CLICK</a>
+    <div id="result"></div>
+    <applet name="proxyApplet" code="com.proxy.proxyapplet.Proxy" codebase="." archive="proxy.jar" width="200" heigth="200">
+        <a href="http://java.com">no java ?</a>
+    </applet>
+</body>
+</html>
