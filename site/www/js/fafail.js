@@ -34,13 +34,17 @@ fafail.showImage = function(submission) {
     $(div).hide();
     $(img).appendTo(div);
     $(img).load(function () {
-      var top = Math.floor(Math.random()*($('#show').height() - img.height + 1));
-      var left = Math.floor(Math.random()*($('#show').width() - img.width + 1));
-      $(div).css('top', top).css('left', left);
+      var top = Math.floor(Math.random()*($('#show').height() - img.height));
+      var left = Math.floor(Math.random()*($('#show').width() - img.width));
+      $(div).css('top', top).css('left', left).css('z-index', 990);
       $(div).appendTo('#show').animaDrag({
           interval: 100,
           speed: 400,
-          boundary: $('#show')
+          boundary: $('#show'),
+          overlay: false,
+          after: function() {
+              $(div).appendTo('#show');
+          }
       }).fadeIn();
     }).attr('src', submission.resource.half);
 }
