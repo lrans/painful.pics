@@ -6,7 +6,6 @@ fapi.inner = {};
 fapi.inner.proxy = function(url) {
     console.log('proxy for : ' + url);
     var result = document.proxyApplet.request(url);
-    //console.log(result);
     return $($.parseXML(result));
 }
 
@@ -88,4 +87,29 @@ fapi.getGallery = function(user, nbSubmissions, callback) {
 fapi.getRecent = function(nbRecents, callback) {
     var NB_RECENTS_PER_PAGE = 32;
     return fapi.inner.getSubmission('/browse/', nbRecents, NB_RECENTS_PER_PAGE, callback);
+}
+
+fapi.doLogin = function(login, password) {
+    document.proxyApplet.request('/login/', 'POST', JSON.stringify({
+        action:'login', 
+        retard_protection: 1, 
+        name : login, 
+        pass : password, 
+        login : 'Login to FurAffinity'
+    }));
+}
+
+fapi.doLogout = function() {
+    fapi.inner.proxy('/logout/');
+}
+
+fapi.getCurrentUser = function () {
+    var pageXML = fapi.inner.proxy('/');
+    var node = pageXML.find('#logout-link').parent().find('span').find('a').attr('href');
+    if (node) {
+        var user = /\/user\/(.*)\//.exec(node)[1];
+        return user;
+    } else {
+        return null;
+    }
 }
