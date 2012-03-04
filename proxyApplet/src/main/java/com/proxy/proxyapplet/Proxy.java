@@ -33,8 +33,8 @@ public class Proxy extends Applet {
     @Override
     public void init() {
         super.init();
-        JSObject win = (JSObject) JSObject.getWindow(this);
-        win.eval("alert('" + StringEscapeUtils.escapeJavaScript(request("")) + "');");
+        /*JSObject win = (JSObject) JSObject.getWindow(this);
+        win.eval("alert('" + StringEscapeUtils.escapeJavaScript(request("")) + "');");*/
     }
 
     public static String request(final String url) {

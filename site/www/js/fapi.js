@@ -4,7 +4,9 @@ var fapi = {};
 fapi.inner = {};
 
 fapi.inner.proxy = function(url) {
+    console.log('proxy for : ' + url);
     var result = document.proxyApplet.request(url);
+    //console.log(result);
     return $($.parseXML(result));
 }
 
@@ -12,19 +14,27 @@ fapi.inner.extractSubmissions = function(pageXML, callback) {
     var result = null;
     var pageHasResults = false;
     pageXML.find('ul[class="messages-stream"]').find('li').map(function(){
-        var id = $(this).attr('id').substr(3);
+        var id = /id_([0-9]+)/.exec($(this).attr('id'))[1];
         if (id) {
             if (!result) {
                 result = {};
             }
             pageHasResults = true;
+            var imgThumbURL = $(this).find('img[alt="thumb"]').attr('src');
+            var imgId = /([0-9]+)\./.exec(imgThumbURL)[1];
+            var matchThumb = /(.*)\.thumbnail\.(.*)/.exec(imgThumbURL);
             result[id] = {
                 id: id,
-                thumbnail: $(this).find('img[alt="thumb"]').attr('src'),
                 title: $(this).find('div[class="info"]').find('span').text(),
                 author: {
                     name: $(this).find('div[class="info"]').find('a').text(),
-                    handle: $(this).find('div[class="info"]').find('a').attr('href').substr(6)
+                    handle: /\/user\/(.*)\//.exec($(this).find('div[class="info"]').find('a').attr('href'))[1]
+                },
+                resource: {
+                    id: imgId,
+                    thumbnail: imgThumbURL,
+                    half: matchThumb[1] + '.half.' + matchThumb[2],
+                    full: matchThumb[1] + '.' + matchThumb[2]
                 }
             };
         }
@@ -41,21 +51,21 @@ fapi.inner.extractSubmissions = function(pageXML, callback) {
         });
     }
     if (typeof(callback) == 'function') {
-        $.map(result, function(id, submission) {
+        $.map(result, function(submission){
             callback(submission);
         });
     }
     return result;
 }
 
-fapi.inner.getSubmission(baseURL, nb, nbPerPage, callback) {
+fapi.inner.getSubmission = function(baseURL, nb, nbPerPage, callback) {
     var nbPages = Math.max(1, nb / nbPerPage);
     var result = {};
     for (var page = 1; page <= nbPages || !(nb); page++) {
         var pageXml = fapi.inner.proxy(baseURL + '/' + page);
         var pageSubmissions = fapi.inner.extractSubmissions(pageXml, callback);
         if (pageSubmissions) {
-            $(pageSubmissions).map(function(id, props){
+            $.map(pageSubmissions, function(props, id){
                 result[id] = props;
             });
         } else {
@@ -67,24 +77,15 @@ fapi.inner.getSubmission(baseURL, nb, nbPerPage, callback) {
 
 fapi.getFavs = function(user, nbFavs, callback) {
     var NB_FAVS_PER_PAGE = 32;
-    return 
+    return fapi.inner.getSubmission('/favorites/' + user, nbFavs, NB_FAVS_PER_PAGE, callback);
 }
 
-fapi.getRecent = function(user, nbRecents, callback) {
+fapi.getGallery = function(user, nbSubmissions, callback) {
+    var NB_SUBS_PER_PAGE = 32;
+    return fapi.inner.getSubmission('/gallery/' + user, nbSubmissions, NB_SUBS_PER_PAGE, callback);
+}
+
+fapi.getRecent = function(nbRecents, callback) {
     var NB_RECENTS_PER_PAGE = 32;
-    var nbPages = Math.max(1, nbFavs / NB_FAVS_PER_PAGE);
-    var result = {};
-    for (var page = 1; page <= nbPages || !(nbFavs); page++) {
-        var pageXml = fapi.inner.proxy('/favorites/' + user + '/' + page);
-        var pageSubmissions = fapi.inner.extractSubmissions(pageXml, callback);
-        if (pageSubmissions) {
-            $(pageSubmissions).map(function(id, props){
-                result[id] = props;
-            });
-        } else {
-            break;
-        }
-    }
-    return result;
+    return fapi.inner.getSubmission('/browse/', nbRecents, NB_RECENTS_PER_PAGE, callback);
 }
-
