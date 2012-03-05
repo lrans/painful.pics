@@ -45,3 +45,11 @@ div.submission img {
     cursor: pointer;
 }
 
+div.submissions-buttons {
+    float: right;
+}
+
+div.submissions-buttons a {
+    border: none;
+}
+

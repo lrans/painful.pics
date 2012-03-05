@@ -50,6 +50,48 @@ fafail.showImage = function(submission) {
                 $(div).appendTo('#show');
             }
         }).fadeIn();
+        var buttons = $('<div class="submission-buttons"></div>');
+        
+        var gotoSubmissionPage = $('<a href="http://www.furaffinity.net/view/' + submission.id + '/" target="_new"><img src="img/internet-web-browser.png"/></a>');
+        gotoSubmissionPage.appendTo(buttons);
+        
+        var deleteSubmission = $('<img src="img/edit-delete.png" title="D&eacute;gage, saloperie !"/>').click(function(){
+            $(div).hide();
+        });
+        deleteSubmission.appendTo(buttons);
+        
+        var zoomSubmission = $('<img src="img/zoom-draw.png" title="View full size"/>').click(function(){
+            var imgButton = $(this);
+            imgButton.fadeOut();
+            var fullImg = new Image();
+            $(fullImg).load(function () {
+                $(img).fadeOut();
+                $(fullImg).hide();
+                $(fullImg).appendTo(div);
+                $(fullImg).click(function(){
+                    $(fullImg).fadeOut();
+                    $(img).fadeIn();
+                    $(fullImg).remove();
+                    imgButton.fadeIn();
+                    // TODO super effet de zoom
+                });
+                $(fullImg).fadeIn();
+            }).attr('src', submission.resource.full);
+        });
+        zoomSubmission.appendTo(buttons);
+        
+        var favSubmission = $('<img src="img/emblem-favorite.png" title="Me gusta"/>').click(function(){
+            // TODO +fav
+        });
+        favSubmission.appendTo(buttons);
+
+        buttons.hide();
+        buttons.appendTo(div);
+        $(div).mouseenter(function(){
+            buttons.fadeIn();
+        }).mouseleave(function(){
+            buttons.fadeOut();
+        });
     }).attr('src', submission.resource.half);
 }
 
