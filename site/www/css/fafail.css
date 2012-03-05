@@ -45,11 +45,16 @@ div.submission img {
     cursor: pointer;
 }
 
-div.submissions-buttons {
-    float: right;
+div.submission-buttons {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
 }
 
-div.submissions-buttons a {
+div.submission-buttons a {
     border: none;
 }
 
+div.submission-buttons img {
+    padding: 5px;
+}

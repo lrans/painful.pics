@@ -18,7 +18,7 @@ fafail.addSubmission = function(submission) {
 fafail.getRecent = function() {
     fapi.getRecent(32, fafail.addSubmission);
     if (fafail.vars.browsing) {
-        setTimeout(fafail.getRecent, 10 * 1000);
+        setTimeout(fafail.getRecent, 30 * 1000);
     }
 }
 
@@ -28,7 +28,7 @@ fafail.displayRecent = function() {
         fafail.showImage(submission);
     }
     if (fafail.vars.browsing) {
-        setTimeout(fafail.displayRecent, 0.5 * 1000);
+        setTimeout(fafail.displayRecent, 1 * 1000);
     }
 }
 
@@ -36,30 +36,22 @@ fafail.showImage = function(submission) {
     var img = new Image();
     var div = $('<div class="submission" name="' + submission.id + '"></div>');
     $(div).hide();
-    $(img).appendTo(div);
+    $(img).attr('class', 'half').appendTo(div);
     $(img).load(function () {
         var top = Math.floor(Math.random()*($('#show').height() - img.height - 10));
         var left = Math.floor(Math.random()*($('#show').width() - img.width - 10));
         $(div).css('top', top).css('left', left).css('z-index', 990);
-        $(div).appendTo('#show').animaDrag({
-            interval: 100,
-            speed: 400,
-            boundary: $('#show'),
-            overlay: false,
-            after: function() {
-                $(div).appendTo('#show');
-            }
-        }).fadeIn();
+        
         var buttons = $('<div class="submission-buttons"></div>');
         
-        var gotoSubmissionPage = $('<a href="http://www.furaffinity.net/view/' + submission.id + '/" target="_new"><img src="img/internet-web-browser.png"/></a>');
+        var gotoSubmissionPage = $('<a href="http://www.furaffinity.net/view/' + submission.id + '/" target="_new" title="Go to submission page"><img src="img/internet-web-browser.png"/></a>');
         gotoSubmissionPage.appendTo(buttons);
         
         var deleteSubmission = $('<img src="img/edit-delete.png" title="D&eacute;gage, saloperie !"/>').click(function(){
             $(div).hide();
         });
         deleteSubmission.appendTo(buttons);
-        
+
         var zoomSubmission = $('<img src="img/zoom-draw.png" title="View full size"/>').click(function(){
             var imgButton = $(this);
             imgButton.fadeOut();
@@ -68,6 +60,7 @@ fafail.showImage = function(submission) {
                 $(img).fadeOut();
                 $(fullImg).hide();
                 $(fullImg).appendTo(div);
+                $(fullImg).mousedown(function(e){$(img).mousedown(e);});
                 $(fullImg).click(function(){
                     $(fullImg).fadeOut();
                     $(img).fadeIn();
@@ -78,20 +71,32 @@ fafail.showImage = function(submission) {
                 $(fullImg).fadeIn();
             }).attr('src', submission.resource.full);
         });
-        zoomSubmission.appendTo(buttons);
+        //zoomSubmission.appendTo(buttons);
         
         var favSubmission = $('<img src="img/emblem-favorite.png" title="Me gusta"/>').click(function(){
             // TODO +fav
         });
-        favSubmission.appendTo(buttons);
+        //favSubmission.appendTo(buttons);
 
         buttons.hide();
         buttons.appendTo(div);
         $(div).mouseenter(function(){
-            buttons.fadeIn();
+            buttons.fadeIn('fast');
         }).mouseleave(function(){
-            buttons.fadeOut();
+            buttons.fadeOut('fast');
         });
+
+        $(div).appendTo('#show').animaDrag({
+            interval: 100,
+            speed: 400,
+            boundary: $('#show'),
+            overlay: false,
+            after: function() {
+                $(div).appendTo('#show');
+            },
+            grip:'img.half'
+        }).fadeIn();
+        
     }).attr('src', submission.resource.half);
 }
 
@@ -130,7 +135,7 @@ fafail.initTools = function() {
         if(fafail.vars.browsing) {
             $('img[name="tool-browse"]').attr('src', 'img/chronometer.png').attr('title', 'Click to browse new submissions in real time');
             fafail.vars.browsing = false;
-            fafail.clearShow();
+            //fafail.clearShow();
         } else {
             fafail.vars.browsing = true;
             $('img[name="tool-browse"]').attr('src', 'img/wait.png').attr('title', 'Currently browsing, click to stop');
