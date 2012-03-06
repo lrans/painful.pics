@@ -1,8 +1,3 @@
-/*function getFA() {
-    fapi.getRecent(64, function(submission){
-        console.log(submission.title);
-    })
-}*/
 
 var fafail = {};
 
@@ -34,9 +29,11 @@ fafail.displayRecent = function() {
 
 fafail.showImage = function(submission) {
     var img = new Image();
+    var fullImg = new Image();
     var div = $('<div class="submission" name="' + submission.id + '"></div>');
     $(div).hide();
-    $(img).attr('class', 'half').appendTo(div);
+    $(fullImg).hide().attr('class', 'handle').appendTo(div);
+    $(img).attr('class', 'handle').appendTo(div);
     $(img).load(function () {
         var top = Math.floor(Math.random()*($('#show').height() - img.height - 10));
         var left = Math.floor(Math.random()*($('#show').width() - img.width - 10));
@@ -54,29 +51,43 @@ fafail.showImage = function(submission) {
 
         var zoomSubmission = $('<img src="img/zoom-draw.png" title="View full size"/>').click(function(){
             var imgButton = $(this);
-            imgButton.fadeOut();
-            var fullImg = new Image();
-            $(fullImg).load(function () {
-                $(img).fadeOut();
-                $(fullImg).hide();
-                $(fullImg).appendTo(div);
-                $(fullImg).mousedown(function(e){$(img).mousedown(e);});
-                $(fullImg).click(function(){
-                    $(fullImg).fadeOut();
-                    $(img).fadeIn();
-                    $(fullImg).remove();
-                    imgButton.fadeIn();
-                    // TODO super effet de zoom
-                });
-                $(fullImg).fadeIn();
-            }).attr('src', submission.resource.full);
+            imgButton.fadeOut('fast');
+            if (imgButton.attr('name') == 'full') {
+                $(fullImg).fadeOut();
+                $(img).fadeIn();
+                imgButton.attr('name','half').attr('title', 'View full size').fadeIn('fast');
+            } else {
+                $(fullImg).load(function () {
+                    var fullDimensions = {height: fullImg.height, width: fullImg.width};
+                    $(fullImg).css('height', img.height).css('width', img.width);
+                    $(img).hide();
+                    $(fullImg).show();
+                    var targetDimensions = {
+                        height: Math.max(fullDimensions.height, $('#show').height() - 10),
+                        width: Math.max(fullDimensions.width, $('#show').width() - 10)
+                    };
+                    var targetPosition = {
+                        top: (targetDimensions.height +  $(div).css('top') > $('#show').height() ? $('#show').height() - targetDimensions.height : $(div).css('top')),
+                        left: (targetDimensions.width +  $(div).css('left') > $('#show').width() ? $('#show').width() - targetDimensions.width : $(div).css('left'))
+                    };
+                    $(fullImg).animate({height: targetDimensions.height, width: targetDimensions.width}, 600);
+                    $(div).animate({top: targetPosition.top, left: targetPosition.left}, 600);
+                    imgButton.attr('name', 'full').attr('title', 'View half size').fadeIn('fast');
+                }).attr('src', submission.resource.full);
+            }
         });
-        //zoomSubmission.appendTo(buttons);
-        
+        zoomSubmission.appendTo(buttons);
+
         var favSubmission = $('<img src="img/emblem-favorite.png" title="Me gusta"/>').click(function(){
-            // TODO +fav
+            $(this).attr('src', 'img/wait.png');
+            if (fapi.doFav(submission.id)) {
+                // whatever
+                $(this).fadeOut('fast');
+            } else {
+                $(this).attr('src', 'img/emblem-favorite.png');
+            }
         });
-        //favSubmission.appendTo(buttons);
+        favSubmission.appendTo(buttons);
 
         buttons.hide();
         buttons.appendTo(div);
@@ -94,7 +105,7 @@ fafail.showImage = function(submission) {
             after: function() {
                 $(div).appendTo('#show');
             },
-            grip:'img.half'
+            grip:'img.handle'
         }).fadeIn();
         
     }).attr('src', submission.resource.half);
@@ -135,7 +146,6 @@ fafail.initTools = function() {
         if(fafail.vars.browsing) {
             $('img[name="tool-browse"]').attr('src', 'img/chronometer.png').attr('title', 'Click to browse new submissions in real time');
             fafail.vars.browsing = false;
-            //fafail.clearShow();
         } else {
             fafail.vars.browsing = true;
             $('img[name="tool-browse"]').attr('src', 'img/wait.png').attr('title', 'Currently browsing, click to stop');
@@ -143,6 +153,10 @@ fafail.initTools = function() {
             fafail.getRecent();
         }
     }).attr('title', 'Browse new submissions in real time');
+    
+    $('img[name="tool-clear"]').click(function(){
+        fafail.clearShow();
+    });
 }
 
 $(document).ready(function(){

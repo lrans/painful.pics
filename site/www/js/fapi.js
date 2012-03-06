@@ -113,3 +113,11 @@ fapi.getCurrentUser = function () {
         return null;
     }
 }
+
+fapi.doFav = function(submissionId) {
+    var pageXML = fapi.inner.proxy('/view/' + submissionId);
+    var favLink = pageXML.find('a').attr('href'); // TODO extraction lien fav
+    var favedPage = fapi.inner.proxy(favLink);
+    return true;// TODO : tester si fav OK
+}
+
