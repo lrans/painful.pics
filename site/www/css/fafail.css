@@ -57,4 +57,5 @@ div.submission-buttons a {
 
 div.submission-buttons img {
     padding: 5px;
+    cursor: pointer;
 }

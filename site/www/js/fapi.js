@@ -115,9 +115,10 @@ fapi.getCurrentUser = function () {
 }
 
 fapi.doFav = function(submissionId) {
+    // TODO : gérer les cookies / image
     var pageXML = fapi.inner.proxy('/view/' + submissionId);
-    var favLink = pageXML.find('a').attr('href'); // TODO extraction lien fav
+    var favLink = pageXML.find('div.actions').find('b').find('a').filter(function(){return $(this).attr('href').indexOf('/fav') == 0;}).attr('href');
     var favedPage = fapi.inner.proxy(favLink);
-    return true;// TODO : tester si fav OK
+    return favedPage.find('div.actions').find('b').find('a').filter(function(){return $(this).attr('href').indexOf('/fav') == 0;}).text().indexOf('-') == 0;
 }
 

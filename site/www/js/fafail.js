@@ -53,25 +53,33 @@ fafail.showImage = function(submission) {
             var imgButton = $(this);
             imgButton.fadeOut('fast');
             if (imgButton.attr('name') == 'full') {
-                $(fullImg).fadeOut();
-                $(img).fadeIn();
-                imgButton.attr('name','half').attr('title', 'View full size').fadeIn('fast');
+                $(fullImg).animate({height: img.height, width: img.width}, 600, function(){
+                    $(fullImg).hide();
+                    $(img).show();
+                    imgButton.attr('name','half').attr('title', 'View full size').fadeIn('fast');
+                });
             } else {
                 $(fullImg).load(function () {
+                    $(fullImg).attr('style', '');
                     var fullDimensions = {height: fullImg.height, width: fullImg.width};
                     $(fullImg).css('height', img.height).css('width', img.width);
                     $(img).hide();
                     $(fullImg).show();
                     var targetDimensions = {
-                        height: Math.max(fullDimensions.height, $('#show').height() - 10),
-                        width: Math.max(fullDimensions.width, $('#show').width() - 10)
+                        height: Math.min(fullDimensions.height, $('#show').height() - 30),
+                        width: Math.min(fullDimensions.width, $('#show').width() - 30)
+                    };
+                    var ratio = Math.min(targetDimensions.height/fullDimensions.height, targetDimensions.width/fullDimensions.width);
+                    targetDimensions = {
+                        height: fullDimensions.height * ratio,
+                        width: fullDimensions.width * ratio
                     };
                     var targetPosition = {
-                        top: (targetDimensions.height +  $(div).css('top') > $('#show').height() ? $('#show').height() - targetDimensions.height : $(div).css('top')),
-                        left: (targetDimensions.width +  $(div).css('left') > $('#show').width() ? $('#show').width() - targetDimensions.width : $(div).css('left'))
+                        top: ((targetDimensions.height +  $(div).position().top)> $('#show').height() ? ($('#show').height() - targetDimensions.height - 20) : $(div).position().top),
+                        left: ((targetDimensions.width +  $(div).position().left) > $('#show').width() ? ($('#show').width() - targetDimensions.width - 20) : $(div).position().left)
                     };
                     $(fullImg).animate({height: targetDimensions.height, width: targetDimensions.width}, 600);
-                    $(div).animate({top: targetPosition.top, left: targetPosition.left}, 600);
+                    $(div).animate({top: targetPosition.top + 'px', left: targetPosition.left + 'px'}, 600);
                     imgButton.attr('name', 'full').attr('title', 'View half size').fadeIn('fast');
                 }).attr('src', submission.resource.full);
             }
@@ -81,13 +89,14 @@ fafail.showImage = function(submission) {
         var favSubmission = $('<img src="img/emblem-favorite.png" title="Me gusta"/>').click(function(){
             $(this).attr('src', 'img/wait.png');
             if (fapi.doFav(submission.id)) {
-                // whatever
                 $(this).fadeOut('fast');
             } else {
                 $(this).attr('src', 'img/emblem-favorite.png');
             }
         });
-        favSubmission.appendTo(buttons);
+        if (fafail.vars.loggedIn) {
+            // favSubmission.appendTo(buttons);
+        }
 
         buttons.hide();
         buttons.appendTo(div);
