@@ -1,18 +1,28 @@
 
-var fapi = {};
+var fapi = {
+    conf: {
+        domain: {
+            base: 'www.furaffinity.net',
+            thumbnails: 't.facdn.net'
+        }
+    }
+};
 
 fapi.inner = {};
 
-fapi.inner.proxy = function(url) {
-    console.log('proxy for : ' + url);
-    var result = document.proxyApplet.request(url);
+fapi.inner.proxy = function(url, domain) {
+    if(!domain) {
+        domain = fapi.conf.domain.base;
+    }
+    console.log('proxy for : ' + domain + url);
+    var result = document.proxyApplet.request(domain, url);
     return $($.parseXML(result));
 }
 
 fapi.inner.extractSubmissions = function(pageXML, callback) {
     var result = null;
     var pageHasResults = false;
-    pageXML.find('center.flow').find('b').map(function(){
+    pageXML.find('.flow.browse').find('b').map(function(){
         var id = /sid_([0-9]+)/.exec($(this).attr('id'))[1];
         if (id) {
             if (!result) {
@@ -36,8 +46,8 @@ fapi.inner.extractSubmissions = function(pageXML, callback) {
                 resource: {
                     id: imgId,
                     thumbnail: imgThumbURL,
-                    half: thumbServer + '/' + subId + '@200-' + imgId,
-                    full: thumbServer + '/' + subId + '@400-' + imgId
+                    small: thumbServer + '/' + subId + '@200-' + imgId,
+                    half: thumbServer + '/' + subId + '@400-' + imgId
                 }
             };
         }
@@ -126,3 +136,15 @@ fapi.doFav = function(submissionId) {
     return favedPage.find('div.actions').find('b').find('a').filter(function(){return $(this).attr('href').indexOf('/fav') == 0;}).text().indexOf('-') == 0;
 }
 
+fapi.getRawImage = function(url, callback) {
+    console.log('img proxy for : ' + url);
+    var extractDomain = /.*\/\/([^\/]+)(\/.*)/.exec(url);
+    var domain = extractDomain[1];
+    var path = extractDomain[2];
+    console.log('img proxy for : ' + domain + path)
+    var result = 'data:image/jpg;base64,' + document.proxyApplet.requestImage(domain, path);
+    if (typeof(callback) == 'function') {
+        callback(result);
+    }
+    return result;
+}

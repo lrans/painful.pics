@@ -23,7 +23,7 @@ fafail.displayRecent = function() {
         fafail.showImage(submission);
     }
     if (fafail.vars.browsing) {
-        setTimeout(fafail.displayRecent, 1 * 1000);
+        setTimeout(fafail.displayRecent, 0.01 * 1000);
     }
 }
 
@@ -31,7 +31,9 @@ fafail.showImage = function(submission) {
     var img = new Image();
     var fullImg = new Image();
     var div = $('<div class="submission" name="' + submission.id + '"></div>');
+    var rotation = Math.floor(Math.random() * 40) - 20;
     $(div).hide();
+    $(div).rotate(rotation);
     $(fullImg).hide().attr('class', 'handle').appendTo(div);
     $(img).attr('class', 'handle').appendTo(div);
     $(img).load(function () {
@@ -45,7 +47,9 @@ fafail.showImage = function(submission) {
         gotoSubmissionPage.appendTo(buttons);
         
         var deleteSubmission = $('<img src="img/edit-delete.png" title="D&eacute;gage, saloperie !"/>').click(function(){
-            $(div).hide();
+            $(div).fadeOut('fast', function(){
+                $(div).remove();
+            });
         });
         deleteSubmission.appendTo(buttons);
 
@@ -58,6 +62,7 @@ fafail.showImage = function(submission) {
                     $(img).show();
                     imgButton.attr('name','half').attr('title', 'View full size').fadeIn('fast');
                 });
+                $(div).rotate({animateTo:rotation, duration:600});
             } else {
                 $(fullImg).load(function () {
                     $(fullImg).attr('style', '');
@@ -79,9 +84,9 @@ fafail.showImage = function(submission) {
                         left: ((targetDimensions.width +  $(div).position().left) > $('#show').width() ? ($('#show').width() - targetDimensions.width - 20) : $(div).position().left)
                     };
                     $(fullImg).animate({height: targetDimensions.height, width: targetDimensions.width}, 600);
-                    $(div).animate({top: targetPosition.top + 'px', left: targetPosition.left + 'px'}, 600);
+                    $(div).animate({top: targetPosition.top + 'px', left: targetPosition.left + 'px'}, 600).rotate({animateTo:0, duration:600});
                     imgButton.attr('name', 'full').attr('title', 'View half size').fadeIn('fast');
-                }).attr('src', submission.resource.full);
+                }).attr('src', fapi.getRawImage(submission.resource.half));
             }
         });
         zoomSubmission.appendTo(buttons);
@@ -117,7 +122,7 @@ fafail.showImage = function(submission) {
             grip:'img.handle'
         }).fadeIn();
         
-    }).attr('src', submission.resource.half);
+    }).attr('src', fapi.getRawImage(submission.resource.small));
 }
 
 fafail.clearShow = function() {

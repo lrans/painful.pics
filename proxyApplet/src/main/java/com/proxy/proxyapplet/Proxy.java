@@ -3,6 +3,8 @@ package com.proxy.proxyapplet;
 import com.sun.org.apache.xml.internal.serialize.OutputFormat;
 import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import java.applet.Applet;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
@@ -33,12 +35,18 @@ import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
+import org.apache.xerces.impl.dv.util.Base64;
 import org.w3c.dom.Document;
 import org.w3c.tidy.Tidy;
+import org.apache.commons.io.IOUtils;
 
 public class Proxy extends Applet {
 
-    private static final String RQ_BASE_URL = "www.furaffinity.net";
+    private static final String DOMAINS[] = {
+        "www.furaffinity.net",
+        "t.facdn.net"
+    };
+
     private final CookieStore cookieStore = new CookieStore() {
 
         public void addCookie(Cookie cookie) {
@@ -54,9 +62,11 @@ public class Proxy extends Applet {
                 String[] nameAndValue = cookieString.split("=");
 
                 if (nameAndValue.length >= 2) {
+                    for(String domain : DOMAINS) {
                     BasicClientCookie cookie = new BasicClientCookie(nameAndValue[0].trim(), nameAndValue[1].trim());
-                    cookie.setDomain("www.furaffinity.net");
-                    result.add(cookie);
+                        cookie.setDomain(domain);
+                        result.add(cookie);
+                    }
                 }
             }
             return result;
@@ -76,15 +86,19 @@ public class Proxy extends Applet {
         super.init();
     }
 
-    public String request(final String url) {
-        return request(url, "GET", "{}");
+    public String request(final String domain, final String url) {
+        return request(domain, url, "GET", "{}", false);
+    }
+    
+    public String requestImage(final String domain, final String url) {
+        return request(domain, url, "GET", "{}", true);
     }
 
-    public String request(final String url, final String method) {
-        return request(url, method, "{}");
+    public String request(final String domain, final String url, final String method) {
+        return request(domain, url, method, "{}", false);
     }
 
-    public String request(final String url, final String method, final String paramsAsJSON) {
+    public String request(final String domain, final String url, final String method, final String paramsAsJSON, final boolean binaryResult) {
         try {
             return AccessController.doPrivileged(new PrivilegedAction<String>() {
 
@@ -93,37 +107,6 @@ public class Proxy extends Applet {
                         DefaultHttpClient httpclient = new DefaultHttpClient();
                         httpclient.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
                         httpclient.setCookieStore(cookieStore);
-                        /*
-                         * httpclient.setRedirectStrategy(new
-                         * DefaultRedirectStrategy() {
-                         *
-                         * @Override public boolean isRedirected( final
-                         * HttpRequest request, final HttpResponse response,
-                         * final HttpContext context) throws ProtocolException {
-                         * if (response == null) { throw new
-                         * IllegalArgumentException("HTTP response may not be
-                         * null"); }
-                         *
-                         * int statusCode =
-                         * response.getStatusLine().getStatusCode(); String
-                         * method = request.getRequestLine().getMethod(); Header
-                         * locationHeader = response.getFirstHeader("location");
-                         * switch (statusCode) { case
-                         * HttpStatus.SC_MOVED_TEMPORARILY: return
-                         * (method.equalsIgnoreCase(HttpGet.METHOD_NAME) ||
-                         * method.equalsIgnoreCase(HttpPost.METHOD_NAME) ||
-                         * method.equalsIgnoreCase(HttpHead.METHOD_NAME)) &&
-                         * locationHeader != null; case
-                         * HttpStatus.SC_MOVED_PERMANENTLY: case
-                         * HttpStatus.SC_TEMPORARY_REDIRECT: return
-                         * method.equalsIgnoreCase(HttpGet.METHOD_NAME) ||
-                         * method.equalsIgnoreCase(HttpPost.METHOD_NAME) ||
-                         * method.equalsIgnoreCase(HttpHead.METHOD_NAME); case
-                         * HttpStatus.SC_SEE_OTHER: return true; default: return
-                         * false; } //end of switch }
-                        });
-                         */
-
 
                         List<NameValuePair> qparams = new ArrayList<NameValuePair>();
                         JSONObject params = JSONObject.fromString(paramsAsJSON);
@@ -136,10 +119,10 @@ public class Proxy extends Applet {
 
                         HttpRequestBase request = null;
                         if ("get".equalsIgnoreCase(method)) {
-                            URI uri = URIUtils.createURI("http", RQ_BASE_URL, -1, url, URLEncodedUtils.format(qparams, "UTF-8"), null);
+                            URI uri = URIUtils.createURI("http", domain, -1, url, URLEncodedUtils.format(qparams, "UTF-8"), null);
                             request = new HttpGet(uri);
                         } else if ("post".equalsIgnoreCase(method)) {
-                            URI uri = URIUtils.createURI("https", RQ_BASE_URL, -1, url, null, null);
+                            URI uri = URIUtils.createURI("https", domain, -1, url, null, null);
                             HttpPost post = new HttpPost(uri);
                             UrlEncodedFormEntity entity = new UrlEncodedFormEntity(qparams, "UTF-8");
                             post.setEntity(entity);
@@ -152,21 +135,28 @@ public class Proxy extends Applet {
                         HttpResponse response = httpclient.execute(request);
                         HttpEntity entity = response.getEntity();
                         if (entity != null) {
-                            System.err.println();
-                            Tidy tidy = new Tidy();
-                            tidy.setMakeClean(true);
-                            tidy.setWrapScriptlets(true);
-                            tidy.setXmlOut(true);
-                            tidy.setQuiet(true);
-                            Document doc = tidy.parseDOM(entity.getContent(), null);
 
-                            OutputFormat format = new OutputFormat(doc);
+                            if (binaryResult) {
+                                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                                IOUtils.copy(response.getEntity().getContent(), out);
+                                return Base64.encode(out.toByteArray());
+                            } else {
+                                System.err.println();
+                                Tidy tidy = new Tidy();
+                                tidy.setMakeClean(true);
+                                tidy.setWrapScriptlets(true);
+                                tidy.setXmlOut(true);
+                                tidy.setQuiet(true);
+                                Document doc = tidy.parseDOM(entity.getContent(), null);
 
-                            Writer out = new StringWriter();
-                            XMLSerializer serializer = new XMLSerializer(out, format);
-                            serializer.serialize(doc);
+                                OutputFormat format = new OutputFormat(doc);
 
-                            return out.toString();
+                                Writer out = new StringWriter();
+                                XMLSerializer serializer = new XMLSerializer(out, format);
+                                serializer.serialize(doc);
+
+                                return out.toString();
+                            }
                         } else {
                             return "Nope! entity null";
                         }
