@@ -23,7 +23,7 @@ fafail.displayRecent = function() {
         fafail.showImage(submission);
     }
     if (fafail.vars.browsing) {
-        setTimeout(fafail.displayRecent, 1 * 1000);
+        setTimeout(fafail.displayRecent, 0.5 * 1000);
     }
 }
 
@@ -117,12 +117,21 @@ fafail.showImage = function(submission) {
             // favSubmission.appendTo(buttons);
         }
 
+        var infos = $('<div class="submission-infos"></div>');
+        
+        var title = $('<span><b>' + submission.title + '</b><i> by <a target="_new" href="http://www.furaffinity.net/user/'+ submission.author.handle +'">'+ submission.author.name +'</a></i></span>');
+        title.appendTo(infos);
+
         buttons.hide();
         buttons.appendTo(div);
+        infos.hide();
+        infos.appendTo(div);
         $(div).mouseenter(function(){
             buttons.fadeIn('fast');
+            infos.fadeIn('fast');
         }).mouseleave(function(){
             buttons.fadeOut('fast');
+            infos.fadeOut('fast');
         });
 
         $(div).appendTo('#show').animaDrag({

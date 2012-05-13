@@ -65,3 +65,13 @@ div.submission-buttons img {
     padding: 5px;
     cursor: pointer;
 }
+
+div.submission-infos {
+    background-color: gray;
+    border-radius: 8px 8px 8px 8px;
+    top: 5px;
+    opacity: 0.9;
+    position: absolute;
+    left: 5px;
+    padding: 3px;
+}
