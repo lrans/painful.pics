@@ -12,28 +12,32 @@ fapi.inner.proxy = function(url) {
 fapi.inner.extractSubmissions = function(pageXML, callback) {
     var result = null;
     var pageHasResults = false;
-    pageXML.find('ul[class="messages-stream"]').find('li').map(function(){
-        var id = /id_([0-9]+)/.exec($(this).attr('id'))[1];
+    pageXML.find('center.flow').find('b').map(function(){
+        var id = /sid_([0-9]+)/.exec($(this).attr('id'))[1];
         if (id) {
             if (!result) {
                 result = {};
             }
             pageHasResults = true;
-            var imgThumbURL = $(this).find('img[alt="thumb"]').attr('src');
-            var imgId = /([0-9]+)\./.exec(imgThumbURL)[1];
-            var matchThumb = /(.*)\.thumbnail\.(.*)/.exec(imgThumbURL);
+            var imgThumbURL = $(this).find('img').attr('src');
+            var matchThumb = /(.*)\/([0-9]+)@([0-9]+)-(.*)#(.*)/.exec(imgThumbURL);
+            var thumbServer = matchThumb[1];
+            var subId = matchThumb[2];
+            var thumbResolution = matchThumb[3];
+            var imgId = matchThumb[4];
+            var authorHandle = matchThumb[5];
             result[id] = {
                 id: id,
-                title: $(this).find('div[class="info"]').find('span').text(),
+                title: $(this).find('span').text(),
                 author: {
-                    name: $(this).find('div[class="info"]').find('a').text(),
-                    handle: /\/user\/(.*)\//.exec($(this).find('div[class="info"]').find('a').attr('href'))[1]
+                    name: $(this).find('small').find('a').text(),
+                    handle: /\/user\/(.*)\//.exec($(this).find('small').find('a').attr('href'))[1]
                 },
                 resource: {
                     id: imgId,
                     thumbnail: imgThumbURL,
-                    half: matchThumb[1] + '.half.' + matchThumb[2],
-                    full: matchThumb[1] + '.' + matchThumb[2]
+                    half: thumbServer + '/' + subId + '@200-' + imgId,
+                    full: thumbServer + '/' + subId + '@400-' + imgId
                 }
             };
         }
