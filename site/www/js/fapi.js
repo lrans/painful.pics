@@ -114,7 +114,7 @@ fapi.inner.getSubmissions = function(baseURL, nbPages, callback, page) {
     var pageXml = fapi.inner.proxy(baseURL + '/' + page);
     fapi.inner.proxy(baseURL + '/' + page, function(pageXML){
         fapi.inner.extractSubmissions(pageXML, callback);
-        if(page <= nbPages) {
+        if(page < nbPages) {
             fapi.inner.getSubmissions(baseURL, nbPages, callback, page + 1);
         }
     });
@@ -177,4 +177,45 @@ fapi.getRawImage = function(url, callback) {
     fapi.inner.proxy(path, function(data){
         callback('data:image/jpg;base64,' + data);
     }, domain, {}, 'GET', true);
+}
+
+fapi.getExtendedInfo = function(submissionID, callback) {
+    fapi.inner.proxy('/full/' + submissionID, function(pageXML){
+        var result = {
+            fullImg: pageXML.find('#submissionImg').attr('src')
+        };
+
+        var infoTD = pageXML.find('b').filter(function(){return $(this).text() == 'Submission information:';}).parent();
+        var contents = infoTD.contents();
+        $.map(contents, function(elem, index){
+            if($(elem).text() == 'Category:') {
+                result['category'] = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+            }
+            if($(elem).text() == 'Theme:') {
+                result['theme'] = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+            }
+            if($(elem).text() == 'Species:') {
+                result['species'] = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+            }
+            if($(elem).text() == 'Gender:') {
+                result['gender'] = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+            }
+            if($(elem).text() == 'Favorites:') {
+                result['favorites'] = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+            }
+            if($(elem).text() == 'Comments:') {
+                result['comments'] = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+            }
+            if($(elem).text() == 'Views:') {
+                result['views'] = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+            }
+        });
+        
+        var keywords = pageXML.find('#keywords').find('a').map(function(){
+            return $(this).text();
+        });
+        result['keywords'] = keywords;
+
+        callback(result);
+    });
 }

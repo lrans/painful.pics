@@ -34,7 +34,7 @@ fafail.showImage = function(submission) {
     var rotation = Math.floor(Math.random() * 40) - 20;
     $(div).hide();
     $(div).rotate(rotation);
-    $(fullImg).hide().attr('class', 'handle').appendTo(div);
+    $(fullImg).attr('src','').hide().attr('class', 'handle').appendTo(div);
     $(img).attr('class', 'handle').appendTo(div);
     $(img).load(function () {
         var top = Math.floor(Math.random()*($('#show').height() - img.height - 10));
@@ -64,7 +64,7 @@ fafail.showImage = function(submission) {
                 });
                 $(div).rotate({animateTo:rotation, duration:600});
             } else {
-                $(fullImg).load(function () {
+                var switchToFull = function() {
                     $(fullImg).attr('style', '');
                     var fullDimensions = {height: fullImg.height, width: fullImg.width};
                     $(fullImg).css('height', img.height).css('width', img.width);
@@ -86,11 +86,21 @@ fafail.showImage = function(submission) {
                     $(fullImg).animate({height: targetDimensions.height, width: targetDimensions.width}, 600);
                     $(div).animate({top: targetPosition.top + 'px', left: targetPosition.left + 'px'}, 600).rotate({animateTo:0, duration:600});
                     imgButton.attr('name', 'full').attr('title', 'View half size').fadeIn('fast');
-                });
-                
-                fapi.getRawImage(submission.resource.half, function(imgSrc){
-                    $(fullImg).attr('src',imgSrc);
-                });
+                }
+
+                if($(fullImg).attr('src') != '') {
+                    switchToFull();
+                } else {
+                    $(fullImg).load(function () {
+                        switchToFull();
+                    });
+                    fapi.getExtendedInfo(submission.id, function(exInfos) {
+                        fafail.submissions[submission.id].extendedInfo = exInfos;
+                        fapi.getRawImage(exInfos.fullImg, function(imgSrc){
+                            $(fullImg).attr('src',imgSrc);
+                        });
+                    });
+                }
             }
         });
         zoomSubmission.appendTo(buttons);
@@ -163,7 +173,7 @@ fafail.initTools = function() {
             fapi.doLogin(login, password, function() {fafail.updateLoginStatus();});
         }
     });
-    
+
     fafail.vars.browsing = false;
     $('img[name="tool-browse"]').click(function(){
         if(fafail.vars.browsing) {
