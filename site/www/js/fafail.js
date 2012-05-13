@@ -23,7 +23,7 @@ fafail.displayRecent = function() {
         fafail.showImage(submission);
     }
     if (fafail.vars.browsing) {
-        setTimeout(fafail.displayRecent, 0.01 * 1000);
+        setTimeout(fafail.displayRecent, 1 * 1000);
     }
 }
 
@@ -86,7 +86,11 @@ fafail.showImage = function(submission) {
                     $(fullImg).animate({height: targetDimensions.height, width: targetDimensions.width}, 600);
                     $(div).animate({top: targetPosition.top + 'px', left: targetPosition.left + 'px'}, 600).rotate({animateTo:0, duration:600});
                     imgButton.attr('name', 'full').attr('title', 'View half size').fadeIn('fast');
-                }).attr('src', fapi.getRawImage(submission.resource.half));
+                });
+                
+                fapi.getRawImage(submission.resource.half, function(imgSrc){
+                    $(fullImg).attr('src',imgSrc);
+                });
             }
         });
         zoomSubmission.appendTo(buttons);
@@ -122,7 +126,11 @@ fafail.showImage = function(submission) {
             grip:'img.handle'
         }).fadeIn();
         
-    }).attr('src', fapi.getRawImage(submission.resource.small));
+    });
+
+    fapi.getRawImage(submission.resource.small, function(imgSrc){
+        $(img).attr('src', imgSrc);
+    });
 }
 
 fafail.clearShow = function() {
@@ -132,12 +140,14 @@ fafail.clearShow = function() {
 }
 
 fafail.updateLoginStatus = function () {
-    fafail.vars.loggedIn = fapi.getCurrentUser();
-    if (fafail.vars.loggedIn) {
-        $('img[name="tool-login"]').attr('src', 'img/system-log-out.png').attr('title', 'Logged in as : ' + fafail.vars.loggedIn + ', click to logout');
-    } else {
-        $('img[name="tool-login"]').attr('src', 'img/view-media-artist.png').attr('title', 'Logged out, click to login');
-    }
+    fapi.getCurrentUser(function(user){
+        fafail.vars.loggedIn = user;
+        if (fafail.vars.loggedIn) {
+            $('img[name="tool-login"]').attr('src', 'img/system-log-out.png').attr('title', 'Logged in as : ' + fafail.vars.loggedIn + ', click to logout');
+        } else {
+            $('img[name="tool-login"]').attr('src', 'img/view-media-artist.png').attr('title', 'Logged out, click to login');
+        }
+    });
 }
 
 fafail.initTools = function() {
@@ -146,13 +156,12 @@ fafail.initTools = function() {
     $('img[name="tool-login"]').click(function(){
         $('img[name="tool-login"]').attr('src', 'img/wait.png').attr('title', 'Processing...');
         if (fafail.vars.loggedIn) {
-            fapi.doLogout();
+            fapi.doLogout(fafail.updateLoginStatus);
         } else {
             var login = prompt('Login');
             var password = prompt('Password');
-            fapi.doLogin(login, password);
+            fapi.doLogin(login, password, function() {fafail.updateLoginStatus();});
         }
-        fafail.updateLoginStatus();
     });
     
     fafail.vars.browsing = false;

@@ -10,13 +10,49 @@ var fapi = {
 
 fapi.inner = {};
 
-fapi.inner.proxy = function(url, domain) {
+fapi.inner.proxycallBacks = {};
+
+var proxyCallBack = function(key, rawResult) {
+    fapi.inner.proxycallBacks[key](rawResult);
+    fapi.inner.proxycallBacks[key] = null;
+}
+
+fapi.inner.proxy = function(path, callback, domain, params, method, binaryResult) {
     if(!domain) {
         domain = fapi.conf.domain.base;
     }
-    console.log('proxy for : ' + domain + url);
-    var result = document.proxyApplet.request(domain, url);
-    return $($.parseXML(result));
+    if(!method) {
+        method = 'GET';
+    }
+    if(!params) {
+        params = {};
+    }
+    if(!binaryResult) {
+        binaryResult = false;
+    } else {
+        binaryResult = true;
+    }
+    console.log('proxy for : ' + domain + path);
+
+    var chars = "abcdefghiklmnopqrstuvwxyz";
+    var string_length = 64;
+    var key = '';
+    for (var i=0; i<string_length; i++) {
+            var rnum = Math.floor(Math.random() * chars.length);
+            key += chars.substring(rnum,rnum+1);
+    }
+
+    fapi.inner.proxycallBacks[key] = function(rawResult) {
+        if (typeof(callback) == 'function') {
+            if (binaryResult) {
+                callback(rawResult);
+            } else {
+                callback($($.parseXML(rawResult)));
+            }
+        }
+    };
+
+    document.proxyApplet.request(domain, path, method,JSON.stringify(params), binaryResult, key)
 }
 
 fapi.inner.extractSubmissions = function(pageXML, callback) {
@@ -45,8 +81,8 @@ fapi.inner.extractSubmissions = function(pageXML, callback) {
                 },
                 resource: {
                     id: imgId,
-                    thumbnail: imgThumbURL,
-                    small: thumbServer + '/' + subId + '@200-' + imgId,
+                    tiny: thumbServer + '/' + subId + '@100-' + imgId,
+                    small: thumbServer + '/' + subId + '@300-' + imgId,
                     half: thumbServer + '/' + subId + '@400-' + imgId
                 }
             };
@@ -63,69 +99,66 @@ fapi.inner.extractSubmissions = function(pageXML, callback) {
             });
         });
     }
-    if (typeof(callback) == 'function') {
-        $.map(result, function(submission){
-            callback(submission);
-        });
-    }
-    return result;
+    $.map(result, function(submission){
+        callback(submission);
+    });
 }
 
 fapi.inner.getSubmission = function(baseURL, nb, nbPerPage, callback) {
     var nbPages = Math.max(1, nb / nbPerPage);
-    var result = {};
-    for (var page = 1; page <= nbPages || !(nb); page++) {
-        var pageXml = fapi.inner.proxy(baseURL + '/' + page);
-        var pageSubmissions = fapi.inner.extractSubmissions(pageXml, callback);
-        if (pageSubmissions) {
-            $.map(pageSubmissions, function(props, id){
-                result[id] = props;
-            });
-        } else {
-            break;
+    fapi.inner.getSubmissions(baseURL, nbPages, callback, 1);
+}
+
+
+fapi.inner.getSubmissions = function(baseURL, nbPages, callback, page) {
+    var pageXml = fapi.inner.proxy(baseURL + '/' + page);
+    fapi.inner.proxy(baseURL + '/' + page, function(pageXML){
+        fapi.inner.extractSubmissions(pageXML, callback);
+        if(page <= nbPages) {
+            fapi.inner.getSubmissions(baseURL, nbPages, callback, page + 1);
         }
-    }
-    return result;
+    });
 }
 
 fapi.getFavs = function(user, nbFavs, callback) {
     var NB_FAVS_PER_PAGE = 32;
-    return fapi.inner.getSubmission('/favorites/' + user, nbFavs, NB_FAVS_PER_PAGE, callback);
+    fapi.inner.getSubmission('/favorites/' + user, nbFavs, NB_FAVS_PER_PAGE, callback);
 }
 
 fapi.getGallery = function(user, nbSubmissions, callback) {
     var NB_SUBS_PER_PAGE = 32;
-    return fapi.inner.getSubmission('/gallery/' + user, nbSubmissions, NB_SUBS_PER_PAGE, callback);
+    fapi.inner.getSubmission('/gallery/' + user, nbSubmissions, NB_SUBS_PER_PAGE, callback);
 }
 
 fapi.getRecent = function(nbRecents, callback) {
     var NB_RECENTS_PER_PAGE = 32;
-    return fapi.inner.getSubmission('/browse/', nbRecents, NB_RECENTS_PER_PAGE, callback);
+    fapi.inner.getSubmission('/browse/', nbRecents, NB_RECENTS_PER_PAGE, callback);
 }
 
-fapi.doLogin = function(login, password) {
-    document.proxyApplet.request('/login/', 'POST', JSON.stringify({
+fapi.doLogin = function(login, password, callback) {
+    fapi.inner.proxy('/login/', callback, 'www.furaffinity.net', {
         action:'login', 
         retard_protection: 1, 
         name : login, 
         pass : password, 
         login : 'Login to FurAffinity'
-    }));
+    }, 'POST', true);
 }
 
-fapi.doLogout = function() {
-    fapi.inner.proxy('/logout/');
+fapi.doLogout = function(callback) {
+    fapi.inner.proxy('/logout/', callback);
 }
 
-fapi.getCurrentUser = function () {
-    var pageXML = fapi.inner.proxy('/');
-    var node = pageXML.find('#logout-link').parent().find('span').find('a').attr('href');
-    if (node) {
-        var user = /\/user\/(.*)\//.exec(node)[1];
-        return user;
-    } else {
-        return null;
-    }
+fapi.getCurrentUser = function(callback) {
+    fapi.inner.proxy('/', function(pageXML){
+        var node = pageXML.find('#logout-link').parent().find('span').find('a').attr('href');
+        if (node) {
+            var user = /\/user\/(.*)\//.exec(node)[1];
+            callback(user);
+        } else {
+            callback(null);
+        }
+    });
 }
 
 fapi.doFav = function(submissionId) {
@@ -137,14 +170,11 @@ fapi.doFav = function(submissionId) {
 }
 
 fapi.getRawImage = function(url, callback) {
-    console.log('img proxy for : ' + url);
     var extractDomain = /.*\/\/([^\/]+)(\/.*)/.exec(url);
     var domain = extractDomain[1];
     var path = extractDomain[2];
     console.log('img proxy for : ' + domain + path)
-    var result = 'data:image/jpg;base64,' + document.proxyApplet.requestImage(domain, path);
-    if (typeof(callback) == 'function') {
-        callback(result);
-    }
-    return result;
+    fapi.inner.proxy(path, function(data){
+        callback('data:image/jpg;base64,' + data);
+    }, domain, {}, 'GET', true);
 }

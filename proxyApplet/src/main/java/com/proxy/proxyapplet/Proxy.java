@@ -3,7 +3,6 @@ package com.proxy.proxyapplet;
 import com.sun.org.apache.xml.internal.serialize.OutputFormat;
 import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import java.applet.Applet;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -15,14 +14,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.sf.json.JSONObject;
 import netscape.javascript.JSObject;
 import org.apache.http.*;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.params.ClientPNames;
@@ -31,10 +30,8 @@ import org.apache.http.client.utils.URIUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HttpContext;
 import org.apache.xerces.impl.dv.util.Base64;
 import org.w3c.dom.Document;
 import org.w3c.tidy.Tidy;
@@ -46,7 +43,6 @@ public class Proxy extends Applet {
         "www.furaffinity.net",
         "t.facdn.net"
     };
-
     private final CookieStore cookieStore = new CookieStore() {
 
         public void addCookie(Cookie cookie) {
@@ -62,8 +58,8 @@ public class Proxy extends Applet {
                 String[] nameAndValue = cookieString.split("=");
 
                 if (nameAndValue.length >= 2) {
-                    for(String domain : DOMAINS) {
-                    BasicClientCookie cookie = new BasicClientCookie(nameAndValue[0].trim(), nameAndValue[1].trim());
+                    for (String domain : DOMAINS) {
+                        BasicClientCookie cookie = new BasicClientCookie(nameAndValue[0].trim(), nameAndValue[1].trim());
                         cookie.setDomain(domain);
                         result.add(cookie);
                     }
@@ -86,90 +82,106 @@ public class Proxy extends Applet {
         super.init();
     }
 
-    public String request(final String domain, final String url) {
-        return request(domain, url, "GET", "{}", false);
-    }
-    
-    public String requestImage(final String domain, final String url) {
-        return request(domain, url, "GET", "{}", true);
+    public void request(final String domain, final String url, final String callback) {
+        request(domain, url, "GET", "{}", false, callback);
     }
 
-    public String request(final String domain, final String url, final String method) {
-        return request(domain, url, method, "{}", false);
+    public void requestImage(final String domain, final String url, final String callback) {
+        request(domain, url, "GET", "{}", true, callback);
     }
 
-    public String request(final String domain, final String url, final String method, final String paramsAsJSON, final boolean binaryResult) {
+    public void request(final String domain, final String url, final String method, final String callback) {
+        request(domain, url, method, "{}", false, callback);
+    }
+
+    public void request(final String domain, final String url, final String method, final String paramsAsJSON, final boolean binaryResult, final String callback) {
         try {
-            return AccessController.doPrivileged(new PrivilegedAction<String>() {
+            AccessController.doPrivileged(new PrivilegedAction<String>() {
 
                 public String run() {
-                    try {
-                        DefaultHttpClient httpclient = new DefaultHttpClient();
-                        httpclient.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
-                        httpclient.setCookieStore(cookieStore);
+                    new Thread(new Runnable() {
 
-                        List<NameValuePair> qparams = new ArrayList<NameValuePair>();
-                        JSONObject params = JSONObject.fromString(paramsAsJSON);
-                        Iterator<Object> keysIt = params.keys();
-                        while (keysIt.hasNext()) {
-                            String key = keysIt.next().toString();
-                            String value = params.get(key).toString();
-                            qparams.add(new BasicNameValuePair(key, value));
-                        }
+                        public void run() {
+                            String result = "";
+                            try {
 
-                        HttpRequestBase request = null;
-                        if ("get".equalsIgnoreCase(method)) {
-                            URI uri = URIUtils.createURI("http", domain, -1, url, URLEncodedUtils.format(qparams, "UTF-8"), null);
-                            request = new HttpGet(uri);
-                        } else if ("post".equalsIgnoreCase(method)) {
-                            URI uri = URIUtils.createURI("https", domain, -1, url, null, null);
-                            HttpPost post = new HttpPost(uri);
-                            UrlEncodedFormEntity entity = new UrlEncodedFormEntity(qparams, "UTF-8");
-                            post.setEntity(entity);
-                            // post.addHeader("Referer", "https://www.furaffinity.net/login/");
-                            request = post;
-                        } else {
-                            throw new InvalidParameterException("method " + method + "unknown");
-                        }
+                                DefaultHttpClient httpclient = new DefaultHttpClient();
+                                httpclient.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
+                                httpclient.setCookieStore(cookieStore);
 
-                        HttpResponse response = httpclient.execute(request);
-                        HttpEntity entity = response.getEntity();
-                        if (entity != null) {
+                                List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+                                JSONObject params = JSONObject.fromString(paramsAsJSON);
+                                Iterator<Object> keysIt = params.keys();
+                                while (keysIt.hasNext()) {
+                                    String key = keysIt.next().toString();
+                                    String value = params.get(key).toString();
+                                    qparams.add(new BasicNameValuePair(key, value));
+                                }
 
-                            if (binaryResult) {
-                                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                                IOUtils.copy(response.getEntity().getContent(), out);
-                                return Base64.encode(out.toByteArray());
-                            } else {
-                                System.err.println();
-                                Tidy tidy = new Tidy();
-                                tidy.setMakeClean(true);
-                                tidy.setWrapScriptlets(true);
-                                tidy.setXmlOut(true);
-                                tidy.setQuiet(true);
-                                Document doc = tidy.parseDOM(entity.getContent(), null);
+                                HttpRequestBase request = null;
+                                if ("get".equalsIgnoreCase(method)) {
+                                    URI uri = URIUtils.createURI("http", domain, -1, url, URLEncodedUtils.format(qparams, "UTF-8"), null);
+                                    request = new HttpGet(uri);
+                                } else if ("post".equalsIgnoreCase(method)) {
+                                    URI uri = URIUtils.createURI("https", domain, -1, url, null, null);
+                                    HttpPost post = new HttpPost(uri);
+                                    UrlEncodedFormEntity entity = new UrlEncodedFormEntity(qparams, "UTF-8");
+                                    post.setEntity(entity);
+                                    // post.addHeader("Referer", "https://www.furaffinity.net/login/");
+                                    request = post;
+                                } else {
+                                    throw new InvalidParameterException("method " + method + "unknown");
+                                }
 
-                                OutputFormat format = new OutputFormat(doc);
+                                HttpResponse response = httpclient.execute(request);
+                                HttpEntity entity = response.getEntity();
+                                if (entity != null) {
 
-                                Writer out = new StringWriter();
-                                XMLSerializer serializer = new XMLSerializer(out, format);
-                                serializer.serialize(doc);
+                                    if (binaryResult) {
+                                        ByteArrayOutputStream out = new ByteArrayOutputStream();
+                                        IOUtils.copy(response.getEntity().getContent(), out);
+                                        result = Base64.encode(out.toByteArray());
+                                    } else {
+                                        System.err.println();
+                                        Tidy tidy = new Tidy();
+                                        tidy.setMakeClean(true);
+                                        tidy.setWrapScriptlets(true);
+                                        tidy.setXmlOut(true);
+                                        tidy.setQuiet(true);
+                                        Document doc = tidy.parseDOM(entity.getContent(), null);
 
-                                return out.toString();
+                                        OutputFormat format = new OutputFormat(doc);
+
+                                        Writer out = new StringWriter();
+                                        XMLSerializer serializer = new XMLSerializer(out, format);
+                                        serializer.serialize(doc);
+
+                                        result = out.toString();
+                                    }
+                                } else {
+                                    result = "Nope! entity null";
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                result = "Nope!" + e.getMessage();
                             }
-                        } else {
-                            return "Nope! entity null";
+
+                            final JSObject win = (JSObject) JSObject.getWindow(Proxy.this);
+                            
+                            win.call("proxyCallBack", new String[]{callback, result});
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return "Nope!" + e.getMessage();
-                    }
+                    }).start();
+
+
+
+
+                    return null;
                 }
             });
 
+
         } catch (Exception e) {
             e.printStackTrace();
-            return "Nope!" + e.getMessage();
         }
     }
 
