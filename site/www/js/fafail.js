@@ -10,6 +10,12 @@ fafail.addSubmission = function(submission) {
     }
 }
 
+fafail.removeImage = function(submissionId) {
+    $('div.submission[name='+submissionId+"]").fadeOut().remove();
+    // delete fafail.submissions[submissionId];
+    console.log("removed:"+submissionId);
+}
+
 fafail.getRecent = function() {
     fapi.getRecent(32, fafail.addSubmission);
     if (fafail.vars.browsing) {
@@ -18,12 +24,18 @@ fafail.getRecent = function() {
 }
 
 fafail.displayRecent = function() {
+    var MAX_SUBMISSIONS_DISPLAYED = 64;
     if (fafail.submissionsQueue.length > 0) {
         var submission = fafail.submissionsQueue.shift();
         fafail.showImage(submission);
+
+        var displayedImages = $('div.submission').map(function(){return $(this).attr('name');});
+        if (displayedImages.length > MAX_SUBMISSIONS_DISPLAYED) {
+            fafail.removeImage(displayedImages[0]);
+        }
     }
     if (fafail.vars.browsing) {
-        setTimeout(fafail.displayRecent, 0.5 * 1000);
+        setTimeout(fafail.displayRecent, 0.1 * 1000);
     }
 }
 
@@ -170,6 +182,11 @@ fafail.updateLoginStatus = function () {
 }
 
 fafail.initTools = function() {
+    // disable image drag in firefox
+    $(document).on("dragstart", function() {
+        return false;
+    });
+
     fafail.vars = {};
     fafail.updateLoginStatus();
     $('img[name="tool-login"]').click(function(){
