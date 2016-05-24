@@ -3,6 +3,7 @@ package com.proxy.proxyapplet;
 import com.sun.org.apache.xml.internal.serialize.OutputFormat;
 import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import java.applet.Applet;
+import java.applet.AppletContext;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sf.json.JSONObject;
+import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
 import org.apache.http.*;
 import org.apache.http.client.CookieStore;
@@ -36,6 +38,7 @@ import org.apache.xerces.impl.dv.util.Base64;
 import org.w3c.dom.Document;
 import org.w3c.tidy.Tidy;
 import org.apache.commons.io.IOUtils;
+import sun.plugin.javascript.JSContext;
 
 public class Proxy extends Applet {
 
@@ -43,15 +46,35 @@ public class Proxy extends Applet {
         "www.furaffinity.net",
         "t.facdn.net"
     };
+
+
+    public static JSObject getWindow(Applet applet) {
+        if (applet != null) {
+            AppletContext context = applet.getAppletContext();
+
+            if (context instanceof JSContext) {
+                JSContext jsContext = (JSContext)context;
+                JSObject jsObject = jsContext.getJSObject();
+
+                if (jsObject != null) {
+                    return jsObject;
+                }
+            }
+        }
+
+        throw new JSException();
+    }
+
+
     private final CookieStore cookieStore = new CookieStore() {
 
         public void addCookie(Cookie cookie) {
-            JSObject win = (JSObject) JSObject.getWindow(Proxy.this);
+            JSObject win = (JSObject) getWindow(Proxy.this);
             win.eval("document.cookie = '" + cookie.getName().trim() + "=" + cookie.getValue().trim() + "';");
         }
 
         public List<Cookie> getCookies() {
-            JSObject win = (JSObject) JSObject.getWindow(Proxy.this);
+            JSObject win = (JSObject) getWindow(Proxy.this);
             Object cookies = win.eval("document.cookie;");
             List<Cookie> result = new ArrayList<Cookie>();
             for (String cookieString : cookies.toString().split(";")) {
@@ -166,7 +189,7 @@ public class Proxy extends Applet {
                                 result = "Nope!" + e.getMessage();
                             }
 
-                            final JSObject win = (JSObject) JSObject.getWindow(Proxy.this);
+                            final JSObject win = (JSObject) getWindow(Proxy.this);
                             
                             win.call("proxyCallBack", new String[]{callback, result});
                         }

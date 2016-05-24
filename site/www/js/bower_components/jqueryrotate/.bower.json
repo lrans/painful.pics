@@ -1,0 +1,22 @@
+{
+  "name": "jqueryrotate",
+  "description": "upload jQueryRotate.js to github and bower easy to use",
+  "main": [
+    "jQueryRotate.js"
+  ],
+  "ignore": [
+    "/.*",
+    "/*.json"
+  ],
+  "homepage": "https://github.com/aaronshsieh/jqueryrotate",
+  "_release": "2a99aa92b7",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "2a99aa92b7e14ef316c95cdd8f4679248bb4a720"
+  },
+  "_source": "https://github.com/aaronshsieh/jqueryrotate.git",
+  "_target": "*",
+  "_originalSource": "jqueryrotate",
+  "_direct": true
+}

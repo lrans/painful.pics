@@ -75,3 +75,10 @@ div.submission-infos {
     left: 5px;
     padding: 3px;
 }
+
+#login-modal label {
+    padding: 2px;
+    margin: 5px;
+    display: block;
+    border: 1px solid gray;
+}

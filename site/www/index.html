@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="js/jquery-1.6.4.min.js"></script>
-        <script src="js/jquery.easing.1.3.js"></script>
+        <script src="js/bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="js/bower_components/jquery-easing-original/jquery.easing.min.js"></script>
         <script src="js/animadrag.min.js"></script>
-        <script src="js/jQueryRotateCompressed.2.2.js"></script>
+        <script src="js/bower_components/jqueryrotate/jQueryRotate.js"></script>
+        <script src="js/bower_components/jquery-modal/jquery.modal.min.js"></script>
         <script src="js/fapi.js"></script>
         <script src="js/fafail.js"></script>
+        <link href="js/bower_components/jquery-modal/jquery.modal.css" rel="stylesheet" type="text/css">
         <link href="css/fafail.css" rel="stylesheet" type="text/css">
     </head>
     <body>
@@ -17,8 +19,26 @@
                 <img src="img/edit-delete.png" name="tool-clear"/>
             </div>
         </div>
-    <applet name="proxyApplet" code="com.proxy.proxyapplet.Proxy" codebase="." archive="proxy.jar" width="1" heigth="1">
-        <a href="http://java.com">no java ?</a>
-    </applet>
-</body>
+        <applet name="proxyApplet" code="com.proxy.proxyapplet.Proxy" codebase="." archive="proxy.jar" width="1" heigth="1">
+            <a href="http://java.com">no java ?</a>
+        </applet>
+        <div id="login-modal">
+            <form>
+                <label>
+                    Login
+                    <input name="login">
+                </label>
+                <label>
+                    Password
+                    <input name="password" type="password">
+                </label>
+                <label>
+                    Captcha
+                    <span id="captcha-placeholder"></span>
+                    <input name="captcha" autocomplete="off">
+                </label>
+                <button class="login">Login</button>
+            </form>
+        </div>
+    </body>
 </html>

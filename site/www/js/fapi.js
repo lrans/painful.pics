@@ -58,7 +58,7 @@ fapi.inner.proxy = function(path, callback, domain, params, method, binaryResult
 fapi.inner.extractSubmissions = function(pageXML, callback) {
     var result = null;
     var pageHasResults = false;
-    pageXML.find('.flow.browse').find('b').map(function(){
+    pageXML.find('.flow').find('b').map(function(){
         var id = /sid_([0-9]+)/.exec($(this).attr('id'))[1];
         if (id) {
             if (!result) {
@@ -135,14 +135,25 @@ fapi.getRecent = function(nbRecents, callback) {
     fapi.inner.getSubmission('/browse/', nbRecents, NB_RECENTS_PER_PAGE, callback);
 }
 
-fapi.doLogin = function(login, password, callback) {
-    fapi.inner.proxy('/login/', callback, 'www.furaffinity.net', {
-        action:'login', 
-        retard_protection: 1, 
-        name : login, 
-        pass : password, 
-        login : 'Login to FurAffinity'
-    }, 'POST', true);
+fapi.doLogin = function(callback) {
+    fapi.inner.proxy('captcha.jpg', function(data){
+        var loginModal = $('#login-modal');
+        $('#captcha-placeholder').append('<img src="data:image/jpg;base64,'+ data+'"/>');
+        loginModal.find('button.login').click(function(){
+            fapi.inner.proxy('/login/', function(){
+                $.modal.close();
+                callback();
+            }, 'www.furaffinity.net', {
+                action: 'login',
+                captcha: loginModal.find('input[name=captcha]').val(),
+                login : 'Login to FurAffinity',
+                name : loginModal.find('input[name=login]').val(),
+                pass : loginModal.find('input[name=password]').val()
+            }, 'POST', true);
+            return false;
+        });
+        loginModal.modal();
+    }, "www.furaffinity.net", {}, "GET", true);
 }
 
 fapi.doLogout = function(callback) {
@@ -151,9 +162,9 @@ fapi.doLogout = function(callback) {
 
 fapi.getCurrentUser = function(callback) {
     fapi.inner.proxy('/', function(pageXML){
-        var node = pageXML.find('#logout-link').parent().find('span').find('a').attr('href');
+        var node = pageXML.find('#my-username.hideonmobile').attr('href');
         if (node) {
-            var user = /\/user\/(.*)\//.exec(node)[1];
+            var user = /.*\/user\/(.*)\//.exec(node)[1];
             callback(user);
         } else {
             callback(null);

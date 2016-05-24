@@ -1,0 +1,12 @@
+{
+	"name": "jqueryrotate",
+	"description": "upload jQueryRotate.js to github and bower easy to use",
+	"version": "2.3.0",
+	"main": [
+		"jQueryRotate.js"
+	],
+	"ignore": [
+		"/.*",
+		"/*.json"
+	]
+}

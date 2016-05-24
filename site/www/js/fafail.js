@@ -13,7 +13,7 @@ fafail.addSubmission = function(submission) {
 fafail.getRecent = function() {
     fapi.getRecent(32, fafail.addSubmission);
     if (fafail.vars.browsing) {
-        setTimeout(fafail.getRecent, 30 * 1000);
+        setTimeout(fafail.getRecent, 10 * 1000);
     }
 }
 
@@ -177,9 +177,9 @@ fafail.initTools = function() {
         if (fafail.vars.loggedIn) {
             fapi.doLogout(fafail.updateLoginStatus);
         } else {
-            var login = prompt('Login');
-            var password = prompt('Password');
-            fapi.doLogin(login, password, function() {fafail.updateLoginStatus();});
+            //var login = prompt('Login');
+            //var password = prompt('Password');
+            fapi.doLogin(function() {fafail.updateLoginStatus();});
         }
     });
 
