@@ -1,0 +1,47 @@
+.quizz {
+    height: 100%;
+}
+
+.quizz .score {
+    position: absolute;
+    font-size: large;
+    font-weight: bolder;
+    color: white;
+}
+
+.quizz .question {
+    height: 100%;
+}
+
+.quizz .image {
+    height: 100%;
+    position: absolute;
+    width: 50%;
+}
+
+.quizz .image-container {
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.quizz .image-container > embed {
+    box-shadow: 2px 2px 2px #2A2A2A;
+    border: 1px solid #2A2A2A;
+    max-height: 100%;
+    max-width: 100%;
+
+    top: -9999px;
+    bottom: -9999px;
+    margin: auto;
+    position: absolute;
+    right: 0;
+}
+
+.quizz .answers {
+    position: absolute;
+    left: 50%;
+    padding: 20px;
+    height: 50%;
+    top: 25%;
+}

@@ -1,27 +1,27 @@
 
 var fafail = {};
 
-fafail.submissions = {}
+fafail.submissions = {};
 fafail.submissionsQueue = [];
 fafail.addSubmission = function(submission) {
     if ($.inArray(submission.id, Object.keys(fafail.submissions)) == -1) {
         fafail.submissions[submission.id] = submission;
         fafail.submissionsQueue.push(submission);
     }
-}
+};
 
 fafail.removeImage = function(submissionId) {
     $('div.submission[name='+submissionId+"]").fadeOut().remove();
     // delete fafail.submissions[submissionId];
     console.log("removed:"+submissionId);
-}
+};
 
 fafail.getRecent = function() {
     fapi.getRecent(32, fafail.addSubmission);
     if (fafail.vars.browsing) {
         setTimeout(fafail.getRecent, 10 * 1000);
     }
-}
+};
 
 fafail.displayRecent = function() {
     var MAX_SUBMISSIONS_DISPLAYED = 64;
@@ -37,7 +37,7 @@ fafail.displayRecent = function() {
     if (fafail.vars.browsing) {
         setTimeout(fafail.displayRecent, 0.1 * 1000);
     }
-}
+};
 
 fafail.showImage = function(submission) {
     var img = new Image();
@@ -162,13 +162,13 @@ fafail.showImage = function(submission) {
     fapi.getRawImage(submission.resource.small, function(imgSrc){
         $(img).attr('src', imgSrc);
     });
-}
+};
 
 fafail.clearShow = function() {
     fafail.submissions = {}
     fafail.submissionsQueue = [];
     $('#show div.submission').remove();
-}
+};
 
 fafail.updateLoginStatus = function () {
     fapi.getCurrentUser(function(user){
@@ -179,7 +179,7 @@ fafail.updateLoginStatus = function () {
             $('img[name="tool-login"]').attr('src', 'img/view-media-artist.png').attr('title', 'Logged out, click to login');
         }
     });
-}
+};
 
 fafail.initTools = function() {
     // disable image drag in firefox
@@ -216,7 +216,11 @@ fafail.initTools = function() {
     $('img[name="tool-clear"]').click(function(){
         fafail.clearShow();
     });
-}
+
+    $('img[name="tool-game"]').click(function(){
+        e621games.guessSpecies.start();
+    });
+};
 
 $(document).ready(function(){
     fafail.initTools();

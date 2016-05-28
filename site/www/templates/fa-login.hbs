@@ -1,0 +1,18 @@
+<form id="login-modal">
+    <label>
+        Login
+        <input name="login">
+    </label>
+    <label>
+        Password
+        <input name="password" type="password">
+    </label>
+    <label>
+        Captcha
+        <span id="captcha-placeholder">
+            <img src="data:image/jpg;base64,{{ captcha }}" />
+        </span>
+        <input name="captcha" autocomplete="off">
+    </label>
+    <button class="login">Login</button>
+</form>

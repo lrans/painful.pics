@@ -31,9 +31,10 @@ div.submission > img {
 }
 
 #tools {
-    float: right;
+    position: absolute;
     z-index: 5000;
-    margin-top:200px;
+    top:200px;
+    right: 0;
     border-bottom: 1px solid gray;
     border-top: 1px solid gray;
     border-left: 1px solid gray;

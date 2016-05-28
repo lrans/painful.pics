@@ -133,26 +133,31 @@ fapi.getGallery = function(user, nbSubmissions, callback) {
 fapi.getRecent = function(nbRecents, callback) {
     var NB_RECENTS_PER_PAGE = 32;
     fapi.inner.getSubmission('/browse/', nbRecents, NB_RECENTS_PER_PAGE, callback);
-}
+};
 
 fapi.doLogin = function(callback) {
-    fapi.inner.proxy('captcha.jpg', function(data){
-        var loginModal = $('#login-modal');
-        $('#captcha-placeholder').append('<img src="data:image/jpg;base64,'+ data+'"/>');
-        loginModal.find('button.login').click(function(){
-            fapi.inner.proxy('/login/', function(){
-                $.modal.close();
-                callback();
-            }, 'www.furaffinity.net', {
-                action: 'login',
-                captcha: loginModal.find('input[name=captcha]').val(),
-                login : 'Login to FurAffinity',
-                name : loginModal.find('input[name=login]').val(),
-                pass : loginModal.find('input[name=password]').val()
-            }, 'POST', true);
-            return false;
-        });
-        loginModal.modal();
+    fapi.inner.proxy('captcha.jpg', function(captcha){
+        $.get('templates/fa-login.hbs', function (rawTemplate) {
+            var template = Handlebars.compile(rawTemplate);
+            $('body').append(template({
+                'captcha': captcha
+            }));
+            var loginModal = $('#login-modal');
+            loginModal.find('button.login').click(function(){
+                fapi.inner.proxy('/login/', function(){
+                    $.modal.close();
+                    callback();
+                }, 'www.furaffinity.net', {
+                    action: 'login',
+                    captcha: loginModal.find('input[name=captcha]').val(),
+                    login : 'Login to FurAffinity',
+                    name : loginModal.find('input[name=login]').val(),
+                    pass : loginModal.find('input[name=password]').val()
+                }, 'POST', true);
+                return false;
+            });
+            loginModal.modal();
+        }, 'html');
     }, "www.furaffinity.net", {}, "GET", true);
 }
 

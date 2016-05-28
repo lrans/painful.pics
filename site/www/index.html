@@ -6,39 +6,27 @@
         <script src="js/animadrag.min.js"></script>
         <script src="js/bower_components/jqueryrotate/jQueryRotate.js"></script>
         <script src="js/bower_components/jquery-modal/jquery.modal.min.js"></script>
+        <script src="js/bower_components/handlebars/handlebars.min.js"></script>
+        <script src="js/tools.js"></script>
         <script src="js/fapi.js"></script>
         <script src="js/fafail.js"></script>
+        <script src="js/e621-games.js"></script>
         <link href="js/bower_components/jquery-modal/jquery.modal.css" rel="stylesheet" type="text/css">
         <link href="css/fafail.css" rel="stylesheet" type="text/css">
+        <link href="css/quizz.css" rel="stylesheet" type="text/css">
     </head>
     <body>
+        <div id="tools">
+            <img src="img/wait.png" name="tool-login"/>
+            <img src="img/chronometer.png" name="tool-browse"/>
+            <img src="img/edit-delete.png" name="tool-clear"/>
+            <img src="img/applications-games.png" name="tool-game"/>
+        </div>
         <div id="show">
-            <div id="tools">
-                <img src="img/wait.png" name="tool-login"/>
-                <img src="img/chronometer.png" name="tool-browse"/>
-                <img src="img/edit-delete.png" name="tool-clear"/>
-            </div>
+
         </div>
         <applet name="proxyApplet" code="com.proxy.proxyapplet.Proxy" codebase="." archive="proxy.jar" width="1" heigth="1">
             <a href="http://java.com">no java ?</a>
         </applet>
-        <div id="login-modal">
-            <form>
-                <label>
-                    Login
-                    <input name="login">
-                </label>
-                <label>
-                    Password
-                    <input name="password" type="password">
-                </label>
-                <label>
-                    Captcha
-                    <span id="captcha-placeholder"></span>
-                    <input name="captcha" autocomplete="off">
-                </label>
-                <button class="login">Login</button>
-            </form>
-        </div>
     </body>
 </html>

@@ -1,0 +1,10 @@
+<div class="image">
+    <div class="image-container">
+        <embed src="{{ imageUrl }}"></embed>
+    </div>
+</div>
+<div class="answers">
+    {{#each answers}}
+        <button class="answer" name="{{ this.name }}">{{ this.label }}</button><br/>
+    {{/each}}
+</div>
