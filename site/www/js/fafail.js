@@ -188,7 +188,7 @@ fafail.initTools = function() {
     });
 
     fafail.vars = {};
-    fafail.updateLoginStatus();
+   // fafail.updateLoginStatus();
     $('img[name="tool-login"]').click(function(){
         $('img[name="tool-login"]').attr('src', 'img/wait.png').attr('title', 'Processing...');
         if (fafail.vars.loggedIn) {

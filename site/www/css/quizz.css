@@ -6,7 +6,9 @@
     position: absolute;
     font-size: large;
     font-weight: bolder;
-    color: white;
+    background-color: lightgrey;
+    top: 10%;
+    right: 10%;
 }
 
 .quizz .question {
@@ -38,6 +40,14 @@
     right: 0;
 }
 
+.quizz .image-container > embed.vertical {
+    min-height: 90%;
+}
+
+.quizz .image-container > embed.horizontal {
+    min-width: 90%;
+}
+
 .quizz .answers {
     position: absolute;
     left: 50%;
@@ -45,3 +55,30 @@
     height: 50%;
     top: 25%;
 }
+
+.quizz .answers button {
+    border: 3px solid lightgray;
+    font-size: x-large;
+    margin: 10px 20px;
+    width: 100%;
+    cursor: pointer;
+    font-weight: bold;
+    color: #747474;
+    height: 37px;
+}
+
+.quizz .answers button:hover {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.quizz .answers button.correct {
+    border: 3px solid limegreen;
+    background: url('../img/dialog-ok-apply.png') no-repeat #ffffff;
+}
+
+.quizz .answers button.wrong {
+    border: 3px solid red;
+    background: url('../img/edit-delete.png') no-repeat #ffffff;
+}
+

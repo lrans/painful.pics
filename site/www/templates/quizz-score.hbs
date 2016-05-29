@@ -1,0 +1,7 @@
+<div>
+    <div class="correct">Correct : {{ correct }}</div>
+    <div class="wrong">Wrong : {{ wrong }}</div>
+    <div class="progress">
+        <progress max="{{ nbItems }}" value="{{math correct "+" wrong }}"></progress>
+    </div>
+</div>
