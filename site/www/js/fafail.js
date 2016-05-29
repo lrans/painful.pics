@@ -176,7 +176,7 @@ fafail.updateLoginStatus = function () {
         if (fafail.vars.loggedIn) {
             $('img[name="tool-login"]').attr('src', 'img/system-log-out.png').attr('title', 'Logged in as : ' + fafail.vars.loggedIn + ', click to logout');
         } else {
-            $('img[name="tool-login"]').attr('src', 'img/view-media-artist.png').attr('title', 'Logged out, click to login');
+            $('img[name="tool-login"]').attr('src', 'img/view-media-artist.png').attr('title', 'Logged out, click to login on FA (needed to access PORN)');
         }
     });
 };
@@ -188,7 +188,7 @@ fafail.initTools = function() {
     });
 
     fafail.vars = {};
-   // fafail.updateLoginStatus();
+
     $('img[name="tool-login"]').click(function(){
         $('img[name="tool-login"]').attr('src', 'img/wait.png').attr('title', 'Processing...');
         if (fafail.vars.loggedIn) {
@@ -215,11 +215,17 @@ fafail.initTools = function() {
     
     $('img[name="tool-clear"]').click(function(){
         fafail.clearShow();
-    });
+    }).attr('title', "Clear all displayed image");
 
     $('img[name="tool-game"]').click(function(){
         e621games.guessSpecies.start();
-    });
+    }).attr('title', 'Play "Guess Species" !');
+
+    $('img[name="tool-enable-fa"]').click(function(){
+        fafail.updateLoginStatus();
+        $('#tools').find('img.fa-required-tool').css('display', 'block');
+        $(this).remove();
+    }).attr('title', 'Enable FA features, needs Java installed on your computer');
 };
 
 $(document).ready(function(){

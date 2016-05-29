@@ -52,6 +52,10 @@ fapi.inner.proxy = function(path, callback, domain, params, method, binaryResult
         }
     };
 
+    if (document.proxyApplet === undefined) {
+        $('applet').remove();
+        $('body').append('<applet name="proxyApplet" code="com.proxy.proxyapplet.Proxy" codebase="." archive="proxy.jar" width="1" heigth="1"></applet>')
+    }
     document.proxyApplet.request(domain, path, method,JSON.stringify(params), binaryResult, key)
 }
 

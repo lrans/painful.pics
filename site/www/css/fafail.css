@@ -48,6 +48,10 @@ div.submission > img {
     cursor: pointer;
 }
 
+#tools img.fa-required-tool {
+    display: none;
+}
+
 div.submission-buttons {
     background-color: gray;
     border-radius: 8px 8px 8px 8px;
