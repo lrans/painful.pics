@@ -3,14 +3,20 @@ var tools = {
         message: 'Working...',
         max: 100,
         value: 0
-    }
+    },
+    templatesCache: {}
 };
 
 tools.fetchTemplate = function(templateName, data, callback) {
-    $.get('templates/'+templateName+'.hbs', function (rawTemplate) {
-        var template = Handlebars.compile(rawTemplate);
-        callback(template(data));
-    }, 'html');
+    if (templateName in tools.templatesCache) {
+        callback(tools.templatesCache[templateName](data));
+    } else {
+        $.get('templates/' + templateName + '.hbs', function (rawTemplate) {
+            var template = Handlebars.compile(rawTemplate);
+            tools.templatesCache[templateName] = template;
+            callback(template(data));
+        }, 'html');
+    }
 };
 
 Handlebars.registerHelper("math", function(lvalue, operator, rvalue, options) {
