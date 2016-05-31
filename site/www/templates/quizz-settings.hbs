@@ -1,0 +1,19 @@
+<form class="quizz-settings">
+    <label>
+        How many questions ?
+        <select name="nbItems">
+            {{#each choices_nbItems}}
+                <option value="{{ this.value }}" {{#test this.value "==" ../nbItems}}selected{{/test}}>{{ this.label }}</option>
+            {{/each}}
+        </select>
+    </label>
+    <label>
+        How many choices per question ?
+        <select name="nbAnswers">
+            {{#each choices_nbAnswers}}
+                <option value="{{ this.value }}" {{#test this.value "==" ../nbAnswers}}selected{{/test}}>{{ this.label }}</option>
+            {{/each}}
+        </select>
+    </label>
+    <button>Begin quizz !</button>
+</form>

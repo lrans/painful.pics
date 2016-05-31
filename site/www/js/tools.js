@@ -32,6 +32,15 @@ Handlebars.registerHelper("math", function(lvalue, operator, rvalue, options) {
     }[operator];
 });
 
+Handlebars.registerHelper("test", function(lvalue, operator, rvalue, options) {
+    var doRender = {
+        "==": lvalue == rvalue,
+        "!=": lvalue != rvalue
+    }[operator];
+
+    return doRender ? options.fn(this) : '';
+});
+
 tools.showProgress = function(progressObject) {
     for (var attrname in progressObject) {
         tools.lastProgress[attrname] = progressObject[attrname];

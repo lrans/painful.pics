@@ -81,7 +81,7 @@ div.submission-infos {
     padding: 3px;
 }
 
-#login-modal label {
+form label {
     padding: 2px;
     margin: 5px;
     display: block;

@@ -253,14 +253,40 @@ e621games.guessSpecies.resetData = function () {
 e621games.guessSpecies.start = function() {
     tools.fetchTemplate('quizz-fullpage', {}, function(page){
         $('#show').html(page);
-        e621games.guessSpecies.resetData();
-        tools.showProgress({
-            message: "Fetching quizz data...",
-            max: e621games.guessSpecies.config.NB_QUIZZ_ITEMS,
-            value: 0
-        });
-        e621games.fetchData(e621games.guessSpecies.config.NB_QUIZZ_ITEMS, function(detailedPost){
-            e621games.guessSpecies.addPost(detailedPost);
+        tools.fetchTemplate('quizz-settings', {
+            choices_nbItems: [
+                {value:10, label: '10'},
+                {value:20, label: '20'},
+                {value:30, label: '30'}
+            ],
+            nbItems: 10,
+            choices_nbAnswers: [
+                {value:3, label: '3'},
+                {value:5, label: '5'},
+                {value:10, label: '10'}
+            ],
+            nbAnswers: 5
+        }, function(settings) {
+            $('body').append(settings);
+
+            $('.quizz-settings button').click(function(event){
+                event.preventDefault();
+                e621games.guessSpecies.config.NB_QUIZZ_ITEMS = parseInt($('.quizz-settings select[name=nbItems]').val());
+                e621games.guessSpecies.config.NB_ANSWERS_PER_ITEM = parseInt($('.quizz-settings select[name=nbAnswers]').val());
+                $('.quizz-settings').remove();
+
+                e621games.guessSpecies.resetData();
+                tools.showProgress({
+                    message: "Fetching quizz data...",
+                    max: e621games.guessSpecies.config.NB_QUIZZ_ITEMS,
+                    value: 0
+                });
+                e621games.fetchData(e621games.guessSpecies.config.NB_QUIZZ_ITEMS, function(detailedPost){
+                    e621games.guessSpecies.addPost(detailedPost);
+                });
+            });
+
+            $('.quizz-settings').modal();
         });
     });
 };
