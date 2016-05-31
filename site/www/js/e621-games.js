@@ -40,12 +40,16 @@ e621games.extractTagsForNextPost = function() {
         var post = postAndCallBack.post;
         var callback = postAndCallBack.callback;
         e621games.extractTags(post, function(tags) {
+            var ratio = post.sample_width < post.sample_height ? 'vertical' : 'horizontal';
+            if (!(/.+\.(jpg|png|gif)/i.exec(post.sample_url))) {
+                ratio = 'horizontal vertical';
+            }
             var detailedPost = {
                 id: post.id,
                 imageUrl: post.sample_url,
                 imageWidth: post.sample_width,
                 imageHeight: post.sample_height,
-                ratio: post.sample_width < post.sample_height ? 'vertical' : 'horizontal',
+                ratio: ratio,
                 tags: {}
             };
             $.each(tags, function(index, tag) {
