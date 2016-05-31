@@ -84,6 +84,10 @@ e621games.fetchData = function(nbItems, callback) {
             format: "json"
         },
         success: function( response ) {
+            for( i = 0; i < (nbItems - response.length); i++) {
+                e621games.guessSpecies.config.NB_QUIZZ_ITEMS--;
+                e621games.guessSpecies.addPost({});  // push empty missing posts
+            }
             var submissions = $.map(response, function(post){
                 e621games.addRawPost(post, callback);
             });
@@ -137,6 +141,19 @@ e621games.guessSpecies.wrongAnswer = function (correctAnswer, wrongAnswer) {
     e621games.guessSpecies.updateScore();
     $('.quizz button.answer[name="'+correctAnswer+'"]').addClass("correct");
     $('.quizz button.answer[name="'+wrongAnswer+'"]').addClass("wrong");
+};
+
+e621games.guessSpecies.startGame = function() {
+    e621games.guessSpecies.score = {
+        correct: 0,
+        wrong: 0,
+        nbItems: e621games.guessSpecies.config.NB_QUIZZ_ITEMS
+    };
+    e621games.guessSpecies.updateScore();
+    e621games.guessSpecies.showQuizzItem(0);
+    e621games.bgMusic = tools.playSound('bgmusic');
+    e621games.bgMusic.loop = -1;
+    e621games.bgMusic.volume = .6;
 };
 
 e621games.guessSpecies.endOfGame = function () {
@@ -224,11 +241,8 @@ e621games.guessSpecies.generateQuizzItems = function () {
         e621games.guessSpecies.quizzItems.push(quizzItem);
     });
     e621games.shuffleArrayInPlace(e621games.guessSpecies.quizzItems);
-    e621games.guessSpecies.updateScore();
-    e621games.guessSpecies.showQuizzItem(0);
-    e621games.bgMusic = tools.playSound('bgmusic');
-    e621games.bgMusic.loop = -1;
-    e621games.bgMusic.volume = .6;
+
+    e621games.guessSpecies.startGame();
 };
 
 e621games.guessSpecies.addPost = function(detailedPost) {
@@ -241,7 +255,7 @@ e621games.guessSpecies.addPost = function(detailedPost) {
         }
     });
 
-    if (detailedPost.imageUrl.endsWith("swf")) {
+    if (!skip && detailedPost.imageUrl.endsWith("swf")) {
         skip = true; // skip posts that are flash animations
     }
     if (!skip) {
