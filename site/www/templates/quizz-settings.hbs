@@ -16,6 +16,22 @@
         </select>
     </label>
     <label>
+        Where to pick the images from ?
+        <select>
+            <option>e621.net</option>
+        </select>
+    </label>
+    <label>
+        With which query ?
+        <select name="choices-query">
+            {{#each choices_query}}
+                <option value="{{ this.value }}">{{ this.label }}</option>
+            {{/each}}
+            <option value="custom">Custom</option>
+        </select>
+        <input name="query" value="{{ choices_query.[0].value }}" readonly disabled>
+    </label>
+    <label>
         What will you have to guess ?
         <select name="tags">
             {{#each choices_tags}}
@@ -23,6 +39,5 @@
             {{/each}}
         </select>
     </label>
-
     <button>Begin quizz !</button>
 </form>

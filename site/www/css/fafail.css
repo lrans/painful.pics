@@ -92,3 +92,7 @@ form label {
     width: 100%;
     text-align: center;
 }
+
+form.quizz-settings {
+    width: auto;
+}

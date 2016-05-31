@@ -75,7 +75,7 @@ e621games.fetchData = function(nbItems, callback) {
         jsonp: "callback",
         dataType: "jsonp",
         data: {
-            tags: 'wtf order:random',
+            tags: e621games.guessSpecies.config.QUERY,
             limit: nbItems,
             format: "json"
         },
@@ -197,7 +197,11 @@ e621games.guessSpecies.generateQuizzItems = function () {
             answers: [postSpecies[0]]
         };
         for (var i = 1; i < e621games.guessSpecies.config.NB_ANSWERS_PER_ITEM; i++) {
-            quizzItem.answers.push(e621games.pickRandom(e621games.guessSpecies.allPossibleAnswers, quizzItem.answers.concat(postSpecies)));
+            var nextAnswer = e621games.pickRandom(e621games.guessSpecies.allPossibleAnswers, quizzItem.answers.concat(postSpecies));
+            if (nextAnswer == undefined) {
+                break;
+            }
+            quizzItem.answers.push(nextAnswer);
         }
         e621games.shuffleArrayInPlace(quizzItem.answers);
         quizzItem.answers = $.map(quizzItem.answers, function(rawSpecie){
@@ -290,10 +294,15 @@ e621games.guessSpecies.start = function() {
                 {value:10, label: '10'}
             ],
             nbAnswers: 5,
+            choices_query: [
+                {value:'wtf order:random', label: 'Slightly unsettling things'},
+                {value:'nightmare_fuel order:random', label: 'Most unpleasant things'},
+                {value:'zootopia order:score', label: 'The community\'s favourite rule34'}
+            ],
             choices_tags: [
                 {value:'artist', label: 'The ""A R T I S T""'},
                 {value:'general', label: 'General tags'},
-                {value:'copyright', label: 'Which intellectual property or licence was raped (copyright)'},
+                {value:'copyright', label: 'The intellectual property/licence that was raped (copyright)'},
                 {value:'character', label: 'The character name (original, do not steal)'},
                 {value:'species', label: 'The specie'},
                 {value:'all', label: 'Any of the above !'}
@@ -302,12 +311,22 @@ e621games.guessSpecies.start = function() {
         }, function(settings) {
             $('body').append(settings);
 
+            $('select[name=choices-query]').change(function(){
+                var newValue = $('select[name=choices-query]').val();
+                if('custom' == newValue) {
+                    $('input[name=query]').prop('readonly', false).prop('disabled', false);
+                } else {
+                    $('input[name=query]').prop('readonly', true).prop('disabled', true).val(newValue);
+                }
+            });
+
             $('.quizz-settings button').click(function(event){
                 event.preventDefault();
                 tools.playSound('letsrock');
 
                 e621games.guessSpecies.config.NB_QUIZZ_ITEMS = parseInt($('.quizz-settings select[name=nbItems]').val());
                 e621games.guessSpecies.config.NB_ANSWERS_PER_ITEM = parseInt($('.quizz-settings select[name=nbAnswers]').val());
+                e621games.guessSpecies.config.QUERY = $('.quizz-settings input[name=query]').val();
                 e621games.guessSpecies.config.TARGET_TAGS_TYPES = [$('.quizz-settings select[name=tags]').val()];
                 if('all' == e621games.guessSpecies.config.TARGET_TAGS_TYPES) {
                     e621games.guessSpecies.config.TARGET_TAGS_TYPES = ['artist', 'general', 'copyright', 'character', 'species'];

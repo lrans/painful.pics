@@ -11,7 +11,7 @@ tools.fetchTemplate = function(templateName, data, callback) {
     if (templateName in tools.templatesCache) {
         callback(tools.templatesCache[templateName](data));
     } else {
-        $.get('templates/' + templateName + '.hbs', function (rawTemplate) {
+        $.get('templates/' + templateName + '.hbs?t='+new Date().getTime(), function (rawTemplate) {
             var template = Handlebars.compile(rawTemplate);
             tools.templatesCache[templateName] = template;
             callback(template(data));
