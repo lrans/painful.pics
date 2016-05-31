@@ -186,22 +186,28 @@ e621games.prettyLabel = function (rawSpecie) {
 
 e621games.guessSpecies.generateQuizzItems = function () {
     $.each(e621games.guessSpecies.detailedPosts, function(x, detailedPost) {
-        var postSpecies = [];
+        var postTagsAndCounts = [];
         $.each(e621games.guessSpecies.config.TARGET_TAGS_TYPES, function(i, item){
             $.each(detailedPost.tags[item], function(i, tag) {
-                postSpecies.push(tag.name);
+                postTagsAndCounts.push(tag);
             });
         });
-        e621games.shuffleArrayInPlace(postSpecies);
+        postTagsAndCounts.sort(function (a, b) {
+            return a.count - b.count;
+        });
+        var postTags = $.map(postTagsAndCounts, function(tag){
+            return tag.name;
+        });
         var quizzItem = {
             id: detailedPost.id,
             imageUrl: detailedPost.imageUrl,
             ratio: detailedPost.ratio,
-            specie: postSpecies[0],
-            answers: [postSpecies[0]]
+            specie: postTags[0],
+            answers: [postTags[0]]
         };
+        e621games.shuffleArrayInPlace(postTags);
         for (var i = 1; i < e621games.guessSpecies.config.NB_ANSWERS_PER_ITEM; i++) {
-            var nextAnswer = e621games.pickRandom(e621games.guessSpecies.allPossibleAnswers, quizzItem.answers.concat(postSpecies));
+            var nextAnswer = e621games.pickRandom(e621games.guessSpecies.allPossibleAnswers, quizzItem.answers.concat(postTags));
             if (nextAnswer == undefined) {
                 break;
             }
@@ -245,11 +251,6 @@ e621games.guessSpecies.addPost = function(detailedPost) {
                 if ($.inArray(tagName, e621games.guessSpecies.allPossibleAnswers) == -1) {
                     e621games.guessSpecies.allPossibleAnswers.push(tagName);
                 }
-            });
-        });
-        $.each(detailedPost.tags, function(key, tagsForType){
-            detailedPost.tags[key].sort(function (a, b) {
-                return a.count - b.count;
             });
         });
 
@@ -301,7 +302,8 @@ e621games.guessSpecies.start = function() {
             choices_query: [
                 {value:'wtf order:random', label: 'Slightly unsettling things'},
                 {value:'nightmare_fuel order:random', label: 'Most unpleasant things'},
-                {value:'zootopia order:score', label: 'The community\'s favourite rule34'}
+                {value:'zootopia order:score', label: 'The community\'s favourite rule34'},
+                {value:'fursuit canine order:random', label: 'Everything looks like a dog'}
             ],
             choices_tags: [
                 {value:'artist', label: 'The ""A R T I S T""'},
