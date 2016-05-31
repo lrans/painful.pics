@@ -15,5 +15,14 @@
             {{/each}}
         </select>
     </label>
+    <label>
+        What will you have to guess ?
+        <select name="tags">
+            {{#each choices_tags}}
+                <option value="{{ this.value }}" {{#test this.value "==" ../choices}}selected{{/test}}>{{ this.label }}</option>
+            {{/each}}
+        </select>
+    </label>
+
     <button>Begin quizz !</button>
 </form>

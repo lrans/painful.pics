@@ -30,7 +30,7 @@ e621games.tagTypeFromInt = function (type) {
         case 3: return "copyright";
         case 4: return "character";
         case 5: return "species";
-        default : return "other;"
+        default : return "other";
     }
 };
 
@@ -173,18 +173,22 @@ e621games.prettyLabel = function (rawSpecie) {
 
 e621games.guessSpecies.generateQuizzItems = function () {
     $.each(e621games.guessSpecies.detailedPosts, function(x, detailedPost) {
-        var postSpecies = $.map(detailedPost.tags.species, function(item){
-            return item.name;
+        var postSpecies = [];
+        $.each(e621games.guessSpecies.config.TARGET_TAGS_TYPES, function(i, item){
+            $.each(detailedPost.tags[item], function(i, tag) {
+                postSpecies.push(tag.name);
+            });
         });
+        e621games.shuffleArrayInPlace(postSpecies);
         var quizzItem = {
             id: detailedPost.id,
             imageUrl: detailedPost.imageUrl,
             ratio: detailedPost.ratio,
-            specie: detailedPost.tags.species[0].name,
-            answers: [detailedPost.tags.species[0].name]
+            specie: postSpecies[0],
+            answers: [postSpecies[0]]
         };
         for (var i = 1; i < e621games.guessSpecies.config.NB_ANSWERS_PER_ITEM; i++) {
-            quizzItem.answers.push(e621games.pickRandom(e621games.guessSpecies.species, quizzItem.answers.concat(postSpecies)));
+            quizzItem.answers.push(e621games.pickRandom(e621games.guessSpecies.allPossibleAnswers, quizzItem.answers.concat(postSpecies)));
         }
         e621games.shuffleArrayInPlace(quizzItem.answers);
         quizzItem.answers = $.map(quizzItem.answers, function(rawSpecie){
@@ -203,22 +207,30 @@ e621games.guessSpecies.generateQuizzItems = function () {
 
 e621games.guessSpecies.addPost = function(detailedPost) {
     e621games.guessSpecies.missingPosts--;
-    var skip = false;
-    if (!("tags" in detailedPost) || !("species" in detailedPost.tags)) {
-        skip = true; // skip posts without any species
-    }
+
+    var skip = true; // skip by default ...
+    $.each(e621games.guessSpecies.config.TARGET_TAGS_TYPES, function(i, targetTagType){
+        if (("tags" in detailedPost) && targetTagType in detailedPost.tags) {
+            skip = false; // ... except if we have some relevant tag
+        }
+    });
+
     if (detailedPost.imageUrl.endsWith("swf")) {
         skip = true; // skip posts that are flash animations
     }
     if (!skip) {
-        $.each(detailedPost.tags['species'], function (i, speciesTag) {
-            var speciesName = speciesTag.name;
-            if ($.inArray(speciesName, e621games.guessSpecies.species) == -1) {
-                e621games.guessSpecies.species.push(speciesName);
-            }
+        $.each(e621games.guessSpecies.config.TARGET_TAGS_TYPES, function(i, targetTagType) {
+            $.each(detailedPost.tags[targetTagType], function (i, targetTag) {
+                var tagName = targetTag.name;
+                if ($.inArray(tagName, e621games.guessSpecies.allPossibleAnswers) == -1) {
+                    e621games.guessSpecies.allPossibleAnswers.push(tagName);
+                }
+            });
         });
-        detailedPost.tags['species'].sort(function (a, b) {
-            return a.count - b.count;
+        $.each(detailedPost.tags, function(key, tagsForType){
+            tagsForType.sort(function (a, b) {
+                return a.count - b.count;
+            });
         });
 
         e621games.guessSpecies.detailedPosts.push(detailedPost);
@@ -239,7 +251,7 @@ e621games.guessSpecies.addPost = function(detailedPost) {
 e621games.guessSpecies.resetData = function () {
     e621games.guessSpecies.rawPosts  = [];
     e621games.extractingTags = false;
-    e621games.guessSpecies.species = [];
+    e621games.guessSpecies.allPossibleAnswers = [];
     e621games.guessSpecies.detailedPosts = [];
     e621games.guessSpecies.quizzItems = [];
     e621games.guessSpecies.score = {
@@ -265,7 +277,16 @@ e621games.guessSpecies.start = function() {
                 {value:5, label: '5'},
                 {value:10, label: '10'}
             ],
-            nbAnswers: 5
+            nbAnswers: 5,
+            choices_tags: [
+                {value:'artist', label: 'The "artist"'},
+                {value:'general', label: 'General tags'},
+                {value:'copyright', label: 'Which intellectual property was raped (copyright)'},
+                {value:'character', label: 'The original character (do not steal)'},
+                {value:'species', label: 'The species'},
+                {value:'all', label: 'Any of the above !'}
+            ],
+            tags: 'species'
         }, function(settings) {
             $('body').append(settings);
 
@@ -273,6 +294,10 @@ e621games.guessSpecies.start = function() {
                 event.preventDefault();
                 e621games.guessSpecies.config.NB_QUIZZ_ITEMS = parseInt($('.quizz-settings select[name=nbItems]').val());
                 e621games.guessSpecies.config.NB_ANSWERS_PER_ITEM = parseInt($('.quizz-settings select[name=nbAnswers]').val());
+                e621games.guessSpecies.config.TARGET_TAGS_TYPES = [$('.quizz-settings select[name=tags]').val()];
+                if('all' == e621games.guessSpecies.config.TARGET_TAGS_TYPES) {
+                    e621games.guessSpecies.config.TARGET_TAGS_TYPES = ['artist', 'general', 'copyright', 'character', 'species'];
+                }
                 $('.quizz-settings').remove();
 
                 e621games.guessSpecies.resetData();
