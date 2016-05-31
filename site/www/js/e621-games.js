@@ -136,9 +136,16 @@ e621games.guessSpecies.wrongAnswer = function (correctAnswer, wrongAnswer) {
 };
 
 e621games.guessSpecies.endOfGame = function () {
+    e621games.bgMusic.stop(); // todo fadeout
     $('.quizz').remove();
     var finalScore = (e621games.guessSpecies.score.correct / e621games.guessSpecies.quizzItems.length) * 100;
     tools.message("Accuracy : "+finalScore+"%", function(){}, true);
+    if (finalScore >= 50) {
+        tools.playSound('epic10pts');
+    } else {
+        tools.playSound('humiliation');
+    }
+
 };
 
 e621games.guessSpecies.showQuizzItem = function (number) {
@@ -205,6 +212,9 @@ e621games.guessSpecies.generateQuizzItems = function () {
     e621games.shuffleArrayInPlace(e621games.guessSpecies.quizzItems);
     e621games.guessSpecies.updateScore();
     e621games.guessSpecies.showQuizzItem(0);
+    e621games.bgMusic = tools.playSound('bgmusic');
+    e621games.bgMusic.loop = -1;
+    e621games.bgMusic.volume = .6;
 };
 
 e621games.guessSpecies.addPost = function(detailedPost) {
@@ -281,11 +291,11 @@ e621games.guessSpecies.start = function() {
             ],
             nbAnswers: 5,
             choices_tags: [
-                {value:'artist', label: 'The "artist"'},
+                {value:'artist', label: 'The ""A R T I S T""'},
                 {value:'general', label: 'General tags'},
-                {value:'copyright', label: 'Which intellectual property was raped (copyright)'},
-                {value:'character', label: 'The original character (do not steal)'},
-                {value:'species', label: 'The species'},
+                {value:'copyright', label: 'Which intellectual property or licence was raped (copyright)'},
+                {value:'character', label: 'The character name (original, do not steal)'},
+                {value:'species', label: 'The specie'},
                 {value:'all', label: 'Any of the above !'}
             ],
             tags: 'species'
@@ -294,6 +304,8 @@ e621games.guessSpecies.start = function() {
 
             $('.quizz-settings button').click(function(event){
                 event.preventDefault();
+                tools.playSound('letsrock');
+
                 e621games.guessSpecies.config.NB_QUIZZ_ITEMS = parseInt($('.quizz-settings select[name=nbItems]').val());
                 e621games.guessSpecies.config.NB_ANSWERS_PER_ITEM = parseInt($('.quizz-settings select[name=nbAnswers]').val());
                 e621games.guessSpecies.config.TARGET_TAGS_TYPES = [$('.quizz-settings select[name=tags]').val()];

@@ -79,6 +79,13 @@ tools.message = function(message, callback, closeable) {
 tools.initSounds = function () {
     createjs.Sound.registerSound("sound/wtf_fa - allright.mp3", 'allright');
     createjs.Sound.registerSound("sound/wtf_fa - fail.mp3", 'fail');
+    createjs.Sound.registerSound("sound/wtf_fa - bgmusic.mp3", 'bgmusic');
+    createjs.Sound.registerSound("sound/wtf_fa - bitch.mp3", 'bitch');
+    createjs.Sound.registerSound("sound/wtf_fa - epic10pts.mp3", 'epic10pts');
+    createjs.Sound.registerSound("sound/wtf_fa - humiliation.mp3", 'humiliation');
+    createjs.Sound.registerSound("sound/wtf_fa - letsrock.mp3", 'letsrock');
+    createjs.Sound.registerSound("sound/wtf_fa - shat.mp3", 'shat');
+    createjs.Sound.registerSound("sound/wtf_fa - update.mp3", 'update');
 };
 
 tools.playSound = function(soundID) {
