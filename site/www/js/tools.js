@@ -75,3 +75,12 @@ tools.message = function(message, callback, closeable) {
         callback();
     });
 };
+
+tools.initSounds = function () {
+    createjs.Sound.registerSound("sound/wtf_fa - allright.mp3", 'allright');
+    createjs.Sound.registerSound("sound/wtf_fa - fail.mp3", 'fail');
+};
+
+tools.playSound = function(soundID) {
+    return createjs.Sound.play(soundID);
+};

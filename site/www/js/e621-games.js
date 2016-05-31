@@ -121,12 +121,14 @@ e621games.guessSpecies.updateScore = function () {
 };
 
 e621games.guessSpecies.correctAnswer = function (correctAnswer) {
+    tools.playSound('allright');
     e621games.guessSpecies.score.correct++;
     e621games.guessSpecies.updateScore();
     $('.quizz button.answer[name="'+correctAnswer+'"]').addClass("correct");
 };
 
 e621games.guessSpecies.wrongAnswer = function (correctAnswer, wrongAnswer) {
+    tools.playSound('fail');
     e621games.guessSpecies.score.wrong++;
     e621games.guessSpecies.updateScore();
     $('.quizz button.answer[name="'+correctAnswer+'"]').addClass("correct");
@@ -228,7 +230,7 @@ e621games.guessSpecies.addPost = function(detailedPost) {
             });
         });
         $.each(detailedPost.tags, function(key, tagsForType){
-            tagsForType.sort(function (a, b) {
+            detailedPost.tags[key].sort(function (a, b) {
                 return a.count - b.count;
             });
         });

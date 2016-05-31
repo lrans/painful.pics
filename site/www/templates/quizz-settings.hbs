@@ -19,7 +19,7 @@
         What will you have to guess ?
         <select name="tags">
             {{#each choices_tags}}
-                <option value="{{ this.value }}" {{#test this.value "==" ../choices}}selected{{/test}}>{{ this.label }}</option>
+                <option value="{{ this.value }}" {{#test this.value "==" ../tags}}selected{{/test}}>{{ this.label }}</option>
             {{/each}}
         </select>
     </label>
