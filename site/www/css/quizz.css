@@ -48,12 +48,15 @@
     min-width: 90%;
 }
 
+.quizz .answers-container {
+    display: table;
+    height: 100%;
+    margin-left: 50%;
+}
+
 .quizz .answers {
-    position: absolute;
-    left: 50%;
-    padding: 20px;
-    height: 50%;
-    top: 25%;
+    display: table-cell;
+    vertical-align: middle;
 }
 
 .quizz .answers button {

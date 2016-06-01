@@ -3,10 +3,12 @@
         <embed class="{{ ratio }}" src="{{ imageUrl }}"></embed>
     </div>
 </div>
-<div class="answers">
-    {{#each answers}}
-        <div>
-            <button class="answer" name="{{ this.name }}">{{ this.label }}</button>
-        </div>
-    {{/each}}
+<div class="answers-container">
+    <div class="answers">
+        {{#each answers}}
+            <div>
+                <button class="answer" name="{{ this.name }}">{{ this.label }}</button>
+            </div>
+        {{/each}}
+    </div>
 </div>
