@@ -16,6 +16,14 @@
         </select>
     </label>
     <label>
+        How long to answer ?
+        <select name="timer">
+            {{#each choices_timer}}
+                <option value="{{ this.value }}" {{#test this.value "==" ../timer}}selected{{/test}}>{{ this.label }}</option>
+            {{/each}}
+        </select>
+    </label>
+    <label>
         Where to pick the images from ?
         <select>
             <option>e621.net</option>

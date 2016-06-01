@@ -6,9 +6,19 @@
     position: absolute;
     font-size: large;
     font-weight: bolder;
-    background-color: lightgrey;
+    background-color: transparent;
+    color: white;
     top: 10%;
     right: 10%;
+}
+
+.quizz .score progress {
+    width:200px;
+}
+
+.quizz .score .progress .label {
+    position: relative;
+    left: -50%;
 }
 
 .quizz .question {
