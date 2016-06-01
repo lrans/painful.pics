@@ -172,27 +172,29 @@ e621games.guessSpecies.endOfGame = function () {
 e621games.guessSpecies.showQuizzItem = function (number) {
     tools.message("Get ready !", function(){
         var quizzItem = e621games.guessSpecies.quizzItems[number];
-
-        tools.fetchTemplate('quizz-item', quizzItem, function(page){
-            var question = $('.quizz .question');
-            question.html(page);
-            question.find('button.answer').click(function(){
-                var answer = $(this).attr('name');
-                if (answer == quizzItem.specie) {
-                    e621games.guessSpecies.correctAnswer(answer);
-                } else {
-                    e621games.guessSpecies.wrongAnswer(quizzItem.specie, answer);
-                }
-                setTimeout(function() {
-                    if (e621games.guessSpecies.quizzItems.length > (number+1)) {
-                        e621games.guessSpecies.showQuizzItem(number + 1);
+        tools.ensurePreloaded(quizzItem.imageUrl, function(){
+            tools.fetchTemplate('quizz-item', quizzItem, function(page){
+                var question = $('.quizz .question');
+                question.html(page);
+                question.find('button.answer').click(function(){
+                    question.find('button.answer').prop('disabled', 'true');
+                    var answer = $(this).attr('name');
+                    if (answer == quizzItem.specie) {
+                        e621games.guessSpecies.correctAnswer(answer);
                     } else {
-                        e621games.guessSpecies.endOfGame();
+                        e621games.guessSpecies.wrongAnswer(quizzItem.specie, answer);
                     }
-                }, 2000);
-            });
+                    setTimeout(function() {
+                        if (e621games.guessSpecies.quizzItems.length > (number+1)) {
+                            e621games.guessSpecies.showQuizzItem(number + 1);
+                        } else {
+                            e621games.guessSpecies.endOfGame();
+                        }
+                    }, 2000);
+                });
 
-            $.modal.close();
+                $.modal.close();
+            });
         });
     });
 };
@@ -238,6 +240,7 @@ e621games.guessSpecies.generateQuizzItems = function () {
             }
         });
 
+        tools.preload(quizzItem.imageUrl);
         e621games.guessSpecies.quizzItems.push(quizzItem);
     });
     e621games.shuffleArrayInPlace(e621games.guessSpecies.quizzItems);

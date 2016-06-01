@@ -4,7 +4,10 @@ var tools = {
         max: 100,
         value: 0
     },
-    templatesCache: {}
+    templatesCache: {},
+    preloadQueue: new createjs.LoadQueue(false),
+    preloadedItems: [],
+    preloadedItemsCallBacks: {}
 };
 
 tools.fetchTemplate = function(templateName, data, callback) {
@@ -76,7 +79,24 @@ tools.message = function(message, callback, closeable) {
     });
 };
 
-tools.initSounds = function () {
+tools.initTools = function () {
+    tools.preloadQueue.installPlugin(createjs.Sound);
+
+    var preloadCallback = function(event) {
+        var item = event.item;
+        var type = item.type;
+        tools.preloadedItems.push(item.id);
+        if (item.id in tools.preloadedItemsCallBacks) {
+            var callbacks = tools.preloadedItemsCallBacks[item.id];
+            for (var i = 0 ; i < callbacks.length ; i++) {
+                callbacks[i]();
+            }
+        }
+    };
+
+    tools.preloadQueue.on('fileload', preloadCallback, this);
+    tools.preloadQueue.on('error', preloadCallback, this);
+
     createjs.Sound.registerSound("sound/wtf_fa - allright.mp3", 'allright');
     createjs.Sound.registerSound("sound/wtf_fa - fail.mp3", 'fail');
     createjs.Sound.registerSound("sound/wtf_fa - bgmusic.mp3", 'bgmusic');
@@ -86,8 +106,24 @@ tools.initSounds = function () {
     createjs.Sound.registerSound("sound/wtf_fa - letsrock.mp3", 'letsrock');
     createjs.Sound.registerSound("sound/wtf_fa - shat.mp3", 'shat');
     createjs.Sound.registerSound("sound/wtf_fa - update.mp3", 'update');
+
 };
 
 tools.playSound = function(soundID) {
     return createjs.Sound.play(soundID);
+};
+
+tools.preload = function(url) {
+    tools.preloadQueue.loadFile(url);
+};
+
+tools.ensurePreloaded = function(url, callback) {
+    if($.inArray(url, tools.preloadedItems) != -1) {
+        callback();
+    } else {
+        if (!(url in tools.preloadedItemsCallBacks)) {
+            tools.preloadedItemsCallBacks[url] = [];
+        }
+        tools.preloadedItemsCallBacks[url].push(callback);
+    }
 };
