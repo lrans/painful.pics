@@ -1,9 +1,8 @@
 <div>
-    <div class="correct">Correct : {{ correct }}</div>
-    <div class="wrong">Wrong : {{ wrong }}</div>
+    <div class="players"></div>
     <div class="progress">
-        <progress max="{{ nbItems }}" value="{{math correct "+" wrong }}"></progress>
-        <span class="label">{{math correct "+" wrong }} / {{ nbItems }}</span>
+        <progress max="{{ nbItems }}" value="{{ answered }}"></progress>
+        <span class="label">{{ answered }} / {{ nbItems }}</span>
     </div>
     <div class="chart" data-percent="100" data-bar-color="#ffffff" data-track-color="#000000"></div>
 </div>

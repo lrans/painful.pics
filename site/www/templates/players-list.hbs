@@ -2,12 +2,16 @@
     <table>
         <tr>
             <th>Player</th>
-            <th>Score</th>
+            <th><img src="img/dialog-ok-apply.png"></th>
+            <th><img src="img/edit-delete.png"></th>
+            <th>%</th>
         </tr>
         {{#each players}}
             <tr>
                 <td>{{this.handle}}</td>
-                <td>{{this.score}}</td>
+                <td>{{this.correct}}</td>
+                <td>{{this.wrong}}</td>
+                <td>{{this.accuracy}}</td>
             </tr>
         {{/each}}
     </table>

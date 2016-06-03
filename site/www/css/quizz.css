@@ -12,9 +12,10 @@
 
 #qrcode {
     float: left;
+    cursor: pointer;
 }
 
-.players {
+.multiplayer-infos .players {
     float: right;
 }
 

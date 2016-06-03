@@ -7,6 +7,7 @@ remote.initRemote = function () {
         $('#show').html(joinScreen);
         $('.join-game').click(function(evt){
             var session = $(location).attr('hash').substring(1);
+            var handle = $('form.join input[name=handle]').val();
             evt.preventDefault();
             /*var pathname = $(location).attr('pathname');
             var socketPath = pathname.substring(0, pathname.lastIndexOf('/')) + '/remote-socket';
@@ -24,8 +25,25 @@ remote.initRemote = function () {
             remote.socket.emit('player joined', {
                 session: session,
                 player: {
-                    handle: $('form.join input[name=handle]').val()
+                    handle: handle
                 }
+            });
+            remote.socket.on('new question', function(question) {
+                tools.fetchTemplate('quizz-item', question, function(questionPanel){
+                    $('#show').empty();
+                    $('#show').html(questionPanel);
+
+                    var answers = $('.quizz .answers');
+                    answers.find('button.answer').click(function () {
+                        answers.find('button.answer').prop('disabled', 'true');
+                        var answer = $(this).attr('name');
+                        remote.socket.emit('new answer', {
+                            number: question.number,
+                            handle: handle,
+                            answer: answer
+                        });
+                    });
+                });
             });
         });
     });

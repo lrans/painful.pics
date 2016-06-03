@@ -16,3 +16,12 @@ form label > * {
     display: block;
     width: 100%;
 }
+
+.quizz .image {
+    display:none;
+}
+
+.quizz .answers-container {
+    margin-left:0;
+    width:100%;
+}

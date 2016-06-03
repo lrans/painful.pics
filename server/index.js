@@ -13,24 +13,33 @@ io.on('connection', function(socket){
     socket.on('server joined', function(msg){
         var session = msg.session;
         console.log('server joined for session : '+session);
-        socket.join(msg.session);
+        socket.join(session);
         socket.on('scores', function(msg) {
             console.log('updating scores for session : '+session);
             io.to(session).emit('scores', msg);
         });
+        socket.on('new question', function(msg) {
+            console.log('new question for session : '+session);
+            io.to(session).emit('new question', msg);
+        });
         socket.on('disconnect', function() {
-            console.log('server left session : '+msg.session);
-            io.to(msg.session).emit('server left');
+            console.log('server left session : '+session);
+            io.to(session).emit('server left');
         });
     });
     socket.on('player joined', function(msg){
-        console.log('player joined for session : '+msg.session);
-        socket.join(msg.session, function() {
-            io.to(msg.session).emit('player joined', msg);
+        var session = msg.session;
+        console.log('player joined for session : '+session);
+        socket.join(session, function() {
+            io.to(session).emit('player joined', msg);
+        });
+        socket.on('new answer', function(msg) {
+            console.log('new answer for session : '+session);
+            io.to(session).emit('new answer', msg);
         });
         socket.on('disconnect', function() {
-            console.log('player left for session : '+msg.session);
-            io.to(msg.session).emit('player left', {handle : msg.player.handle});
+            console.log('player left for session : '+session);
+            io.to(session).emit('player left', {handle : msg.player.handle});
         });
     });
 });
