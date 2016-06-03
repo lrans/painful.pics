@@ -1,51 +1,65 @@
-<form class="quizz-settings">
-    <label>
-        How many questions ?
-        <select name="nbItems">
-            {{#each choices_nbItems}}
-                <option value="{{ this.value }}" {{#test this.value "==" ../nbItems}}selected{{/test}}>{{ this.label }}</option>
-            {{/each}}
-        </select>
-    </label>
-    <label>
-        How many choices per question ?
-        <select name="nbAnswers">
-            {{#each choices_nbAnswers}}
-                <option value="{{ this.value }}" {{#test this.value "==" ../nbAnswers}}selected{{/test}}>{{ this.label }}</option>
-            {{/each}}
-        </select>
-    </label>
-    <label>
-        How long to answer ?
-        <select name="timer">
-            {{#each choices_timer}}
-                <option value="{{ this.value }}" {{#test this.value "==" ../timer}}selected{{/test}}>{{ this.label }}</option>
-            {{/each}}
-        </select>
-    </label>
-    <label>
-        Where to pick the images from ?
-        <select>
-            <option>e621.net</option>
-        </select>
-    </label>
-    <label>
-        With which query ?
-        <select name="choices-query">
-            {{#each choices_query}}
-                <option value="{{ this.value }}">{{ this.label }}</option>
-            {{/each}}
-            <option value="custom">Custom</option>
-        </select>
-        <input name="query" value="{{ choices_query.[0].value }}" readonly disabled>
-    </label>
-    <label>
-        What will you have to guess ?
-        <select name="tags">
-            {{#each choices_tags}}
-                <option value="{{ this.value }}" {{#test this.value "==" ../tags}}selected{{/test}}>{{ this.label }}</option>
-            {{/each}}
-        </select>
-    </label>
-    <button>Begin quizz !</button>
-</form>
+<div class="quizz-modal">
+    <form class="quizz-settings">
+        <div>
+            <label>
+                <input type="radio" name="mode" value="single" {{#test mode "==" 'single'}}checked{{/test}}>Forever alone
+            </label>
+            <label>
+                <input type="radio" name="mode" value="multi" {{#test mode "==" 'multi'}}checked{{/test}}>Party mode !
+            </label>
+        </div>
+        <label>
+            How many questions ?
+            <select name="nbItems">
+                {{#each choices_nbItems}}
+                    <option value="{{ this.value }}" {{#test this.value "==" ../nbItems}}selected{{/test}}>{{ this.label }}</option>
+                {{/each}}
+            </select>
+        </label>
+        <label>
+            How many choices per question ?
+            <select name="nbAnswers">
+                {{#each choices_nbAnswers}}
+                    <option value="{{ this.value }}" {{#test this.value "==" ../nbAnswers}}selected{{/test}}>{{ this.label }}</option>
+                {{/each}}
+            </select>
+        </label>
+        <label>
+            How long to answer ?
+            <select name="timer">
+                {{#each choices_timer}}
+                    <option value="{{ this.value }}" {{#test this.value "==" ../timer}}selected{{/test}}>{{ this.label }}</option>
+                {{/each}}
+            </select>
+        </label>
+        <label>
+            Where to pick the images from ?
+            <select>
+                <option>e621.net</option>
+            </select>
+        </label>
+        <label>
+            With which query ?
+            <select name="choices-query">
+                {{#each choices_query}}
+                    <option value="{{ this.value }}">{{ this.label }}</option>
+                {{/each}}
+                <option value="custom">Custom</option>
+            </select>
+            <input name="query" value="{{ choices_query.[0].value }}" readonly disabled>
+        </label>
+        <label>
+            What will you have to guess ?
+            <select name="tags">
+                {{#each choices_tags}}
+                    <option value="{{ this.value }}" {{#test this.value "==" ../tags}}selected{{/test}}>{{ this.label }}</option>
+                {{/each}}
+            </select>
+        </label>
+        <button>Begin quizz !</button>
+    </form>
+    <div class="multiplayer-infos" style="display: none;">
+        <div id="qrcode"></div>
+        <div class="players"></div>
+    </div>
+</div>

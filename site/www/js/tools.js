@@ -5,7 +5,7 @@ var tools = {
         value: 0
     },
     templatesCache: {},
-    preloadQueue: new createjs.LoadQueue(false),
+    preloadQueue: typeof createjs !== 'undefined' ? new createjs.LoadQueue(false) : null,
     preloadedItems: [],
     preloadedItemsCallBacks: {}
 };
@@ -80,22 +80,24 @@ tools.message = function(message, callback, closeable) {
 };
 
 tools.initTools = function () {
-    tools.preloadQueue.installPlugin(createjs.Sound);
+    if (tools.preloadQueue) {
+        tools.preloadQueue.installPlugin(createjs.Sound);
 
-    var preloadCallback = function(event) {
-        var item = event.item;
-        var type = item.type;
-        tools.preloadedItems.push(item.id);
-        if (item.id in tools.preloadedItemsCallBacks) {
-            var callbacks = tools.preloadedItemsCallBacks[item.id];
-            for (var i = 0 ; i < callbacks.length ; i++) {
-                callbacks[i]();
+        var preloadCallback = function (event) {
+            var item = event.item;
+            var type = item.type;
+            tools.preloadedItems.push(item.id);
+            if (item.id in tools.preloadedItemsCallBacks) {
+                var callbacks = tools.preloadedItemsCallBacks[item.id];
+                for (var i = 0; i < callbacks.length; i++) {
+                    callbacks[i]();
+                }
             }
-        }
-    };
+        };
 
-    tools.preloadQueue.on('fileload', preloadCallback, this);
-    tools.preloadQueue.on('error', preloadCallback, this);
+        tools.preloadQueue.on('fileload', preloadCallback, this);
+        tools.preloadQueue.on('error', preloadCallback, this);
+    }
 
     createjs.Sound.registerSound("sound/wtf_fa - allright.mp3", 'allright');
     createjs.Sound.registerSound("sound/wtf_fa - fail.mp3", 'fail');

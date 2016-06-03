@@ -1,0 +1,14 @@
+<div class="players-list">
+    <table>
+        <tr>
+            <th>Player</th>
+            <th>Score</th>
+        </tr>
+        {{#each players}}
+            <tr>
+                <td>{{this.handle}}</td>
+                <td>{{this.score}}</td>
+            </tr>
+        {{/each}}
+    </table>
+</div>

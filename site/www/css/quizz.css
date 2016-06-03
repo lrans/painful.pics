@@ -1,3 +1,24 @@
+.quizz-modal {
+    width: auto;
+}
+
+.multiplayer-infos {
+    float: right;
+}
+
+.quizz-settings {
+    float: left;
+}
+
+#qrcode {
+    float: left;
+}
+
+.players {
+    float: right;
+}
+
+
 .quizz {
     height: 100%;
 }

@@ -81,7 +81,7 @@ div.submission-infos {
     padding: 3px;
 }
 
-form label {
+form > * {
     padding: 2px;
     margin: 5px;
     display: block;
@@ -93,6 +93,3 @@ form label {
     text-align: center;
 }
 
-form.quizz-settings {
-    width: auto;
-}
