@@ -127,27 +127,26 @@ e621games.guessSpecies.config = {
 e621games.guessSpecies.updateScore = function () {
     for(player in e621games.guessSpecies.players) {
         e621games.guessSpecies.players[player].accuracy = Math.round((e621games.guessSpecies.players[player].correct / (e621games.guessSpecies.currentQuizzItemNumber + 1)) * 100);
+        e621games.guessSpecies.players[player].correctPercent = Math.round((e621games.guessSpecies.players[player].correct / e621games.guessSpecies.quizzItems.length) * 100);
+        e621games.guessSpecies.players[player].wrongPercent = Math.round((e621games.guessSpecies.players[player].wrong / e621games.guessSpecies.quizzItems.length) * 100);
     }
-    tools.fetchTemplate("quizz-score", e621games.guessSpecies.score, function(score){
-        $('.quizz .score').html(score);
-        e621games.guessSpecies.playerListChanged();
-    });
+    e621games.guessSpecies.playerListChanged();
 };
 
 e621games.guessSpecies.correctAnswer = function (player, correctAnswer) {
    // tools.playSound('allright');
     e621games.guessSpecies.players[player].correct++;
     e621games.guessSpecies.updateScore();
-    $('.quizz button.answer[name="'+correctAnswer+'"]').addClass("correct");
+    $('.quizz .answer[name="'+correctAnswer+'"]').addClass("correct").append('<div class="uk-badge uk-badge-success uk-text-bold uk-text-large">'+player+'</div>');
 };
 
 e621games.guessSpecies.wrongAnswer = function (player, correctAnswer, wrongAnswer) {
    // tools.playSound('fail');
     e621games.guessSpecies.players[player].wrong++;
     e621games.guessSpecies.updateScore();
-    $('.quizz button.answer[name="'+correctAnswer+'"]').addClass("correct");
+    $('.quizz .answer[name="'+correctAnswer+'"]').addClass("correct");
     if (wrongAnswer != undefined) {
-        $('.quizz button.answer[name="' + wrongAnswer + '"]').addClass("wrong");
+        $('.quizz .answer[name="' + wrongAnswer + '"]').addClass("wrong").append('<div class="uk-badge uk-badge-danger uk-text-bold uk-text-large">'+player+'</div>');
     }
 };
 
@@ -167,9 +166,8 @@ e621games.guessSpecies.endOfGame = function () {
     e621games.bgMusic.stop(); // todo fadeout
     $('.quizz').remove();
 
-    tools.fetchTemplate('players-list', e621games.guessSpecies.players, function(scoreBoard){
+    tools.fetchTemplate('players-list', {players : e621games.guessSpecies.players}, function(scoreBoard){
         $('#show').html(scoreBoard);
-        $('.players-list').modal();
     });
 /*
     var finalScore = (e621games.guessSpecies.score.correct / e621games.guessSpecies.quizzItems.length) * 100;
@@ -185,7 +183,11 @@ e621games.guessSpecies.timer = function(init, callback, timeLeft) {
     if (timeLeft == undefined) {
         timeLeft = init;
     }
-    $('.score .chart').data('easyPieChart').update((timeLeft/init) * 100);
+    var percentLeft = (timeLeft/init) * 100;
+    $('div.timer').css("width", '' + percentLeft + '%');
+    if (percentLeft <= 20) {
+        $('div.timer').addClass('uk-progress-danger')
+    }
     var TIMER_RESOLUTION = 100; // ms.
     if (timeLeft >= 0) {
         e621games.guessSpecies.timeout = setTimeout(function() {
@@ -253,10 +255,11 @@ e621games.guessSpecies.showQuizzItem = function (number) {
             tools.fetchTemplate('quizz-item', quizzItem, function(page){
                 var question = $('.quizz .question');
                 question.html(page);
+                e621games.guessSpecies.updateScore();
                 if (e621games.guessSpecies.config.MODE == 'single') {
-                    question.find('button.answer').click(function () {
+                    question.find('.answer').click(function () {
                         clearTimeout(e621games.guessSpecies.timeout);
-                        question.find('button.answer').prop('disabled', 'true');
+                        question.find('.answer').off('click');
                         var answer = $(this).attr('name');
                         e621games.guessSpecies.score.answered++;
                         if (answer == quizzItem.specie) {
@@ -272,19 +275,12 @@ e621games.guessSpecies.showQuizzItem = function (number) {
 
                 $.modal.close();
                 if (e621games.guessSpecies.config.TIMER > 0) {
-                    $('.score .chart').easyPieChart({
-                        lineWidth: 20,
-                        size: 200,
-                        animate: {
-                            duration: 200,
-                            enabled: true
-                        }
-                    });
-                    $('.score .chart').data('easyPieChart').update(100);
+                    $('div.timer').removeClass('uk-progress-danger').css("width", '100%');
+                    $('div.timer-container').css('visibility', 'visible');
                     e621games.guessSpecies.timer(e621games.guessSpecies.config.TIMER, function () {
                         if (e621games.guessSpecies.config.MODE == 'single') {
                             e621games.guessSpecies.score.answered++;
-                            question.find('button.answer').prop('disabled', 'true');
+                            question.find('.answer').off('click');
                             e621games.guessSpecies.wrongAnswer('you', quizzItem.specie);
                             e621games.guessSpecies.showNextQuizzItem(number);
                         } else if (e621games.guessSpecies.config.MODE == 'multi') {
@@ -422,58 +418,53 @@ e621games.guessSpecies.broadcastScores = function () {
 
 e621games.guessSpecies.setMultiPlayerMode = function (active) {
     if (active) {
-        e621games.guessSpecies.config.session = Math.random().toString(36).substring(7);
-        e621games.guessSpecies.socket = io();
-        e621games.guessSpecies.socket.emit('server joined', {
-            session: e621games.guessSpecies.config.session
-        });
+        if (!e621games.guessSpecies.socket) {
+            e621games.guessSpecies.config.session = Math.random().toString(36).substring(7);
+            e621games.guessSpecies.socket = io();
+            e621games.guessSpecies.socket.emit('server joined', {
+                session: e621games.guessSpecies.config.session
+            });
 
-        e621games.guessSpecies.socket.on('player joined', function(msg){
-            e621games.guessSpecies.players[msg.player.handle] = {
-                handle: msg.player.handle,
-                correct: 0,
-                wrong: 0
-            };
-            e621games.guessSpecies.playerListChanged();
-        });
+            e621games.guessSpecies.socket.on('player joined', function (msg) {
+                e621games.guessSpecies.players[msg.player.handle] = {
+                    handle: msg.player.handle,
+                    correct: 0,
+                    wrong: 0
+                };
+                e621games.guessSpecies.playerListChanged();
+            });
 
-        e621games.guessSpecies.socket.on('player left', function(msg){
-            delete e621games.guessSpecies.players[msg.handle];
-            e621games.guessSpecies.playerListChanged();
-        });
+            e621games.guessSpecies.socket.on('player left', function (msg) {
+                delete e621games.guessSpecies.players[msg.handle];
+                e621games.guessSpecies.playerListChanged();
+            });
 
-        e621games.guessSpecies.socket.on('new answer', function(msg){
-            e621games.guessSpecies.newAnswerReceived(msg);
-        });
+            e621games.guessSpecies.socket.on('new answer', function (msg) {
+                e621games.guessSpecies.newAnswerReceived(msg);
+            });
+        }
 
         var pathname = $(location).attr('pathname');
-        var joinUrl = $(location).attr('protocol') + '//' + $(location).attr('host') + pathname.substring(0, pathname.lastIndexOf('/')) + '/remote.html#'+e621games.guessSpecies.config.session;
+        var joinUrl = $(location).attr('protocol') + '//' + $(location).attr('host') + pathname.substring(0, pathname.lastIndexOf('/')) + '/remote.html#' + e621games.guessSpecies.config.session;
 
-        var qrcode =new QRCode("qrcode", {
+        var qrcode = new QRCode("qrcode", {
             text: joinUrl,
-            width: 256,
-            height: 256,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
+            width: 240,
+            height: 240,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
         });
 
-        $('#qrcode').click(function(){
-            window.open(joinUrl, 'stuff'+Math.random(), 'left=20,top=20,width=300,height=500,toolbar=0,resizable=0');
+        $('#qrcode').click(function () {
+            window.open(joinUrl, 'stuff' + Math.random(), 'left=20,top=20,width=300,height=500,toolbar=0,resizable=0');
             return false;
         });
 
-        $('.multiplayer-infos')
-            //.html('<a href="'+joinUrl+'">'+e621games.guessSpecies.config.session+"</a>")
-            .show();
+        UIkit.offcanvas.show('.multiplayer-infos');
     } else {
-        e621games.guessSpecies.socket.disconnect();
-        e621games.guessSpecies.socket = null;
-        e621games.guessSpecies.config.session = null;
-        e621games.guessSpecies.players = {};
-        $('.multiplayer-infos').hide();
+        UIkit.offcanvas.hide();
         $('#qrcode').empty();
-        $('.players').empty();
     }
 };
 
@@ -511,7 +502,7 @@ e621games.guessSpecies.start = function() {
             choices_tags: [
                 {value:'artist', label: 'The ""A R T I S T""'},
                 {value:'general', label: 'General tags'},
-                {value:'copyright', label: 'The intellectual property/licence that was raped (copyright)'},
+                {value:'copyright', label: 'The intellectual property/licence (copyright)'},
                 {value:'character', label: 'The character name (original, do not steal)'},
                 {value:'species', label: 'The specie'},
                 {value:'all', label: 'Any of the above !'}
@@ -534,7 +525,9 @@ e621games.guessSpecies.start = function() {
                 e621games.guessSpecies.setMultiPlayerMode(mode == 'multi');
             });
 
-            $('.quizz-settings button').click(function(event){
+            var settingsModal = UIkit.modal(".quizz-modal", {center:true, bgclose:false});
+
+            $('.quizz-modal button').click(function(event){
                 event.preventDefault();
                 tools.playSound('letsrock');
 
@@ -554,7 +547,11 @@ e621games.guessSpecies.start = function() {
                 if('all' == e621games.guessSpecies.config.TARGET_TAGS_TYPES) {
                     e621games.guessSpecies.config.TARGET_TAGS_TYPES = ['artist', 'general', 'copyright', 'character', 'species'];
                 }
-                $('.quizz-settings').remove();
+                settingsModal.hide();
+                UIkit.offcanvas.hide();
+                $('.quizz-modal').remove();
+                $('.multiplayer-infos').remove();
+
 
                 e621games.guessSpecies.resetData();
                 tools.showProgress({
@@ -567,7 +564,7 @@ e621games.guessSpecies.start = function() {
                 });
             });
 
-            $('.quizz-modal').modal();
+            settingsModal.show();
         });
     });
 };

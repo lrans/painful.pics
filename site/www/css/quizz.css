@@ -1,119 +1,44 @@
-.quizz-modal {
-    width: auto;
-}
-
-.multiplayer-infos {
-    float: right;
-}
-
-.quizz-settings {
-    float: left;
-}
-
 #qrcode {
-    float: left;
-    cursor: pointer;
+    height:256px;
+    width:256px;
 }
-
-.multiplayer-infos .players {
-    float: right;
-}
-
 
 .quizz {
     height: 100%;
 }
 
-.quizz .score {
-    position: absolute;
-    font-size: large;
-    font-weight: bolder;
-    background-color: transparent;
-    color: white;
-    top: 10%;
-    right: 10%;
+.quizz-modal {
+    background: none;
 }
 
-.quizz .score progress {
-    width:200px;
-}
-
-.quizz .score .progress .label {
-    position: relative;
-    left: -50%;
-}
-
-.quizz .question {
-    height: 100%;
-}
-
-.quizz .image {
-    height: 100%;
-    position: absolute;
-    width: 50%;
-}
-
-.quizz .image-container {
-    height: 100%;
-    overflow: hidden;
-    position: relative;
-}
-
-.quizz .image-container > embed {
-    box-shadow: 2px 2px 2px #2A2A2A;
-    border: 1px solid #2A2A2A;
-    max-height: 100%;
-    max-width: 100%;
-
-    top: -9999px;
-    bottom: -9999px;
-    margin: auto;
-    position: absolute;
-    right: 0;
-}
-
-.quizz .image-container > embed.vertical {
+.image-container > .vertical {
     min-height: 90%;
 }
 
-.quizz .image-container > embed.horizontal {
+.image-container > .horizontal {
     min-width: 90%;
 }
 
-.quizz .answers-container {
-    display: table;
-    height: 100%;
-    margin-left: 50%;
+.uk-progress-danger.uk-progress-bar {
+    background-color: #da314b;
 }
 
-.quizz .answers {
-    display: table-cell;
-    vertical-align: middle;
+.uk-progress-success.uk-progress-bar {
+    background-color: #8cc14c;
 }
 
-.quizz .answers button {
-    border: 3px solid lightgray;
-    font-size: x-large;
-    margin: 10px 20px;
-    width: 100%;
-    cursor: pointer;
-    font-weight: bold;
-    color: #747474;
-    height: 37px;
+.answers .uk-panel {
+    border-width: thick;
 }
 
-.quizz .answers button:hover {
-    background-color: #ffffff;
-    color: #000000;
+.answers .uk-badge {
+    float: right;
 }
 
-.quizz .answers button.correct {
-    border: 3px solid limegreen;
-    background: url('../img/dialog-ok-apply.png') no-repeat #ffffff;
+.uk-panel.correct {
+    border-color: #8cc14c;
 }
 
-.quizz .answers button.wrong {
-    border: 3px solid red;
-    background: url('../img/edit-delete.png') no-repeat #ffffff;
+.uk-panel.wrong {
+    border-color: #da314b;
 }
-

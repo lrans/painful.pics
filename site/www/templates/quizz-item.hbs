@@ -1,14 +1,22 @@
-<div class="image">
-    <div class="image-container">
-        <embed class="{{ ratio }}" src="{{ imageUrl }}"></embed>
+<div class="uk-width-2-3 uk-text-center image">
+    <div class="uk-height-1-1 uk-vertical-align uk-container-center image-container">
+        <embed class="uk-responsive-height uk-responsive-width uk-vertical-align-middle {{ ratio }}" src="{{ imageUrl }}"></embed>
     </div>
 </div>
-<div class="answers-container">
-    <div class="answers">
-        {{#each answers}}
-            <div>
-                <button class="answer" name="{{ this.name }}">{{ this.label }}</button>
-            </div>
-        {{/each}}
+<div class="uk-width-1-3">
+    <div class="players"></div>
+    <div class="uk-progress uk-progress-striped timer-container" style="visibility: hidden;">
+        <div class="uk-progress-bar timer" style="width: 100%;"></div>
+    </div>
+    <div class="uk-height-1-1 uk-vertical-align uk-text-large uk-text-bold">
+        <div class="uk-vertical-align-middle uk-grid answers">
+            {{#each answers}}
+                <div class="uk-width-1-1">
+                    <a class="uk-panel uk-panel-box answer uk-panel-box-hover" name="{{ this.name }}">
+                        <span>{{ this.label }}</span>
+                    </a>
+                </div>
+            {{/each}}
+        </div>
     </div>
 </div>

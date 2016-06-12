@@ -1,18 +1,21 @@
-<div class="players-list">
-    <table>
-        <tr>
-            <th>Player</th>
-            <th><img src="img/dialog-ok-apply.png"></th>
-            <th><img src="img/edit-delete.png"></th>
-            <th>%</th>
-        </tr>
+<table class="uk-table uk-contrast uk-text-large uk-text-bold players-list">
+    <colgroup>
+        <col width="1">
+        <col width="1000">
+    </colgroup>
+    <tbody>
         {{#each players}}
             <tr>
-                <td>{{this.handle}}</td>
-                <td>{{this.correct}}</td>
-                <td>{{this.wrong}}</td>
-                <td>{{this.accuracy}}</td>
+                <td>
+                    <span>{{this.handle}}</span>
+                </td>
+                <td>
+                    <div class="uk-progress">
+                        <div class="uk-progress-bar uk-progress-success" style="width: {{ this.correctPercent }}%;">{{ this.correctPercent }} %</div>
+                        <div class="uk-progress-bar uk-progress-danger" style="width: {{ this.wrongPercent }}%;">{{ this.wrongPercent }} %</div>
+                    </div>
+                </td>
             </tr>
         {{/each}}
-    </table>
-</div>
+    </tbody>
+</table>
