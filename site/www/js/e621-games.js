@@ -447,13 +447,10 @@ e621games.guessSpecies.setMultiPlayerMode = function (active) {
         var pathname = $(location).attr('pathname');
         var joinUrl = $(location).attr('protocol') + '//' + $(location).attr('host') + pathname.substring(0, pathname.lastIndexOf('/')) + '/remote.html#' + e621games.guessSpecies.config.session;
 
-        var qrcode = new QRCode("qrcode", {
-            text: joinUrl,
-            width: 240,
-            height: 240,
-            colorDark: "#000000",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
+        $('#qrcode').qrcode({
+            render: 'canvas',
+            size: 240,
+            text: joinUrl
         });
 
         $('#qrcode').click(function () {
