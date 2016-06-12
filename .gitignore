@@ -4,3 +4,4 @@ target
 
 
 /site/www/js/bower_components/
+/server/node_modules/
