@@ -3,7 +3,7 @@
 cd server
 npm install
 
-cd ../site/www/js
+cd ../site
 bower install
-
-
+npm install
+gulp
