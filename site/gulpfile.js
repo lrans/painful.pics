@@ -18,6 +18,7 @@ var paths = {
     html: ['html/**/*.html'],
     images: ['images/**/*.png'],
     extras: ['extras/proxy.jar'],
+    sounds: ['sounds/**/*.mp3'],
     templates: ['templates/**/*.hbs']
 };
 
@@ -154,6 +155,10 @@ gulp.task('copy', function() {
     // Copy extra html5bp files
     gulp.src(paths.extras, {cwd: bases.app})
         .pipe(gulp.dest(bases.dist));
+
+    // Copy sounds
+    gulp.src(paths.sounds, {cwd: bases.app})
+        .pipe(gulp.dest(bases.dist + 'sounds/'));
 
 });
 
