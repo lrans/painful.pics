@@ -15,7 +15,7 @@ fapi.inner.proxycallBacks = {};
 var proxyCallBack = function(key, rawResult) {
     fapi.inner.proxycallBacks[key](rawResult);
     fapi.inner.proxycallBacks[key] = null;
-}
+};
 
 fapi.inner.proxy = function(path, callback, domain, params, method, binaryResult) {
     if(!domain) {
@@ -54,10 +54,10 @@ fapi.inner.proxy = function(path, callback, domain, params, method, binaryResult
 
     if (document.proxyApplet === undefined) {
         $('applet').remove();
-        $('body').append('<applet name="proxyApplet" code="com.proxy.proxyapplet.Proxy" codebase="." archive="proxy.jar" width="1" heigth="1"></applet>')
+        $('body').append('<applet name="proxyApplet" code="com.proxy.proxyapplet.Proxy" codebase="." archive="proxy.jar" width="1" heigth="1"></applet>');
     }
-    document.proxyApplet.request(domain, path, method,JSON.stringify(params), binaryResult, key)
-}
+    document.proxyApplet.request(domain, path, method,JSON.stringify(params), binaryResult, key);
+};
 
 fapi.inner.extractSubmissions = function(pageXML, callback) {
     var result = null;
@@ -94,7 +94,7 @@ fapi.inner.extractSubmissions = function(pageXML, callback) {
     });
     if (pageHasResults) {
         pageXML.find('table[class="innertable"]').find('script').map(function(){
-            eval($(this).text());
+            eval($(this).text()); // jshint ignore:line
             $.each(result, function(id, data){
                 var desc = descriptions['id_' + id];
                 if(desc) {
@@ -106,12 +106,12 @@ fapi.inner.extractSubmissions = function(pageXML, callback) {
     $.map(result, function(submission){
         callback(submission);
     });
-}
+};
 
 fapi.inner.getSubmission = function(baseURL, nb, nbPerPage, callback) {
     var nbPages = Math.max(1, nb / nbPerPage);
     fapi.inner.getSubmissions(baseURL, nbPages, callback, 1);
-}
+};
 
 
 fapi.inner.getSubmissions = function(baseURL, nbPages, callback, page) {
@@ -122,17 +122,17 @@ fapi.inner.getSubmissions = function(baseURL, nbPages, callback, page) {
             fapi.inner.getSubmissions(baseURL, nbPages, callback, page + 1);
         }
     });
-}
+};
 
 fapi.getFavs = function(user, nbFavs, callback) {
     var NB_FAVS_PER_PAGE = 32;
     fapi.inner.getSubmission('/favorites/' + user, nbFavs, NB_FAVS_PER_PAGE, callback);
-}
+};
 
 fapi.getGallery = function(user, nbSubmissions, callback) {
     var NB_SUBS_PER_PAGE = 32;
     fapi.inner.getSubmission('/gallery/' + user, nbSubmissions, NB_SUBS_PER_PAGE, callback);
-}
+};
 
 fapi.getRecent = function(nbRecents, callback) {
     var NB_RECENTS_PER_PAGE = 32;
@@ -163,11 +163,11 @@ fapi.doLogin = function(callback) {
             loginModal.modal();
         }, 'html');
     }, "www.furaffinity.net", {}, "GET", true);
-}
+};
 
 fapi.doLogout = function(callback) {
     fapi.inner.proxy('/logout/', callback);
-}
+};
 
 fapi.getCurrentUser = function(callback) {
     fapi.inner.proxy('/', function(pageXML){
@@ -179,25 +179,25 @@ fapi.getCurrentUser = function(callback) {
             callback(null);
         }
     });
-}
+};
 
 fapi.doFav = function(submissionId) {
     // TODO : gérer les cookies / image
     var pageXML = fapi.inner.proxy('/view/' + submissionId);
-    var favLink = pageXML.find('div.actions').find('b').find('a').filter(function(){return $(this).attr('href').indexOf('/fav') == 0;}).attr('href');
+    var favLink = pageXML.find('div.actions').find('b').find('a').filter(function(){return $(this).attr('href').indexOf('/fav') === 0;}).attr('href');
     var favedPage = fapi.inner.proxy(favLink);
-    return favedPage.find('div.actions').find('b').find('a').filter(function(){return $(this).attr('href').indexOf('/fav') == 0;}).text().indexOf('-') == 0;
-}
+    return favedPage.find('div.actions').find('b').find('a').filter(function(){return $(this).attr('href').indexOf('/fav') === 0;}).text().indexOf('-') === 0;
+};
 
 fapi.getRawImage = function(url, callback) {
     var extractDomain = /.*\/\/([^\/]+)(\/.*)/.exec(url);
     var domain = extractDomain[1];
     var path = extractDomain[2];
-    console.log('img proxy for : ' + domain + path)
+    console.log('img proxy for : ' + domain + path);
     fapi.inner.proxy(path, function(data){
         callback('data:image/jpg;base64,' + data);
     }, domain, {}, 'GET', true);
-}
+};
 
 fapi.getExtendedInfo = function(submissionID, callback) {
     fapi.inner.proxy('/full/' + submissionID, function(pageXML){
@@ -209,33 +209,33 @@ fapi.getExtendedInfo = function(submissionID, callback) {
         var contents = infoTD.contents();
         $.map(contents, function(elem, index){
             if($(elem).text() == 'Category:') {
-                result['category'] = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+                result.category = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
             }
             if($(elem).text() == 'Theme:') {
-                result['theme'] = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+                result.theme = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
             }
             if($(elem).text() == 'Species:') {
-                result['species'] = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+                result.species = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
             }
             if($(elem).text() == 'Gender:') {
-                result['gender'] = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+                result.gender = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
             }
             if($(elem).text() == 'Favorites:') {
-                result['favorites'] = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+                result.favorites = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
             }
             if($(elem).text() == 'Comments:') {
-                result['comments'] = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+                result.comments = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
             }
             if($(elem).text() == 'Views:') {
-                result['views'] = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+                result.views = $(contents[index + 1]).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
             }
         });
         
         var keywords = pageXML.find('#keywords').find('a').map(function(){
             return $(this).text();
         });
-        result['keywords'] = keywords;
+        result.keywords = keywords;
 
         callback(result);
     });
-}
+};

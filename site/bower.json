@@ -1,5 +1,5 @@
 {
-  "name": "quizz",
+  "name": "quizz-site",
   "dependencies": {
     "PreloadJS": "0.6.2",
     "SoundJS": "0.6.2",

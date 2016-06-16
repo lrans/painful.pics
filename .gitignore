@@ -1,7 +1,11 @@
 *.iml
 target
 .directory
+.idea
 
 
 /site/www/js/bower_components/
 /server/node_modules/
+/site/node_modules/
+/site/dist/
+/site/tmp/

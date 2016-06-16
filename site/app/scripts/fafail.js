@@ -98,9 +98,9 @@ fafail.showImage = function(submission) {
                     $(fullImg).animate({height: targetDimensions.height, width: targetDimensions.width}, 600);
                     $(div).animate({top: targetPosition.top + 'px', left: targetPosition.left + 'px'}, 600).rotate({animateTo:0, duration:600});
                     imgButton.attr('name', 'full').attr('title', 'View half size').fadeIn('fast');
-                }
+                };
 
-                if($(fullImg).attr('src') != '') {
+                if($(fullImg).attr('src') !== '') {
                     switchToFull();
                 } else {
                     $(fullImg).load(function () {
@@ -165,7 +165,7 @@ fafail.showImage = function(submission) {
 };
 
 fafail.clearShow = function() {
-    fafail.submissions = {}
+    fafail.submissions = {};
     fafail.submissionsQueue = [];
     $('#show div.submission').remove();
 };

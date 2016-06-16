@@ -1,0 +1,26 @@
+{
+  "name": "quizz-site",
+  "version": "0.0.1",
+  "description": "Quizz static website",
+  "dependencies": {
+
+  },
+  "devDependencies": {
+    "gulp": "3.9.1",
+    "gulp-clean": "0.3.2",
+    "gulp-jshint": "2.0.1",
+    "gulp-concat" : "2.6.0",
+    "gulp-uglify" : "1.5.3",
+    "gulp-load-plugins": "1.2.4",
+    "main-bower-files": "2.13.1",
+    "gulp-filter": "4.0.0",
+    "ordered-merge-stream": "1.0.0",
+    "gulp-clean-css": "2.0.6",
+    "gulp-imagemin": "2.4.0",
+    "gulp-debug": "2.1.2",
+    "gulp-handlebars": "4.0.0",
+    "gulp-wrap": "0.13.0",
+    "gulp-declare": "0.3.0",
+    "handlebars": "^4.0.5"
+  }
+}

@@ -1,17 +1,21 @@
-var tools = {
-    lastProgress: {
-        message: 'Working...',
-        max: 100,
-        value: 0
-    },
-    templatesCache: {},
-    preloadQueue: typeof createjs !== 'undefined' ? new createjs.LoadQueue(false) : null,
-    preloadedItems: [],
-    preloadedItemsCallBacks: {}
+var tools = tools || {};
+
+tools.lastProgress = {
+    message: 'Working...',
+    max: 100,
+    value: 0
 };
 
+tools.templatesCache = {};
+tools.preloadQueue= typeof createjs !== 'undefined' ? new createjs.LoadQueue(false) : null;
+tools.preloadedItems= [];
+tools.preloadedItemsCallBacks= {};
+
+
 tools.fetchTemplate = function(templateName, data, callback) {
-    if (templateName in tools.templatesCache) {
+    if (templateName in tools.templates) {
+        callback(tools.templates[templateName](data));
+    } else if (templateName in tools.templatesCache) {
         callback(tools.templatesCache[templateName](data));
     } else {
         $.get('templates/' + templateName + '.hbs?t='+new Date().getTime(), function (rawTemplate) {
@@ -49,7 +53,7 @@ tools.showProgress = function(progressObject) {
         tools.lastProgress[attrname] = progressObject[attrname];
     }
     var progressModal = $("#progress-modal").length > 0 ? $("#progress-modal")[0] : null;
-    if (progressModal == null) {
+    if (progressModal === null) {
         $('body').append('<div id="progress-modal"></div>');
         progressModal = $("#progress-modal")[0];
     }
@@ -64,7 +68,7 @@ tools.showProgress = function(progressObject) {
 };
 
 tools.message = function(message, callback, closeable) {
-    if (closeable == undefined) {
+    if (closeable === undefined) {
         closeable = false;
     }
     $("#message-modal").remove();
