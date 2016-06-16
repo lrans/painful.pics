@@ -158,7 +158,7 @@ gulp.task('copy', function() {
 
     // Copy sounds
     gulp.src(paths.sounds, {cwd: bases.app})
-        .pipe(gulp.dest(bases.dist + 'sounds/'));
+        .pipe(gulp.dest(bases.dist + 'sound/'));
 
 });
 
