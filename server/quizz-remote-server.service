@@ -3,13 +3,13 @@ Description=Quizz remote server
 After=network.target
 
 [Service]
-ExecStart=/var/www/html/fafail/server/index.js
+ExecStart=/var/www/html/fafail-dev/server/index.js
 Restart=always
 User=nobody
 Group=nobody
 Environment=PATH=/usr/bin:/usr/local/bin
 Environment=NODE_ENV=production
-WorkingDirectory=/var/www/html/fafail/server
+WorkingDirectory=/var/www/html/fafail-dev/server
 
 [Install]
 WantedBy=multi-user.target
