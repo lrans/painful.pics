@@ -32,6 +32,7 @@ remote.initRemote = function () {
                 var answers = $('.quizz .answers');
                 answers.find('.answer').click(function () {
                     answers.find('.answer').off('click');
+                    $(this).addClass("active");
                     var answer = $(this).attr('name');
                     remote.socket.emit('new answer', {
                         number: question.number,
