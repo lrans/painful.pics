@@ -1,3 +1,4 @@
+node {
 stage 'Clone'
 git '/mnt/raid/snarl/repos/fafail.git'
 
@@ -9,3 +10,4 @@ dir('site') {
   sh 'gulp'
 }
 
+}
