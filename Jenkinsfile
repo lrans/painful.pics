@@ -32,8 +32,8 @@ node {
 
         dir('server') {
             sh 'scp -r * jenkins@painful.pics:/var/lib/quizz-server/'
-            sh 'ssh jenkins@painful.pics -c "sudo cp /var/lib/quizz-server/quizz-remote-server.service /etc/systemd/"'
-            sh 'ssh jenkins@painful.pics -c "sudo service quizz-remote-server restart"'
+            sh 'ssh jenkins@painful.pics "sudo cp /var/lib/quizz-server/quizz-remote-server.service /etc/systemd/"'
+            sh 'ssh jenkins@painful.pics "sudo service quizz-remote-server restart"'
         }
     }
 }
