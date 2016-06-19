@@ -16,11 +16,24 @@ node {
         sh 'cp -rv * /var/www/html/fafail'
     }
 
+    dir('server') {
+        sh 'rm -rf /var/lib/quizz-server/*'
+        sh 'cp -rv * /var/lib/quizz-server/'
+        sh 'sudo cp quizz-remote-server.service /etc/systemd/'
+        sh 'sudo service quizz-remote-server restart'
+    }
+
     stage 'Deploy to prod'
-    dir('site/dist') {
-        input 'Deploy to production ?'
-        sshagent(['b114e186-3eb1-495c-afcc-c6c6bbad59fd']) {
+    input 'Deploy to production ?'
+    sshagent(['b114e186-3eb1-495c-afcc-c6c6bbad59fd']) {
+        dir('site/dist') {
             sh 'scp -r * jenkins@painful.pics:/var/www/html'
+        }
+
+        dir('server') {
+            sh 'scp -r * jenkins@painful.pics:/var/lib/quizz-server/'
+            sh 'ssh jenkins@painful.pics -c "sudo cp /var/lib/quizz-server/quizz-remote-server.service /etc/systemd/"'
+            sh 'ssh jenkins@painful.pics -c "sudo service quizz-remote-server restart"'
         }
     }
 }
