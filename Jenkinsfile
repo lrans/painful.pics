@@ -15,4 +15,12 @@ node {
         sh 'rm -rf /var/www/html/fafail/*'
         sh 'cp -rv * /var/www/html/fafail'
     }
+
+    stage 'Deploy to prod'
+    dir('site/dist') {
+        input 'Deploy to production ?'
+        sshagent(['b114e186-3eb1-495c-afcc-c6c6bbad59fd']) {
+            sh 'scp -r * jenkins@painful.pics:/var/www/html'
+        }
+    }
 }
