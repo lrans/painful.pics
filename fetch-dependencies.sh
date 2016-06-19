@@ -6,4 +6,4 @@ npm install
 cd ../site
 bower install
 npm install
-gulp
+
