@@ -90,6 +90,7 @@ tools.initTools = function () {
         var preloadCallback = function (event) {
             var item = event.item;
             var type = item.type;
+            console.log('preloaded item ' + item);
             tools.preloadedItems.push(item.id);
             if (item.id in tools.preloadedItemsCallBacks) {
                 var callbacks = tools.preloadedItemsCallBacks[item.id];
@@ -120,11 +121,14 @@ tools.playSound = function(soundID) {
 };
 
 tools.preload = function(url) {
+    console.log('adding file to preload : ' + url);
     tools.preloadQueue.loadFile(url);
 };
 
 tools.ensurePreloaded = function(url, callback) {
     if($.inArray(url, tools.preloadedItems) != -1) {
+        callback();
+    } else if (url.endsWith('webm')) {
         callback();
     } else {
         if (!(url in tools.preloadedItemsCallBacks)) {
