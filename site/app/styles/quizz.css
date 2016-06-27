@@ -45,3 +45,57 @@
 .uk-panel.wrong {
     border-color: #da314b;
 }
+
+.flash-wrong {
+    -moz-animation: flash-wrong 1s ease-out;
+    -moz-animation-iteration-count: 1;
+    -webkit-animation: flash-wrong 1s ease-out;
+    -webkit-animation-iteration-count: 1;
+    -ms-animation: flash-wrong 1s ease-out;
+    -ms-animation-iteration-count: 1;
+}
+
+@-webkit-keyframes flash-wrong {
+    0% { background-color:black;}
+    50% { background-color:#da314b;}
+    100% {background-color:black;}
+}
+
+@-moz-keyframes flash-wrong {
+    0% { background-color:black;}
+    50% { background-color:#da314b;}
+    100% {background-color:black;}
+}
+
+@-ms-keyframes flash-wrong {
+    0% { background-color:black;}
+    50% { background-color:#da314b;}
+    100% {background-color:black;}
+}
+
+.flash-correct {
+    -moz-animation: flash-correct 1s ease-out;
+    -moz-animation-iteration-count: 1;
+    -webkit-animation: flash-correct 1s ease-out;
+    -webkit-animation-iteration-count: 1;
+    -ms-animation: flash-correct 1s ease-out;
+    -ms-animation-iteration-count: 1;
+}
+
+@-webkit-keyframes flash-correct {
+    0% { background-color:black;}
+    50% { background-color:#8cc14c;}
+    100% {background-color:black;}
+}
+
+@-moz-keyframes flash-correct {
+    0% { background-color:black;}
+    50% { background-color:#8cc14c;}
+    100% {background-color:black;}
+}
+
+@-ms-keyframes flash-correct {
+    0% { background-color:black;}
+    50% { background-color:#8cc14c;}
+    100% {background-color:black;}
+}

@@ -13,6 +13,11 @@ remote.initRemote = function () {
             tools.fetchTemplate('players-list', {players : scores}, function(playersList){
                 $('#show').empty();
                 $('#show').html(playersList);
+                if (scores[handle].lastAnswer == 'correct') {
+                    tools.flash('#show', 'correct');
+                } else if (scores[handle].lastAnswer == 'wrong') {
+                    tools.flash('#show', 'wrong');
+                }
             });
         });
         remote.socket.on('server left', function() {

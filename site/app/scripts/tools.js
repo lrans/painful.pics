@@ -133,3 +133,10 @@ tools.ensurePreloaded = function(url, callback) {
         tools.preloadedItemsCallBacks[url].push(callback);
     }
 };
+
+tools.flash = function(selector, flashClass) {
+    $(selector).addClass("flash-"+flashClass);
+    setTimeout( function(){
+        $(selector).removeClass("flash"+flashClass);
+    }, 1000);
+};

@@ -136,17 +136,25 @@ e621games.guessSpecies.updateScore = function () {
 e621games.guessSpecies.correctAnswer = function (player, correctAnswer) {
     // tools.playSound('allright');
     e621games.guessSpecies.players[player].correct++;
+    e621games.guessSpecies.players[player].lastAnswer = 'correct';
     e621games.guessSpecies.updateScore();
     $('.quizz .answer[name="'+correctAnswer+'"]').addClass("correct").append('<div class="uk-badge uk-badge-success uk-text-bold uk-text-large">'+player+'</div>');
+    if (player == 'you') {
+        tools.flash('#show', 'correct');
+    }
 };
 
 e621games.guessSpecies.wrongAnswer = function (player, correctAnswer, wrongAnswer) {
     // tools.playSound('fail');
     e621games.guessSpecies.players[player].wrong++;
+    e621games.guessSpecies.players[player].lastAnswer = 'wrong';
     e621games.guessSpecies.updateScore();
     $('.quizz .answer[name="'+correctAnswer+'"]').addClass("correct");
     if (wrongAnswer !== undefined) {
         $('.quizz .answer[name="' + wrongAnswer + '"]').addClass("wrong").append('<div class="uk-badge uk-badge-danger uk-text-bold uk-text-large">'+player+'</div>');
+    }
+    if (player == 'you') {
+        tools.flash('#show', 'wrong');
     }
 };
 
