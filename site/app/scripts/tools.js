@@ -137,6 +137,6 @@ tools.ensurePreloaded = function(url, callback) {
 tools.flash = function(selector, flashClass) {
     $(selector).addClass("flash-"+flashClass);
     setTimeout( function(){
-        $(selector).removeClass("flash"+flashClass);
+        $(selector).removeClass("flash-"+flashClass);
     }, 1000);
 };
