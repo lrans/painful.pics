@@ -109,7 +109,8 @@ gulp.task('styles', function() {
 
     var app = gulp.src([
         'app/styles/fafail.css',
-        'app/styles/quizz.css'
+        'app/styles/quizz.css',
+        'app/styles/flash.css'
     ]);
     app.pause();
 
@@ -124,6 +125,7 @@ gulp.task('styles', function() {
     var mobileApp = gulp.src([
         'app/styles/fafail.css',
         'app/styles/quizz.css',
+        'app/styles/flash.css',
         'app/styles/remote.css'
     ]);
     mobileApp.pause();
