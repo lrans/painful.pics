@@ -54,7 +54,11 @@ gulp.task('scripts', function() {
         }));
     templates.pause();
 
-    g.orderedMergeStream([libs, templates, app])
+    var localOverrides = (g.util.env.env === 'local' ? ['app/scripts/tools-local-override.js'] : []);
+    var local = gulp.src(localOverrides);
+    local.pause();
+
+    g.orderedMergeStream([libs, templates, app, local])
         .pipe(g.uglify())
         .pipe(g.concat('app.min.js'))
         .pipe(gulp.dest(bases.dist + 'js/'));
@@ -90,7 +94,11 @@ gulp.task('scripts', function() {
         .pipe(g.jshint.reporter('default'));
     mobileApp.pause();
 
-    g.orderedMergeStream([mobileLibs, mobileTemplates, mobileApp])
+    var mobileLocalOverrides = (g.util.env.env === 'local' ? ['app/scripts/tools-local-override.js'] : []);
+    var mobileLocal = gulp.src(mobileLocalOverrides);
+    mobileLocal.pause();
+
+    g.orderedMergeStream([mobileLibs, mobileTemplates, mobileApp, mobileLocal])
         .pipe(g.uglify())
         .pipe(g.concat('app-remote.min.js'))
         .pipe(gulp.dest(bases.dist + 'js/'));

@@ -438,7 +438,7 @@ e621games.guessSpecies.setMultiPlayerMode = function (active) {
     if (active) {
         if (!e621games.guessSpecies.socket) {
             e621games.guessSpecies.config.session = Math.random().toString(36).substring(7);
-            e621games.guessSpecies.socket = io();
+            e621games.guessSpecies.socket = tools.newSocket();
             e621games.guessSpecies.socket.emit('server joined', {
                 session: e621games.guessSpecies.config.session
             });

@@ -17,7 +17,7 @@ remote.initRemote = function () {
         /*var pathname = $(location).attr('pathname');
          var socketPath = pathname.substring(0, pathname.lastIndexOf('/')) + '/remote-socket';
          var socketUrl = $(location).attr('protocol') + '//' + $(location).attr('host');*/
-        remote.socket = io();
+        remote.socket = tools.newSocket();
         remote.socket.on('scores', function(scores) {
             tools.fetchTemplate('players-list', {players : scores}, function(playersList){
                 $('#show').empty();

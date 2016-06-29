@@ -144,3 +144,7 @@ tools.flash = function(selector, flashClass) {
         $(selector).removeClass("flash-"+flashClass);
     }, 1000);
 };
+
+tools.newSocket = function () {
+    return io();
+};
