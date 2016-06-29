@@ -464,6 +464,7 @@ e621games.guessSpecies.setMultiPlayerMode = function (active) {
 
         var pathname = $(location).attr('pathname');
         var joinUrl = $(location).attr('protocol') + '//' + $(location).attr('host') + pathname.substring(0, pathname.lastIndexOf('/')) + '/remote.html#' + e621games.guessSpecies.config.session;
+        console.log("Remote join url : " + joinUrl);
 
         $('#qrcode').qrcode({
             render: 'canvas',
