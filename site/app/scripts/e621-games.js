@@ -449,12 +449,12 @@ e621games.guessSpecies.setMultiPlayerMode = function (active) {
                     correct: 0,
                     wrong: 0
                 };
-                e621games.guessSpecies.playerListChanged();
+                e621games.guessSpecies.playerListChanged(true);
             });
 
             e621games.guessSpecies.socket.on('player left', function (msg) {
                 delete e621games.guessSpecies.players[msg.handle];
-                e621games.guessSpecies.playerListChanged();
+                e621games.guessSpecies.playerListChanged(true);
             });
 
             e621games.guessSpecies.socket.on('new answer', function (msg) {
