@@ -13,7 +13,6 @@ var bases = {
 
 var paths = {
     scripts: ['scripts/**/*.js', '!scripts/libs/**/*.js', '!scripts/remote.js'],
-    libs: ['scripts/libs/jquery/dist/jquery.js', 'scripts/libs/underscore/underscore.js', 'scripts/backbone/backbone.js'],
     styles: ['styles/**/*.css', '!styles/remote.css'],
     html: ['html/**/*.html'],
     images: ['images/**/*.png'],
@@ -27,6 +26,10 @@ gulp.task('clean', function() {
     return gulp.src(bases.dist)
         .pipe(g.clean());
 });
+
+function uglifyIfNeeded() {
+    return g.util.env.env === 'local' ? g.util.noop() : g.uglify();
+}
 
 // Process scripts and concatenate them into one output file
 gulp.task('scripts', function() {
@@ -59,22 +62,26 @@ gulp.task('scripts', function() {
     local.pause();
 
     g.orderedMergeStream([libs, templates, app, local])
-        .pipe(g.uglify())
+        .pipe(uglifyIfNeeded())
         .pipe(g.concat('app.min.js'))
         .pipe(gulp.dest(bases.dist + 'js/'));
 
 
     var mobileLibs = gulp.src([
         'tmp/bower_components/jquery/dist/jquery.js',
+		'tmp/bower_components/jquery-modal/jquery.modal.js',
         'tmp/bower_components/socket.io-client/socket.io.js',
         'tmp/bower_components/handlebars/handlebars.min.js',
-        'tmp/bower_components/uikit/js/uikit.min.js'
+        'tmp/bower_components/uikit/js/uikit.min.js',
+        'tmp/bower_components/jquery-qrcode/jquery.qrcode.min.js'
     ]).pipe(g.debug({title: 'including lib:'}));
     mobileLibs.pause();
 
     var mobileTemplates = gulp.src([
         'templates/players-list.hbs',
-        'templates/quizz-answers.hbs'
+        'templates/quizz-answers.hbs',
+        'templates/lobby-modal.hbs',
+		'templates/message-modal.hbs'
     ], {cwd: bases.app})
         .pipe(g.handlebars({
             handlebars: require('handlebars')
@@ -99,7 +106,7 @@ gulp.task('scripts', function() {
     mobileLocal.pause();
 
     g.orderedMergeStream([mobileLibs, mobileTemplates, mobileApp, mobileLocal])
-        .pipe(g.uglify())
+        .pipe(uglifyIfNeeded())
         .pipe(g.concat('app-remote.min.js'))
         .pipe(gulp.dest(bases.dist + 'js/'));
 });

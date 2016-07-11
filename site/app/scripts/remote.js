@@ -11,50 +11,90 @@ remote.randomName = function () {
     return remote.adjectives[adjectiveIndex] + '' + remote.species[speciesIndex];
 };
 
+remote.cleanScreen = function() {
+	$.modal.close();
+	$("#lobby-modal").remove();
+	$("#message-modal").remove();
+	$('#show').empty();
+};
+
+remote.showLobby = function(players) {
+    remote.cleanScreen();
+    tools.fetchTemplate("lobby-modal", {players : players}, function(lobbyModal){
+        $('#show').append(lobbyModal);
+        remote.lobbyModal = UIkit.modal("#lobby-modal", {center:true, bgclose:false, keyboard: false});
+        $('#qrcode').qrcode({
+            render: 'canvas',
+            size: 240,
+            text: document.location.href
+        });
+        $('#qrcode').find('canvas').addClass("uk-container-center uk-width-1-1");
+		
+		$('button.start-game').click(function(){
+			remote.socket.emit('launch game');
+		});
+		
+        remote.lobbyModal.show();
+    });
+};
+
+remote.showScores = function(scores) {
+	tools.fetchTemplate('players-list', {players : scores}, function(playersList){
+		remote.cleanScreen();
+		$('#show').html(playersList);
+		if (scores[remote.handle].lastAnswer == 'correct') {
+			tools.flash('#show', 'correct');
+		} else if (scores[remote.handle].lastAnswer == 'wrong') {
+			tools.flash('#show', 'wrong');
+		}
+	});
+};
+
+remote.message = function(message) {
+	remote.cleanScreen();
+	if ('blocking' === message.type) {
+		tools.message(message.message, function() {}, false);
+	}
+};
+
+remote.question = function(question) {
+	tools.fetchTemplate('quizz-answers', question, function(questionPanel){
+		remote.cleanScreen();
+		$('#show').html(questionPanel);
+
+		var answers = $('.quizz .answers');
+		answers.find('.answer').click(function () {
+			answers.find('.answer').off('click');
+			$(this).addClass("active");
+			var answer = $(this).attr('name');
+			remote.socket.emit('answer', {
+				number: question.number,
+				handle: remote.handle,
+				answer: answer
+			});
+		});
+	});
+};
+
 remote.initRemote = function () {
     UIkit.modal.prompt("Name:", remote.randomName(), function(handle){
+		remote.handle = handle;
         var session = $(location).attr('hash').substring(1);
-        /*var pathname = $(location).attr('pathname');
-         var socketPath = pathname.substring(0, pathname.lastIndexOf('/')) + '/remote-socket';
-         var socketUrl = $(location).attr('protocol') + '//' + $(location).attr('host');*/
         remote.socket = tools.newSocket();
-        remote.socket.on('scores', function(scores) {
-            tools.fetchTemplate('players-list', {players : scores}, function(playersList){
-                $('#show').empty();
-                $('#show').html(playersList);
-                if (scores[handle].lastAnswer == 'correct') {
-                    tools.flash('#show', 'correct');
-                } else if (scores[handle].lastAnswer == 'wrong') {
-                    tools.flash('#show', 'wrong');
-                }
-            });
-        });
+		
+        remote.socket.on('show scores', remote.showScores);
+		remote.socket.on('message', remote.message);
+        remote.socket.on('show lobby', remote.showLobby);
         remote.socket.on('server left', function() {
             window.close();
         });
-        remote.socket.emit('player joined', {
+        remote.socket.on('question', remote.question);
+		
+		remote.socket.emit('player joined', {
             session: session,
             player: {
-                handle: handle
+                handle: remote.handle
             }
-        });
-        remote.socket.on('new question', function(question) {
-            tools.fetchTemplate('quizz-answers', question, function(questionPanel){
-                $('#show').empty();
-                $('#show').html(questionPanel);
-
-                var answers = $('.quizz .answers');
-                answers.find('.answer').click(function () {
-                    answers.find('.answer').off('click');
-                    $(this).addClass("active");
-                    var answer = $(this).attr('name');
-                    remote.socket.emit('new answer', {
-                        number: question.number,
-                        handle: handle,
-                        answer: answer
-                    });
-                });
-            });
         });
     });
 };
