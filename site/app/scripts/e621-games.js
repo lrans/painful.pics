@@ -180,10 +180,12 @@ e621games.guessSpecies.endOfGame = function () {
     e621games.bgMusic.stop(); // todo fadeout
     $('.quizz').remove();
 
-    tools.fetchTemplate('players-list', {players : e621games.guessSpecies.players}, function(scoreBoard){
+    /*tools.fetchTemplate('players-list', {players : e621games.guessSpecies.players}, function(scoreBoard){
         $('#show').html(scoreBoard);
-    });
+    });*/
 	e621games.guessSpecies._gameInProgress = false;
+	e621games.guessSpecies.start();
+	
     /*
      var finalScore = (e621games.guessSpecies.score.correct / e621games.guessSpecies.quizzItems.length) * 100;
      tools.message("Accuracy : "+finalScore+"%", function(){}, true);
@@ -427,6 +429,11 @@ e621games.guessSpecies.resetData = function () {
         nbItems: e621games.guessSpecies.config.NB_QUIZZ_ITEMS
     };
     e621games.guessSpecies.missingPosts = e621games.guessSpecies.config.NB_QUIZZ_ITEMS;
+	
+	$.each(e621games.guessSpecies.players, function(handle, player) {
+		e621games.guessSpecies.players[handle].correct = 0;
+		e621games.guessSpecies.players[handle].wrong = 0;
+	});
 };
 
 e621games.guessSpecies.gameInProgress = function() {
@@ -497,7 +504,9 @@ e621games.guessSpecies.setMultiPlayerMode = function (active) {
 			e621games.guessSpecies.socket.on('launch game', function () {
                 e621games.guessSpecies.launchNewGame();
             });
-        }
+        } else {
+			e621games.guessSpecies.playerListChanged();
+		}
 
         var pathname = $(location).attr('pathname');
         var joinUrl = $(location).attr('protocol') + '//' + $(location).attr('host') + pathname.substring(0, pathname.lastIndexOf('/')) + '/remote.html#' + e621games.guessSpecies.config.session;
@@ -646,6 +655,10 @@ e621games.guessSpecies.start = function() {
 				e621games.guessSpecies.config.MODE = mode;
 				e621games.guessSpecies.updateStartGameButton();
             });
+			var mode = $(".quizz-settings input[name=mode]:radio:checked").val();
+			e621games.guessSpecies.setMultiPlayerMode(mode === 'multi');
+			e621games.guessSpecies.config.MODE = mode;
+			e621games.guessSpecies.updateStartGameButton();
 
             var settingsModal = UIkit.modal(".quizz-modal", {center:true, bgclose:false});
 
