@@ -148,3 +148,23 @@ tools.flash = function(selector, flashClass) {
 tools.newSocket = function () {
     return io();
 };
+
+tools.pickRandom = function(fromArray, excludingElements) {
+    var array = [];
+    $.each(fromArray, function(x, item) {
+        if ($.inArray(item, excludingElements) === -1) {
+            array.push(item);
+        }
+    });
+    return array[Math.floor(Math.random()*array.length)];
+};
+
+tools.shuffleArrayInPlace = function(a) {
+    var j, x, i;
+    for (i = a.length; i; i -= 1) {
+        j = Math.floor(Math.random() * i);
+        x = a[i - 1];
+        a[i - 1] = a[j];
+        a[j] = x;
+    }
+};
