@@ -184,5 +184,11 @@ gulp.task('watch', function() {
     gulp.watch('app/**/*', ['scripts', 'styles', 'copy']);
 });
 
+gulp.task('webserver', function() {
+  gulp.src('dist')
+    .pipe(g.webserver({
+    }));
+});
+
 // Define the default task as a sequence of the above tasks
 gulp.task('default', ['scripts', 'styles', 'images', 'copy']);
