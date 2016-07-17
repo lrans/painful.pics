@@ -1,0 +1,44 @@
+{
+  "name": "painful.pics proxy",
+  "version": "1.0.0",
+  "manifest_version": 2,
+  "description": "AJAX proxy allowing https://painful.pics to bypass SOP on non CORS-enabled sites",
+  "homepage_url": "https://painful.pics",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "default_locale": "en",
+  "background": {
+    "scripts": [
+      "src/bg/background.js"
+    ],
+    "persistent": true
+  },
+  "permissions": [
+    "contentSettings",
+    "cookies",
+	"*://*.furaffinity.net/",
+	"webRequest",
+	"webRequestBlocking",
+	"webNavigation"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://painful.pics/*",
+		"http://localhost:8000/*"
+      ],
+      "js": [
+        "src/inject/inject.js"
+      ]
+    }
+  ],
+  "externally_connectable": {
+	"matches": [
+        "https://painful.pics/*",
+		"http://localhost:8000/*"
+      ]
+  }
+}
