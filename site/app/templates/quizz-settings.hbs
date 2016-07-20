@@ -48,10 +48,12 @@
                         </div>
                     </div>
                     <div class="uk-form-row">
-                        <label class="uk-form-label" for="imageSource">Where to pick the images from ?</label>
+                        <label class="uk-form-label" for="choices-imageSource">Where to pick the images from ?</label>
                         <div class="uk-form-controls">
-                            <select id="imageSource" name="imageSource">
-                                <option>e621.net</option>
+                            <select id="choices-imageSource" name="choices-imageSource">
+								{{#each choices_imageSource}}
+                                    <option value="{{ this.value }}" {{#test this.value "==" ../imageSource}}selected{{/test}}>{{ this.label }}</option>
+                                {{/each}}
                             </select>
                         </div>
                     </div>

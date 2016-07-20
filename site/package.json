@@ -23,6 +23,7 @@
     "gulp-declare": "0.3.0",
     "handlebars": "^4.0.5",
     "gulp-util": "3.0.7",
-	"gulp-webserver": "0.9.1"
+	"gulp-webserver": "0.9.1",
+	"tidy-html5": "0.1.1"
   }
 }

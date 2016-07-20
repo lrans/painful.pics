@@ -3,7 +3,9 @@ var ds = ds || {};
 ds.e621 = {};
 
 ds.e621.metadata = {
-	label: "e621.net"
+	id: 'e621',
+	label: "e621.net",
+	providedTags : ["general", "artist", "copyright", "character", "species"]
 };
 
 ds.e621._runtime = {

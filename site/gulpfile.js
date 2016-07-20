@@ -35,7 +35,8 @@ function uglifyIfNeeded() {
 gulp.task('scripts', function() {
     var jQueryAndLibs = [
         'tmp/bower_components/jquery/dist/jquery.js',
-        'tmp/bower_components/socket.io-client/socket.io.js'
+        'tmp/bower_components/socket.io-client/socket.io.js',
+		'node_modules/tidy-html5/tidy.js'
     ].concat(g.mainBowerFiles(['**/*.js', '!tmp/bower_components/jquery/dist/jquery.js']));
     var libs = gulp.src(jQueryAndLibs)
         .pipe(g.debug({title: 'including lib:'}));
