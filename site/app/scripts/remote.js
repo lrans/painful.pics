@@ -39,7 +39,10 @@ remote.showLobby = function(players) {
 };
 
 remote.showScores = function(scores) {
-	tools.fetchTemplate('players-list', {players : scores}, function(playersList){
+	tools.fetchTemplate('players-list', {
+		showScores: true,
+		players : scores
+	}, function(playersList){
 		remote.cleanScreen();
 		$('#show').html(playersList);
 		if (scores[remote.handle].lastAnswer == 'correct') {

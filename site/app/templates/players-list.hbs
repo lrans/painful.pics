@@ -1,7 +1,7 @@
-<table class="uk-table uk-contrast uk-text-large uk-text-bold players-list">
+<table class="uk-table uk-text-large uk-text-bold players-list">
     <colgroup>
         <col width="1">
-        <col width="1000">
+        {{#test showScores "==" true }}<col width="1000">{{/test}}
     </colgroup>
     <tbody>
         {{#each players}}
@@ -9,12 +9,14 @@
                 <td>
                     <span>{{this.handle}}</span>
                 </td>
-                <td>
-                    <div class="uk-progress">
-                        <div class="uk-progress-bar uk-progress-success" style="width: {{ this.correctPercent }}%;">{{ this.correctPercent }} %</div>
-                        <div class="uk-progress-bar uk-progress-danger" style="width: {{ this.wrongPercent }}%;">{{ this.wrongPercent }} %</div>
-                    </div>
-                </td>
+                {{#test ../showScores "==" true }}
+					<td>
+						<div class="uk-progress">
+							<div class="uk-progress-bar uk-progress-success" style="width: {{ this.correctPercent }}%;">{{ this.correctPercent }} %</div>
+							<div class="uk-progress-bar uk-progress-danger" style="width: {{ this.wrongPercent }}%;">{{ this.wrongPercent }} %</div>
+						</div>
+					</td>
+				{{/test}}
             </tr>
         {{/each}}
     </tbody>

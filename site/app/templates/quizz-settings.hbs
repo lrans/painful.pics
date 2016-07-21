@@ -1,22 +1,16 @@
-<div class="uk-modal quizz-modal">
+<div class="uk-modal quizz-modal {{ mode }}">
     <div class="uk-modal-dialog">
         <div class="uk-modal-header">
-            <h2>Game settings</h2>
+            <h2 class="uk-display-inline-block">Game settings</h2>
+			<div class="uk-display-inline-block uk-button-group mode" data-uk-switcher="{connect:'#multi-panel-switcher'}">
+				<button class="uk-button {{#test mode "==" 'single'}}uk-active{{/test}}" name="single" type="button">Forever alone</button>
+				<button class="uk-button {{#test mode "==" 'multi'}}uk-active{{/test}}" name="multi" type="button">Party mode</button>
+			</div>
         </div>
         <div class="uk-modal-content">
             <div class="uk-flex">
                 <form class="uk-form uk-form-horizontal quizz-settings">
-                    <div class="uk-form-row">
-                        <span class="uk-form-label">Mode</span>
-                        <div class="uk-form-controls">
-                            <label>
-                                <input type="radio" name="mode" value="single" {{#test mode "==" 'single'}}checked{{/test}}>Forever alone
-                            </label>
-                            <label>
-                                <input type="radio" name="mode" value="multi" {{#test mode "==" 'multi'}}checked{{/test}}>Party mode !
-                            </label>
-                        </div>
-                    </div>
+					<input type="hidden" name="mode" value="{{ mode }}">
                     <div class="uk-form-row">
                         <label class="uk-form-label" for="nbItems">How many questions ?</label>
                         <div class="uk-form-controls">
@@ -81,20 +75,18 @@
                     </div>
                 </form>
             </div>
+			<div class="uk-switcher" id="multi-panel-switcher">
+				<div></div>
+				<div class="uk-panel">
+					<h1>Scan to join</h1>
+					<div id="qrcode"></div>
+					<h1>Players</h1>
+					<div class="players"></div>
+				</div>
+			</div>
         </div>
         <div class="uk-modal-footer uk-text-right">
             <button class="uk-button uk-button-primary start-game">Begin quizz !</button>
-        </div>
-    </div>
-</div>
-
-<div class="uk-offcanvas multiplayer-infos">
-    <div class="uk-offcanvas-bar">
-        <div class="uk-panel uk-contrast">
-            <h1>Scan to join</h1>
-            <div id="qrcode"></div>
-            <h1>Players</h1>
-            <div class="players"></div>
         </div>
     </div>
 </div>

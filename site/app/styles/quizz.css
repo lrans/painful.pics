@@ -10,6 +10,20 @@
     background: none;
 }
 
+.quizz-modal.multi .uk-modal-content .uk-flex {
+    display: inline-block;
+	max-width: 550px;
+}
+
+.quizz-modal.multi .uk-modal-dialog {
+	width: 960px;
+}
+
+#multi-panel-switcher {
+	display: inline-block;
+	max-width: 350px;
+}
+
 .image-container > .vertical {
     min-height: 90%;
 }

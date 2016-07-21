@@ -322,7 +322,10 @@ e621games.guessSpecies.gameInProgress = function() {
 };
 
 e621games.guessSpecies.playerListChanged = function () {
-    tools.fetchTemplate('players-list', {players : e621games.guessSpecies.players}, function(playersList){
+    tools.fetchTemplate('players-list', {
+		showScores: true,
+		players : e621games.guessSpecies.players
+	}, function(playersList){
         $('.players').html(playersList);
     });
     if (e621games.guessSpecies.config.MODE !== 'single' && !e621games.guessSpecies.gameInProgress()) {
@@ -332,7 +335,10 @@ e621games.guessSpecies.playerListChanged = function () {
 };
 
 e621games.guessSpecies.scoreChanged = function () {
-    tools.fetchTemplate('players-list', {players : e621games.guessSpecies.players}, function(playersList){
+    tools.fetchTemplate('players-list', {
+		showScores: true,
+		players : e621games.guessSpecies.players
+	}, function(playersList){
         $('.players').html(playersList);
     });
     if (e621games.guessSpecies.config.MODE !== 'single' && e621games.guessSpecies.gameInProgress()) {
@@ -388,26 +394,22 @@ e621games.guessSpecies.setMultiPlayerMode = function (active) {
         } else {
 			e621games.guessSpecies.playerListChanged();
 		}
+		
+		var pathname = $(location).attr('pathname');
+		var joinUrl = $(location).attr('protocol') + '//' + $(location).attr('host') + pathname.substring(0, pathname.lastIndexOf('/')) + '/remote.html#' + e621games.guessSpecies.config.session;
+		console.log("Remote join url : " + joinUrl);
+		
+		$('#qrcode').empty().qrcode({
+			render: 'canvas',
+			width: 340,
+			height: 340,
+			text: joinUrl
+		});
 
-        var pathname = $(location).attr('pathname');
-        var joinUrl = $(location).attr('protocol') + '//' + $(location).attr('host') + pathname.substring(0, pathname.lastIndexOf('/')) + '/remote.html#' + e621games.guessSpecies.config.session;
-        console.log("Remote join url : " + joinUrl);
-
-        $('#qrcode').qrcode({
-            render: 'canvas',
-            size: 240,
-            text: joinUrl
-        });
-
-        $('#qrcode').click(function () {
-            window.open(joinUrl, 'stuff' + Math.random(), 'left=20,top=20,width=300,height=500,toolbar=0,resizable=0');
-            return false;
-        });
-
-        UIkit.offcanvas.show('.multiplayer-infos');
-    } else {
-        UIkit.offcanvas.hide();
-        $('#qrcode').empty();
+		$('#qrcode').click(function () {
+			window.open(joinUrl, 'stuff' + Math.random(), 'left=20,top=20,width=300,height=500,toolbar=0,resizable=0');
+			return false;
+		});
     }
 };
 
@@ -421,7 +423,6 @@ e621games.guessSpecies.launchNewGame = function() {
 	e621games.guessSpecies._gameInProgress = true;
 	tools.playSound('letsrock');
 
-	e621games.guessSpecies.config.MODE = $(".quizz-settings input[name=mode]:radio:checked").val();
 	if (e621games.guessSpecies.config.MODE === 'single') {
 		e621games.guessSpecies.players.you = {
 			handle: 'You',
@@ -432,7 +433,6 @@ e621games.guessSpecies.launchNewGame = function() {
 	e621games.guessSpecies.config.NB_QUIZZ_ITEMS = parseInt($('.quizz-settings select[name=nbItems]').val());
 	e621games.guessSpecies.config.NB_ANSWERS_PER_ITEM = parseInt($('.quizz-settings select[name=nbAnswers]').val());
 	e621games.guessSpecies.config.TIMER = parseInt($('.quizz-settings select[name=timer]').val());
-	e621games.guessSpecies.config.DATASOURCE = ds.fa;
 	e621games.guessSpecies.config.QUERY = $('.quizz-settings input[name=query]').val();
 	e621games.guessSpecies.config.TARGET_TAGS_TYPES = [$('.quizz-settings select[name=tags]').val()];
 	if('all' === e621games.guessSpecies.config.TARGET_TAGS_TYPES) {
@@ -462,8 +462,16 @@ e621games.guessSpecies.launchNewGame = function() {
 	});
 };
 
+e621games.guessSpecies.gameModeChanged = function() {
+	var mode = $(".quizz-settings input[name=mode]").val();
+	$('.quizz-modal').removeClass('single multi').addClass(mode);
+	e621games.guessSpecies.setMultiPlayerMode(mode === 'multi');
+	e621games.guessSpecies.config.MODE = mode;
+	e621games.guessSpecies.updateStartGameButton();
+};
+
 e621games.guessSpecies.updateStartGameButton = function() {
-	var mode = $(".quizz-settings input[name=mode]:radio:checked").val();
+	var mode = e621games.guessSpecies.config.MODE;
 	var nbPlayers = Object.keys(e621games.guessSpecies.players).length;
 	$('button.start-game').prop('disabled', (mode === 'multi' && nbPlayers === 0));
 };
@@ -548,16 +556,14 @@ e621games.guessSpecies.start = function() {
                 }
             });
 
-            $("input[name=mode]:radio").change(function () {
-                var mode = $(this).val();
-                e621games.guessSpecies.setMultiPlayerMode(mode === 'multi');
-				e621games.guessSpecies.config.MODE = mode;
-				e621games.guessSpecies.updateStartGameButton();
+            $("input[name=mode]").change(function () {
+				e621games.guessSpecies.gameModeChanged();
             });
-			var mode = $(".quizz-settings input[name=mode]:radio:checked").val();
-			e621games.guessSpecies.setMultiPlayerMode(mode === 'multi');
-			e621games.guessSpecies.config.MODE = mode;
-			e621games.guessSpecies.updateStartGameButton();
+			e621games.guessSpecies.gameModeChanged();
+			
+			$('.uk-button-group.mode button').click(function(){
+				$(".quizz-settings input[name=mode]").val($(this).attr('name')).trigger('change');
+			});
 			
 			$('select[name=choices-imageSource]').change(function(){
 				e621games.guessSpecies.datasourceChanged();
@@ -566,7 +572,7 @@ e621games.guessSpecies.start = function() {
 
             var settingsModal = UIkit.modal(".quizz-modal", {center:true, bgclose:false});
 
-            $('.quizz-modal button').click(function(event){
+            $('.quizz-modal button.start-game').click(function(event){
                 event.preventDefault();
 				e621games.guessSpecies.launchNewGame();
             });
