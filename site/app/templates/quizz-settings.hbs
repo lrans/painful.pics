@@ -54,8 +54,8 @@
 					<div class="uk-tab-center">
 						<ul class="uk-tab datasource-chooser" data-uk-tab>
 							{{#each choices_imageSource}}
-								<li class="{{#test this.value "==" ../imageSource}}uk-active{{/test}}" name="{{ this.value }}">
-									<a>{{ this.label }}</a>
+								<li class="{{#test this.value "==" ../imageSource}}uk-active{{/test}} {{#test this.availability.status "==" 'error'}}uk-disabled{{/test}}" name="{{ this.value }}">
+									<a data-uk-tooltip title="{{ this.availability.message }}"><i class="{{ this.availability.icon }}"></i>{{ this.label }}</a>
 								</li>
 							{{/each}}
 						</ul>

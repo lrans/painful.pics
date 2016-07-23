@@ -8,23 +8,48 @@ ds.fa.metadata = {
 	providedTags : ["general", "artist", "species"]
 };
 
+ds.fa.checkAvailability = function() {
+	if (typeof chrome === 'undefined' || typeof chrome.webstore === 'undefined') {
+		return {
+			status: 'error',
+			message: 'Unfortunetely, FA compatibility is enabled on chrome/chromium only for now, sorry about that :('
+		};
+	} else {
+		if (tools.isChromeAppInstalled()) {
+			return {
+				status: 'ok',
+				message: 'FA is available'
+			};
+		} else {
+			return {
+				status: 'warning',
+				message: 'Retrieving data on FA requires to install the painful.pics proxy extension, please click here to do so'
+			};
+		}
+	}
+};
+
 ds.fa.showSettingsScreen = function(settingsPlaceHolder) {
-	tools.fetchTemplate('ds-settings-e621', {
-		choices_query: [
-			{value:'fox gay anal', label: 'Popular things'},
-		]
-	}, function(settings){
-		$(settingsPlaceHolder).html(settings);
-		
-		$('select[name=choices-query]').change(function(){
-			var newValue = $('select[name=choices-query]').val();
-			if('custom' === newValue) {
-				$('input[name=query]').prop('readonly', false).prop('disabled', false);
-			} else {
-				$('input[name=query]').prop('readonly', true).prop('disabled', true).val(newValue);
-			}
+	if (!tools.isChromeAppInstalled()) {
+		chrome.webstore.install();
+	} else {
+		tools.fetchTemplate('ds-settings-e621', {
+			choices_query: [
+				{value:'fox gay anal', label: 'Popular things'},
+			]
+		}, function(settings){
+			$(settingsPlaceHolder).html(settings);
+
+			$('select[name=choices-query]').change(function(){
+				var newValue = $('select[name=choices-query]').val();
+				if('custom' === newValue) {
+					$('input[name=query]').prop('readonly', false).prop('disabled', false);
+				} else {
+					$('input[name=query]').prop('readonly', true).prop('disabled', true).val(newValue);
+				}
+			});
 		});
-	});
+	}
 };
 
 ds.fa._runtime = {

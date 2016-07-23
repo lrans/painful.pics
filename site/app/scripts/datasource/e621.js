@@ -8,6 +8,13 @@ ds.e621.metadata = {
 	providedTags : ["general", "artist", "copyright", "character", "species"]
 };
 
+ds.e621.checkAvailability = function() {
+	return {
+		status: 'ok',
+		message: 'e621.net is available'
+	};
+};
+
 ds.e621.showSettingsScreen = function(settingsPlaceHolder) {
 	tools.fetchTemplate('ds-settings-e621', {
 		choices_query: [

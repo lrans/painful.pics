@@ -37,7 +37,8 @@ gulp.task('scripts', function() {
         'tmp/bower_components/jquery/dist/jquery.js',
         'tmp/bower_components/socket.io-client/socket.io.js',
 		'node_modules/tidy-html5/tidy.js'
-    ].concat(g.mainBowerFiles(['**/*.js', '!tmp/bower_components/jquery/dist/jquery.js']));
+    ].concat(g.mainBowerFiles(['**/*.js', '!tmp/bower_components/jquery/dist/jquery.js']))
+	.concat(['tmp/bower_components/uikit/js/components/tooltip.js']);
     var libs = gulp.src(jQueryAndLibs)
         .pipe(g.debug({title: 'including lib:'}));
     libs.pause();
@@ -118,7 +119,8 @@ gulp.task('styles', function() {
     var vendorStyles = [
         'tmp/bower_components/jquery-modal/jquery.modal.css',
         'tmp/bower_components/uikit/css/uikit.almost-flat.min.css',
-        'tmp/bower_components/uikit/css/components/progress.almost-flat.min.css'
+        'tmp/bower_components/uikit/css/components/progress.almost-flat.min.css',
+		'tmp/bower_components/uikit/css/components/tooltip.almost-flat.min.css'
     ];
     var libs = gulp.src(vendorStyles);
     libs.pause();
@@ -177,6 +179,11 @@ gulp.task('copy', function() {
     // Copy sounds
     gulp.src(paths.sounds, {cwd: bases.app})
         .pipe(gulp.dest(bases.dist + 'sound/'));
+
+	// Copy fonts
+	gulp.src([
+		'tmp/bower_components/uikit/fonts/*'
+	]).pipe(gulp.dest(bases.dist + 'fonts/'));
 
 });
 

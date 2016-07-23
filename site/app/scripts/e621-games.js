@@ -527,7 +527,13 @@ e621games.guessSpecies.start = function() {
             ],
             timer: e621games.guessSpecies.config.TIMER,
 			choices_imageSource: $.map(ds, function (datasource) {
-				return {value: datasource.metadata.id, label: datasource.metadata.label};
+				var availability = datasource.checkAvailability();
+				availability.icon = tools.statusToIcon(availability.status);
+				return {
+					value: datasource.metadata.id, 
+					label: datasource.metadata.label,
+					availability: availability
+				};
 			}),
 			imageSource: e621games.guessSpecies.config.DATASOURCE.metadata.id,
             choices_tags: [

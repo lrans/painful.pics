@@ -168,3 +168,15 @@ tools.shuffleArrayInPlace = function(a) {
         a[j] = x;
     }
 };
+
+tools.statusToIcon = function(statusText) {
+	return {
+		'ok': 'uk-icon-check',
+		'warning': 'uk-icon-warning',
+		'error': 'uk-icon-exclamation'
+	}[statusText];
+};
+
+tools.isChromeAppInstalled = function() {
+	return chrome.app.isInstalled;
+};
