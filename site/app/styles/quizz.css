@@ -13,10 +13,19 @@
 .quizz-modal.multi .uk-modal-content .uk-flex {
     display: inline-block;
 	max-width: 550px;
+	vertical-align: top;
 }
 
 .quizz-modal.multi .uk-modal-dialog {
 	width: 960px;
+}
+
+.quizz-modal .uk-tab.datasource-chooser {
+	padding-top: 5px;
+}
+
+#datasource-settings-placeholder {
+	padding-top: 5px;
 }
 
 #multi-panel-switcher {

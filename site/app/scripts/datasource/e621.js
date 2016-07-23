@@ -8,6 +8,28 @@ ds.e621.metadata = {
 	providedTags : ["general", "artist", "copyright", "character", "species"]
 };
 
+ds.e621.showSettingsScreen = function(settingsPlaceHolder) {
+	tools.fetchTemplate('ds-settings-e621', {
+		choices_query: [
+			{value:'wtf order:random', label: 'Slightly unsettling things'},
+			{value:'nightmare_fuel order:random', label: 'Most unpleasant things'},
+			{value:'zootopia order:score', label: 'The community\'s favourite rule34'},
+			{value:'fursuit canine order:random', label: 'Everything looks like a dog'}
+		]
+	}, function(settings){
+		$(settingsPlaceHolder).html(settings);
+
+		$('select[name=choices-query]').change(function(){
+			var newValue = $('select[name=choices-query]').val();
+			if('custom' === newValue) {
+				$('input[name=query]').prop('readonly', false).prop('disabled', false);
+			} else {
+				$('input[name=query]').prop('readonly', true).prop('disabled', true).val(newValue);
+			}
+		});
+	});
+};
+
 ds.e621._runtime = {
 	
 };

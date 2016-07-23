@@ -8,6 +8,25 @@ ds.fa.metadata = {
 	providedTags : ["general", "artist", "species"]
 };
 
+ds.fa.showSettingsScreen = function(settingsPlaceHolder) {
+	tools.fetchTemplate('ds-settings-e621', {
+		choices_query: [
+			{value:'fox gay anal', label: 'Popular things'},
+		]
+	}, function(settings){
+		$(settingsPlaceHolder).html(settings);
+		
+		$('select[name=choices-query]').change(function(){
+			var newValue = $('select[name=choices-query]').val();
+			if('custom' === newValue) {
+				$('input[name=query]').prop('readonly', false).prop('disabled', false);
+			} else {
+				$('input[name=query]').prop('readonly', true).prop('disabled', true).val(newValue);
+			}
+		});
+	});
+};
+
 ds.fa._runtime = {
 };
 

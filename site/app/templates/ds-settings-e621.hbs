@@ -1,0 +1,12 @@
+<div class="uk-form-row">
+	<label class="uk-form-label" for="choices-query">With which query ?</label>
+	<div class="uk-form-controls">
+		<select id="choices-query" name="choices-query">
+			{{#each choices_query}}
+				<option value="{{ this.value }}">{{ this.label }}</option>
+			{{/each}}
+			<option value="custom">Custom</option>
+		</select>
+		<input name="query" value="{{ choices_query.[0].value }}" readonly disabled>
+	</div>
+</div>
