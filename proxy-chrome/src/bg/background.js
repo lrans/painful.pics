@@ -127,6 +127,7 @@ chrome.runtime.onInstalled.addListener(function(){
 			script.appendChild(document.createTextNode("proxy.availableMethods.chromeExtension = {};")); \
 			(document.body || document.head || document.documentElement).appendChild(script);';
 		for (var i = 0; i < tabs.length ; i++) {
+			painfulPicsTabIDs.push(tabs[i].id);
 			chrome.tabs.executeScript(tabs[i].id, {
 				code: scriptContent
 			});
