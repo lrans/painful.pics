@@ -2,15 +2,6 @@
 
 var faCookiesString;
 
-chrome.runtime.onMessageExternal.addListener(
-		function (request, sender, sendResponse) {
-			console.log(sender.tab ?
-					"from a content script:" + sender.tab.url :
-					"from the extension");
-			if (request.greeting == "hello")
-				sendResponse({farewell: "goodbye"});
-		});
-
 var requestListener = function (details) {
 	chrome.extension.getBackgroundPage().console.log("request listener triggered");
 	details.requestHeaders.push({
@@ -36,6 +27,18 @@ var responseListener = function (details) {
 };
 
 function setupListeners() {
+	chrome.cookies.getAll({
+		url: "https://www.furaffinity.net/"
+	}, function (cookies) {
+		faCookiesString = "";
+		for (var i = 0; i < cookies.length; i++) {
+			faCookiesString += cookies[i].name + '=' + cookies[i].value;
+			if (i + 1 < cookies.length) {
+				faCookiesString += '; ';
+			}
+		}
+	});
+	
 	/*Remove Listeners*/
 	chrome.webRequest.onHeadersReceived.removeListener(responseListener);
 	chrome.webRequest.onBeforeSendHeaders.removeListener(requestListener);
@@ -53,33 +56,14 @@ function setupListeners() {
 }
 
 chrome.webNavigation.onCompleted.addListener(function (details) {
-	chrome.cookies.getAll({
-		url: "https://www.furaffinity.net/"
-	}, function (cookies) {
-		faCookiesString = "";
-		for (var i = 0; i < cookies.length; i++) {
-			faCookiesString += cookies[i].name + '=' + cookies[i].value;
-			if (i + 1 < cookies.length) {
-				faCookiesString += '; ';
-			}
-		}
-		chrome.extension.getBackgroundPage().console.log("retrieved FA cookies :" + faCookiesString);
-	});
-	
 	setupListeners();
 }, {url: [
 		{hostEquals: 'localhost'},
 		{hostSuffix: 'painful.pics'}
 	]});
 
-/*
- var script = document.createElement('script');
-			script.id = 'tmpScript';
-			script.appendChild(document.createTextNode("proxy.availableMethods.chromeExtension = {};"));
-			(document.body || document.head || document.documentElement).appendChild(script);
- */
-
 chrome.runtime.onInstalled.addListener(function(){
+	setupListeners();
 	chrome.tabs.query({url: ['https://painful.pics/*', 'http://localhost:8000/*']}, function(tabs) {
 		var scriptContent = ' var script = document.createElement(\'script\');\
 			script.id = \'tmpScript\';\
