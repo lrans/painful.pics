@@ -145,19 +145,6 @@ ds.fa._extractTagsForNextPost = function () {
 				ratio = 'horizontal vertical';
 			}
 			details.ratio = ratio;
-			/*var detailedPost = {
-				imageUrl: post.sample_url,
-				imageWidth: post.sample_width,
-				imageHeight: post.sample_height,
-				ratio: ratio,
-				tags: {}
-			};
-			$.each(details.tags, function (index, tag) {
-				if (!(tag.type in detailedPost.tags)) {
-					detailedPost.tags[tag.type] = [];
-				}
-				detailedPost.tags[tag.type].push(tag);
-			});*/
 			callback(details);
 		});
 	}
@@ -180,44 +167,98 @@ ds.fa._tagTypeFromInt = function (type) {
 	}
 };
 
+ds.fa._getRawArtist = function(xmlDoc, faSkin) {
+	if (faSkin === 'new') {
+		return $(xmlDoc).find('div.submission-title > span > a > strong').text();
+	} else if (faSkin === 'old') {
+		return $($(xmlDoc).find('table.maintable')[1]).find('tr:first > td > a').text();
+	}
+};
+
+ds.fa._extractFromStatsContainer = function(xmlDoc, keyword) {
+	var propertiesNode = $(xmlDoc).find('td.stats-container').contents();
+	for(var i = 0; i < propertiesNode.length; i++) {
+		if ($(propertiesNode[i]).text() === keyword) {
+			var result = $(propertiesNode[i+1]).text();
+			return result;
+		}
+	}
+};
+
+ds.fa._getRawResolution = function(xmlDoc, faSkin) {
+	var propertiesNode;
+	if (faSkin === 'new') {
+		propertiesNode = $(xmlDoc).find('div.tags-row > div.p10b').contents();
+		return $(propertiesNode[3]).text().replace("\n",'');
+	} else if (faSkin === 'old') {
+		return ds.fa._extractFromStatsContainer(xmlDoc, 'Resolution:');
+	}
+};
+
+ds.fa._getRawSpecies = function(xmlDoc, faSkin) {
+	var propertiesNode;
+	if (faSkin === 'new') {
+		propertiesNode = $(xmlDoc).find('div.tags-row > div.p10b').contents();
+		return $(propertiesNode[5]).text().replace("\n",'');
+	} else if (faSkin === 'old') {
+		return ds.fa._extractFromStatsContainer(xmlDoc, 'Species:');
+	}
+};
+
 ds.fa._extractDetails = function (post, callback) {
 	ds.fa._runtime.extractingTags = true;
 	proxy.get("https://www.furaffinity.net" + post, function(xmlDoc){
+		if (ds.fa._runtime.fetchDone) {
+			return;
+		}
+
 		ds.fa._runtime.extractingTags = false;
 		ds.fa._extractTagsForNextPost();
+		console.log("extracting details for "+post);
+		
+		if($(xmlDoc).find('#submissionImg').size() === 0) {
+			console.log("nothing to read here, skipping");
+			callback({});
+			return;
+		}
+		
+		var faSkin = $(xmlDoc).find('td.stats-container').size() > 0 ? 'old' : 'new';
 		
 		var submissionIdMatcher = /\/view\/([0-9]+)/.exec(post);
 		
 		var tags = {};
 		tags.artist = [{
 			type: 'artist',
-			name: $(xmlDoc).find('div.submission-title > span > a > strong').text()
+			name: ds.fa._getRawArtist(xmlDoc, faSkin)
 		}];
 		
 		tags.general = [];
-		$(xmlDoc).find('div.tags-row > span.tags > a').each(function(i, tag) {
+		var tagsSelector = (faSkin === 'new' ? 'div.tags-row > span.tags > a' : 'td.stats-container div#keywords > a');
+		$(xmlDoc).find(tagsSelector).each(function(i, tag) {
 			tags.general.push({
 				type: 'general',
 				name: $(tag).text()
 			});
 		});
 		
-		var propertiesNode = $(xmlDoc).find('div.tags-row > div.p10b').contents();
-		var resolutionMatcher = /.*([0-9]+)x([0-9]+)px.*/g.exec($(propertiesNode[3]).text().replace("\n",''));
-		var speciesMatcher = / ?([^-|]*)( - ([^|]*))? | /g.exec($(propertiesNode[5]).text().replace("\n",''));
+		var resolutionMatcher = /[^0-9]*([0-9]+)x([0-9]+)(px)?.*/g.exec(ds.fa._getRawResolution(xmlDoc, faSkin));
+		var speciesMatcher = / ?([^-|]*)( - ([^|]*))?( | )?/g.exec(ds.fa._getRawSpecies(xmlDoc, faSkin));
 		
-		tags.species = [{
-			type: 'species',
-			name: speciesMatcher[1]
-		}];
-	
-		if (speciesMatcher[3] !== undefined) {
-			tags.species.push({
+		var baseSpecie = speciesMatcher[1].trim();
+		if (baseSpecie !== 'Unspecified / Any') {
+			tags.species = [{
 				type: 'species',
-				name: speciesMatcher[3]
-			});
+				name: baseSpecie.replace(' (Other)', '')
+			}];
+
+			if (speciesMatcher[3] !== undefined) {
+				tags.species.push({
+					type: 'species',
+					name: speciesMatcher[3].trim()
+				});
+			}
 		}
-		
+
 		callback({
 			id: submissionIdMatcher[1],
 			tags: tags,

@@ -285,7 +285,7 @@ e621games.guessSpecies.addPost = function(detailedPost) {
             value: e621games.guessSpecies.detailedPosts.length
         });
     } else {
-        console.log('skipped fetched post : '+detailedPost.id);
+        console.log('skipped post : '+detailedPost.id);
     }
     if (e621games.guessSpecies.missingPosts === 0) {
         if (e621games.guessSpecies.detailedPosts.length < e621games.guessSpecies.config.NB_QUIZZ_ITEMS) {
