@@ -596,7 +596,7 @@ e621games.guessSpecies.welcome = function() {
     });
 };
 
-$(document).ready(function(){
+$(window).load(function(){
     tools.initTools();
 	e621games.guessSpecies.welcome();
 });
