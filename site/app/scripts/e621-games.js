@@ -369,6 +369,7 @@ e621games.guessSpecies.removePlayer = function(handle) {
 
 e621games.guessSpecies.setMultiPlayerMode = function (active) {
     if (active) {
+		e621games.guessSpecies.removePlayer('you');
         if (!e621games.guessSpecies.socket) {
             e621games.guessSpecies.config.session = Math.random().toString(36).substring(7);
             e621games.guessSpecies.socket = tools.newSocket();
