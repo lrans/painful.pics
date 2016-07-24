@@ -72,7 +72,7 @@ ds.fa._runtime = {
 };
 
 ds.fa.reset = function () {
-	ds.fa._runtime.fetchPage = 1;
+	ds.fa._runtime.fetchPage = 0;
 	ds.fa._runtime.fetchDone = false;
 	ds.fa._runtime.rawPosts = [];
 	ds.fa._runtime.extractingTags = false;
@@ -84,9 +84,8 @@ ds.fa.stop = function () {
 
 ds.fa.fetch = function (nbItems, query, callback) {
 	console.log("fetching " + nbItems + " items... (page " + ds.fa._runtime.fetchPage + ")");
-	proxy.post("https://www.furaffinity.net/search/", {
+	var postData = {
 		q: query,
-		do_search: 'Search',
 		'order-by': 'relevancy',
 		'order-direction': 'desc',
 		perpage: ds.fa._selectPageSize(nbItems),
@@ -94,9 +93,15 @@ ds.fa.fetch = function (nbItems, query, callback) {
 		'rating-general': 'on',
 		'rating-mature': 'on',
 		'rating-adult': 'on',
-		mode: 'extended',
-		page: ds.fa._runtime.fetchPage
-	}, function (xmlDoc) {
+		mode: 'extended'
+	};
+	if (ds.fa._runtime.fetchPage > 0) {
+		postData.page = ds.fa._runtime.fetchPage;
+		postData.next_page = '>>> ' + ds.fa._selectPageSize(nbItems) + ' more >>>';
+	} else {
+		postData.do_search = 'Search';
+	}
+	proxy.post("https://www.furaffinity.net/search/", postData, function (xmlDoc) {
 		ds.fa._parseSubmissionsDocument(nbItems, xmlDoc, callback);
 	});
 	ds.fa._runtime.fetchPage++;
@@ -117,7 +122,6 @@ ds.fa._parseSubmissionsDocument = function (nbItems, doc, callback) {
 	submissions.each(function(i, submissionLink){
 		ds.fa._addRawPost($(submissionLink).attr('href'), callback);
 	});
-	
 	for (var i = 0; i < (nbItems - submissions.size()); i++) {
 		callback({});  // push empty missing posts
 	}
