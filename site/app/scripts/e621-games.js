@@ -575,3 +575,28 @@ e621games.guessSpecies.start = function() {
     });
 };
 
+
+e621games.guessSpecies.welcome = function() {
+    tools.fetchTemplate('welcome-modal', {}, function(page){
+        $('#show').html(page);
+		var welcomeModal = UIkit.modal(".welcome-modal", {center:true, bgclose:false});
+
+		$('.welcome-modal .start-game').click(function(event){
+			event.preventDefault();
+			e621games.guessSpecies.start();
+		});
+		$('.welcome-modal').on({
+			'show.uk.modal': function(){
+				setTimeout(function() {
+					$(".welcome-modal").data('modal').resize();
+				}, 100);
+			}
+		});
+		welcomeModal.show();
+    });
+};
+
+$(document).ready(function(){
+    tools.initTools();
+	e621games.guessSpecies.welcome();
+});

@@ -250,8 +250,4 @@ fafail.initTools = function() {
 
 };
 
-$(document).ready(function(){
-    fafail.initTools();
-    tools.initTools();
-});
 
