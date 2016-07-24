@@ -31,3 +31,7 @@ proxy.post = function(url, data, callback) {
 		}
 	});
 };
+
+proxy.isProxyAvailable = function() {
+	return typeof proxy.availableMethods.chromeExtension !== 'undefined';
+};

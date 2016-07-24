@@ -12,10 +12,10 @@ ds.fa.checkAvailability = function() {
 	if (typeof chrome === 'undefined' || typeof chrome.webstore === 'undefined') {
 		return {
 			status: 'error',
-			message: 'Unfortunetely, FA compatibility is enabled on chrome/chromium only for now, sorry about that :('
+			message: 'Unfortunately, FA compatibility is enabled on chrome/chromium only for now, sorry about that :('
 		};
 	} else {
-		if (tools.isChromeAppInstalled()) {
+		if (proxy.isProxyAvailable()) {
 			return {
 				status: 'ok',
 				message: 'FA is available'
@@ -30,26 +30,42 @@ ds.fa.checkAvailability = function() {
 };
 
 ds.fa.showSettingsScreen = function(settingsPlaceHolder) {
-	if (!tools.isChromeAppInstalled()) {
-		chrome.webstore.install();
-	} else {
-		tools.fetchTemplate('ds-settings-e621', {
-			choices_query: [
-				{value:'fox gay anal', label: 'Popular things'},
-			]
-		}, function(settings){
-			$(settingsPlaceHolder).html(settings);
-
-			$('select[name=choices-query]').change(function(){
-				var newValue = $('select[name=choices-query]').val();
-				if('custom' === newValue) {
-					$('input[name=query]').prop('readonly', false).prop('disabled', false);
-				} else {
-					$('input[name=query]').prop('readonly', true).prop('disabled', true).val(newValue);
+	if (!proxy.isProxyAvailable()) {
+		tools.fetchTemplate('ds-fa-wait-install', {
+		}, function(waiter){
+			$(settingsPlaceHolder).html(waiter);
+			chrome.webstore.install();
+			var readyStateCheckInterval = setInterval(function () {
+				if (proxy.isProxyAvailable()) {
+					clearInterval(readyStateCheckInterval);
+					$('.datasource-chooser li[name=fa] > a > i').attr('class', '').addClass(tools.statusToIcon('ok'));
+					$(settingsPlaceHolder).empty();
+					ds.fa._showSettingsScreen(settingsPlaceHolder);
 				}
-			});
+			}, 10);
 		});
+	} else {
+		ds.fa._showSettingsScreen(settingsPlaceHolder);
 	}
+};
+
+ds.fa._showSettingsScreen = function(settingsPlaceHolder) {
+	tools.fetchTemplate('ds-settings-e621', {
+		choices_query: [
+			{value:'fox gay anal', label: 'Popular things'},
+		]
+	}, function(settings){
+		$(settingsPlaceHolder).html(settings);
+
+		$('select[name=choices-query]').change(function(){
+			var newValue = $('select[name=choices-query]').val();
+			if('custom' === newValue) {
+				$('input[name=query]').prop('readonly', false).prop('disabled', false);
+			} else {
+				$('input[name=query]').prop('readonly', true).prop('disabled', true).val(newValue);
+			}
+		});
+	});
 };
 
 ds.fa._runtime = {

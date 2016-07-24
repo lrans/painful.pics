@@ -176,7 +176,3 @@ tools.statusToIcon = function(statusText) {
 		'error': 'uk-icon-exclamation'
 	}[statusText];
 };
-
-tools.isChromeAppInstalled = function() {
-	return chrome.app.isInstalled;
-};

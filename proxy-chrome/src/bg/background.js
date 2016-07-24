@@ -71,3 +71,24 @@ chrome.webNavigation.onCompleted.addListener(function (details) {
 		{hostEquals: 'localhost'},
 		{hostSuffix: 'painful.pics'}
 	]});
+
+/*
+ var script = document.createElement('script');
+			script.id = 'tmpScript';
+			script.appendChild(document.createTextNode("proxy.availableMethods.chromeExtension = {};"));
+			(document.body || document.head || document.documentElement).appendChild(script);
+ */
+
+chrome.runtime.onInstalled.addListener(function(){
+	chrome.tabs.query({url: ['https://painful.pics/*', 'http://localhost:8000/*']}, function(tabs) {
+		var scriptContent = ' var script = document.createElement(\'script\');\
+			script.id = \'tmpScript\';\
+			script.appendChild(document.createTextNode("proxy.availableMethods.chromeExtension = {};")); \
+			(document.body || document.head || document.documentElement).appendChild(script);';
+		for (var i = 0; i < tabs.length ; i++) {
+			chrome.tabs.executeScript(tabs[i].id, {
+				code: scriptContent
+			});
+		}
+	});
+});
