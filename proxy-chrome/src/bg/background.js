@@ -68,7 +68,7 @@ function setupListeners() {
 
 	/*Add Listeners*/
 	chrome.webRequest.onHeadersReceived.addListener(responseListener, {
-		urls: ["https://www.furaffinity.net/*"]
+		urls: ["https://www.furaffinity.net/*", "https://*.facdn.net/*"]
 	}, ["blocking", "responseHeaders"]);
 
 	chrome.webRequest.onBeforeSendHeaders.addListener(requestListener, {
