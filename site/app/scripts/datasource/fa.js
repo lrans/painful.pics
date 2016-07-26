@@ -76,6 +76,7 @@ ds.fa.reset = function () {
 	ds.fa._runtime.fetchDone = false;
 	ds.fa._runtime.rawPosts = [];
 	ds.fa._runtime.extractingTags = false;
+	ds.fa._runtime.lastPageHit = false;
 };
 
 ds.fa.stop = function () {
@@ -83,6 +84,9 @@ ds.fa.stop = function () {
 };
 
 ds.fa.fetch = function (nbItems, query, callback) {
+	if (ds.fa._runtime.lastPageHit === true) {
+		return;
+	}
 	console.log("fetching " + nbItems + " items... (page " + ds.fa._runtime.fetchPage + ")");
 	var postData = {
 		q: query,
@@ -103,28 +107,51 @@ ds.fa.fetch = function (nbItems, query, callback) {
 	}
 	proxy.post("https://www.furaffinity.net/search/", postData, function (xmlDoc) {
 		ds.fa._parseSubmissionsDocument(nbItems, xmlDoc, callback);
+		ds.fa._runtime.fetchPage++;
 	});
-	ds.fa._runtime.fetchPage++;
 };
 
 ds.fa._selectPageSize = function (nbItems) {
-	var available = [24, 48, 72];
-	for (var i = 0; i < available.length; i++) {
-		if (available[i] >= nbItems) {
-			return available[i];
-		}
-	}
-	return available[available.length - 1];
+	return 72; // dynamic number of items in paged results would be a PITA
 };
 
 ds.fa._parseSubmissionsDocument = function (nbItems, doc, callback) {
 	var submissions = $(doc).find('b.t-image > u > s > a');
-	submissions.each(function(i, submissionLink){
-		ds.fa._addRawPost($(submissionLink).attr('href'), callback);
-	});
-	for (var i = 0; i < (nbItems - submissions.size()); i++) {
-		callback({});  // push empty missing posts
+	var lastPage = ds.fa._extractIsLastResultPage(doc);
+	if (lastPage) {
+		ds.fa._runtime.lastPageHit = true;
 	}
+	var standardCallBack = function(detailedPost) {
+		callback(detailedPost, false);
+	};
+	var lastItemCallBack = function(detailedPost) {
+		callback(detailedPost, true);
+	};
+	for (var i = 0 ; i < submissions.length ; i++) {
+		var lastItemInPage = (i === submissions.length - 1);
+		if (lastPage && lastItemInPage) {
+			ds.fa._addRawPost($(submissions[i]).attr('href'), lastItemCallBack);
+		} else {
+			ds.fa._addRawPost($(submissions[i]).attr('href'), standardCallBack);
+		}
+	}
+	if (!lastPage) {
+		for (var j = 0; j < (nbItems - submissions.size()); j++) {
+			callback({});  // push empty missing posts
+		}
+	}
+};
+
+ds.fa._extractIsLastResultPage = function(doc) {
+	var faSkin = $(doc).find('fieldset#search-results').size() > 0 ? 'old' : 'new';
+	var rawQueryStats;
+	if (faSkin == 'old') {
+		rawQueryStats = $($(doc).find('fieldset#search-results > legend').contents()[1]).text();
+	} else {
+		rawQueryStats = $($(doc).find('div#query-stats').contents().last()).text();
+	}
+	var queryStats = /.* - ([0-9]+) of ([0-9]+).*/.exec(rawQueryStats);
+	return parseInt(queryStats[1]) >= parseInt(queryStats[2]);
 };
 
 ds.fa._addRawPost = function (post, callback) {
@@ -140,7 +167,7 @@ ds.fa._addRawPost = function (post, callback) {
 
 ds.fa._extractTagsForNextPost = function () {
 	if (!ds.fa._runtime.extractingTags && ds.fa._runtime.rawPosts.length > 0) {
-		var postAndCallBack = ds.fa._runtime.rawPosts.pop();
+		var postAndCallBack = ds.fa._runtime.rawPosts.shift();
 		var post = postAndCallBack.post;
 		var callback = postAndCallBack.callback;
 		ds.fa._extractDetails(post, function (details) {
@@ -229,7 +256,7 @@ ds.fa._extractDetails = function (post, callback) {
 		}
 		
 		var imageUrl = 'https:' + $(xmlDoc).find('#submissionImg').attr('src');
-		proxy.head(imageUrl, function(status){
+		proxy.checkGet(imageUrl, function(status) {
 			if (status !== "success" && status !== "nocontent") {
 				// could not HEAD the image, happens with newly published stuff
 				callback({});

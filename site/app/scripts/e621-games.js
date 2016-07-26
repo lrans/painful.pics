@@ -253,7 +253,7 @@ e621games.guessSpecies.generateQuizzItems = function () {
     e621games.guessSpecies.startGame();
 };
 
-e621games.guessSpecies.addPost = function(detailedPost) {
+e621games.guessSpecies.addPost = function(detailedPost, lastPost) {
     if (e621games.guessSpecies.fetchDone) {
         return;
     }
@@ -287,8 +287,8 @@ e621games.guessSpecies.addPost = function(detailedPost) {
     } else {
         console.log('skipped post : '+detailedPost.id);
     }
-    if (e621games.guessSpecies.missingPosts === 0) {
-        if (e621games.guessSpecies.detailedPosts.length < e621games.guessSpecies.config.NB_QUIZZ_ITEMS) {
+    if (e621games.guessSpecies.missingPosts === 0 || lastPost) {
+        if (e621games.guessSpecies.detailedPosts.length < e621games.guessSpecies.config.NB_QUIZZ_ITEMS && !lastPost) {
             e621games.guessSpecies.missingPosts = e621games.guessSpecies.config.NB_QUIZZ_ITEMS - e621games.guessSpecies.detailedPosts.length;
 			e621games.guessSpecies.config.DATASOURCE.fetch(e621games.guessSpecies.config.NB_QUIZZ_ITEMS, e621games.guessSpecies.config.QUERY, e621games.guessSpecies.addPost);
         } else {
@@ -458,9 +458,7 @@ e621games.guessSpecies.launchNewGame = function() {
 	
 	e621games.guessSpecies.fetchDone = false;
 	e621games.guessSpecies.config.DATASOURCE.reset();
-	e621games.guessSpecies.config.DATASOURCE.fetch(e621games.guessSpecies.config.NB_QUIZZ_ITEMS, e621games.guessSpecies.config.QUERY, function(detailedPost){
-		e621games.guessSpecies.addPost(detailedPost);
-	});
+	e621games.guessSpecies.config.DATASOURCE.fetch(e621games.guessSpecies.config.NB_QUIZZ_ITEMS, e621games.guessSpecies.config.QUERY, e621games.guessSpecies.addPost);
 };
 
 e621games.guessSpecies.gameModeChanged = function() {

@@ -20,6 +20,17 @@ proxy.get = function(url, callback) {
 	});
 };
 
+proxy.checkGet = function(url, callback) {
+	// TODO choose strategy based on proxy.availableMethods
+	$.ajax({
+		url: url,
+		method: 'GET',
+		complete: function(jqXhr, status) {
+			callback(status);
+		}
+	});
+};
+
 proxy.head = function(url, callback) {
 	// TODO choose strategy based on proxy.availableMethods
 	$.ajax({
