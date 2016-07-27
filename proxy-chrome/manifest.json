@@ -1,6 +1,6 @@
 {
   "name": "painful.pics proxy",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "manifest_version": 2,
   "description": "AJAX proxy allowing https://painful.pics to bypass SOP on non CORS-enabled sites",
   "homepage_url": "https://painful.pics",

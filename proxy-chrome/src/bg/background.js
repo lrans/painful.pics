@@ -3,6 +3,15 @@
 var faCookiesString;
 var painfulPicsTabIDs = [];
 
+function removeHeader(headers, name) {
+	for (var i = headers.length - 1; i >= 0; i--) {
+		if (headers[i].name.toLowerCase() === name.toLowerCase()) {
+			headers.splice(i, 1);
+			break;
+		}
+	}
+}
+
 /**
  * Adds FA cookies to relevant requests.
  */
@@ -13,6 +22,8 @@ var requestListener = function (details) {
 			name: 'cookie',
 			value: faCookiesString
 		});
+		removeHeader(details.requestHeaders, 'origin');
+		removeHeader(details.requestHeaders, 'referer');
 		return {requestHeaders: details.requestHeaders};
 	} else {
 		return {};
@@ -72,7 +83,7 @@ function setupListeners() {
 	}, ["blocking", "responseHeaders"]);
 
 	chrome.webRequest.onBeforeSendHeaders.addListener(requestListener, {
-		urls: ["https://www.furaffinity.net/*"]
+		urls: ["https://www.furaffinity.net/*", "https://*.facdn.net/*"]
 	}, ["blocking", "requestHeaders"]);
 }
 
