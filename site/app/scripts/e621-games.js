@@ -467,6 +467,11 @@ e621games.guessSpecies.gameModeChanged = function() {
 	e621games.guessSpecies.setMultiPlayerMode(mode === 'multi');
 	e621games.guessSpecies.config.MODE = mode;
 	e621games.guessSpecies.updateStartGameButton();
+	if ($(".quizz-modal").data('modal') !== undefined) {
+		setTimeout(function() {
+			$(".quizz-modal").data('modal').resize();
+		}, 100);
+	}
 };
 
 e621games.guessSpecies.updateStartGameButton = function() {
@@ -558,6 +563,7 @@ e621games.guessSpecies.start = function() {
 			
 			$('.uk-tab.datasource-chooser').on('change.uk.tab', function(evt, active, prev) {
 				e621games.guessSpecies.datasourceChanged($(active).attr('name'));
+				$(".quizz-modal").data('modal').resize();
 			});
 			e621games.guessSpecies.datasourceChanged($('.datasource-chooser li.uk-active').attr('name'));
 			
