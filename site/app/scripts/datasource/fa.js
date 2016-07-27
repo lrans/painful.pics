@@ -256,7 +256,7 @@ ds.fa._extractDetails = function (post, callback) {
 		}
 		
 		var imageUrl = 'https:' + $(xmlDoc).find('#submissionImg').attr('src');
-		proxy.checkGet(imageUrl, function(status) {
+		proxy.head(imageUrl, function(status) {
 			if (status !== "success" && status !== "nocontent") {
 				// could not HEAD the image, happens with newly published stuff
 				callback({});
