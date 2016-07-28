@@ -3,9 +3,12 @@ target
 .directory
 .idea
 
+nbproject
 
 /site/www/js/bower_components/
 /server/node_modules/
 /site/node_modules/
 /site/dist/
 /site/tmp/
+/site/nbproject/private/
+/server/nbproject/private/
