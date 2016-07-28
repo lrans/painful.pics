@@ -1,6 +1,6 @@
 node {
     stage 'Clone'
-    git '/mnt/raid/snarl/repos/fafail.git'
+    git 'https://github.com/lrans/painful.pics.git'
 
     stage 'Fetch deps'
     sh './fetch-dependencies.sh'
