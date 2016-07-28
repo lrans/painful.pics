@@ -21,10 +21,12 @@ That browser extension looks weird...
 =====================================
 
 More in details, this extension :
+
 1. reads your FA cookies, keeps them in browser memory, tracks their changes (when you login/login for ex.)
 2. injects those cookies on-flight in any AJAX request done by the JS app _to the FA domains_
 3. also removes the _origin_ & _referer_ headers of the AJAX requests
 4. injects an _Access-Control-Allow-Origin_ header in the AJAX responses, thus making the browser accept those as valid [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) responses
+
 
 In the end, the painful.pics server never receives any cookie or identity information, the exchanges are only between your browser and FA.
 
@@ -35,28 +37,28 @@ Locally
 -------
 
 1. Fetch all development dependencies
-```
-$> ./fetch-dependencies.sh
-```
-
+	```
+	$> ./fetch-dependencies.sh
+	```
+	
 2. Run the message dispatcher server onn localhost:3000
-```
-$> cd server
-$> ./index.js
-```
-
+	```
+	$> cd server
+	$> ./index.js
+	```
+	
 3. Build the site app that will connect to localhost:3000 
-```
-$> cd site
-$> gulp --env=local
-```
-
+	```
+	$> cd site
+	$> gulp --env=local
+	```
+	
 4. Serve the app static content on localhost:8000
-```
-$> cd site
-$> gulp webserver
-```
-
+	```
+	$> cd site
+	$> gulp webserver
+	```
+	
 5. Point your browser to http://localhost:8000/
 
 On a server
