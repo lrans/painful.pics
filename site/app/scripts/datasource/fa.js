@@ -1,3 +1,5 @@
+/* global proxy, tools */
+
 var ds = ds || {};
 
 ds.fa = {};
@@ -50,9 +52,16 @@ ds.fa.showSettingsScreen = function(settingsPlaceHolder) {
 };
 
 ds.fa._showSettingsScreen = function(settingsPlaceHolder) {
-	tools.fetchTemplate('ds-settings-e621', {
+	tools.fetchTemplate('ds-settings-fa', {
 		choices_query: [
 			{value:'fox gay anal', label: 'Popular things'},
+			{value:'first fursuit', label: 'Where it all begins'}
+		],
+		choices_sorting: [
+			{value:'random', label: 'randomly'},
+			{value:'relevancy', label: 'most relevant first'},
+			{value:'date', label: 'most recent first'},
+			{value:'popularity', label: 'most popular first'}
 		]
 	}, function(settings){
 		$(settingsPlaceHolder).html(settings);
@@ -68,6 +77,14 @@ ds.fa._showSettingsScreen = function(settingsPlaceHolder) {
 	});
 };
 
+ds.fa.buildQuery = function(settingsSelector) {
+	var container = $(settingsSelector);
+	return {
+		query: container.find('input[name=query]').val(),
+		sorting: container.find('select[name=sorting]').val()
+	};
+};
+
 ds.fa._runtime = {
 };
 
@@ -77,6 +94,8 @@ ds.fa.reset = function () {
 	ds.fa._runtime.rawPosts = [];
 	ds.fa._runtime.extractingTags = false;
 	ds.fa._runtime.lastPageHit = false;
+	ds.fa._runtime.availablePages = undefined;
+	ds.fa._runtime.fetchedPages = [];
 };
 
 ds.fa.stop = function () {
@@ -87,10 +106,17 @@ ds.fa.fetch = function (nbItems, query, callback) {
 	if (ds.fa._runtime.lastPageHit === true) {
 		return;
 	}
-	console.log("fetching " + nbItems + " items... (page " + ds.fa._runtime.fetchPage + ")");
+	var sorting = query.sorting;
+	var pageToFetch = ds.fa._runtime.fetchPage;
+	if (sorting === 'random') {
+		sorting = 'date';
+		if (ds.fa._runtime.availablePages !== undefined) {
+			pageToFetch = ds.fa._getRandomPageToFetch();
+		}
+	}
 	var postData = {
-		q: query,
-		'order-by': 'relevancy',
+		q: query.query,
+		'order-by': sorting,
 		'order-direction': 'desc',
 		perpage: ds.fa._selectPageSize(nbItems),
 		range: 'all',
@@ -99,16 +125,44 @@ ds.fa.fetch = function (nbItems, query, callback) {
 		'rating-adult': 'on',
 		mode: 'extended'
 	};
-	if (ds.fa._runtime.fetchPage > 0) {
-		postData.page = ds.fa._runtime.fetchPage;
+	if (pageToFetch > 0) {
+		postData.page = pageToFetch;
 		postData.next_page = '>>> ' + ds.fa._selectPageSize(nbItems) + ' more >>>';
 	} else {
 		postData.do_search = 'Search';
 	}
+	console.log("fetching " + nbItems + " items... (page " + postData.page + ")");
+	ds.fa._runtime.fetchedPages.push(postData.page);
 	proxy.post("https://www.furaffinity.net/search/", postData, function (xmlDoc) {
-		ds.fa._parseSubmissionsDocument(nbItems, xmlDoc, callback);
-		ds.fa._runtime.fetchPage++;
+		if (query.sorting === 'random' && ds.fa._runtime.availablePages === undefined) {
+			ds.fa._runtime.availablePages = ds.fa._getAvailableResultPages(xmlDoc);
+			ds.fa.fetch(nbItems, query, callback);
+		} else {
+			ds.fa._parseSubmissionsDocument(nbItems, xmlDoc, callback);
+			ds.fa._runtime.fetchPage++;
+		}
 	});
+};
+
+ds.fa._getAvailableResultPages = function(xmlDoc) {
+	var result = Math.ceil(parseInt(ds.fa._extractQueryStats(xmlDoc)[2]) / ds.fa._selectPageSize());
+	var maxPages = Math.floor(3000 / ds.fa._selectPageSize());
+	if (result > maxPages) {
+		result = maxPages;
+	}
+	return result;
+};
+
+ds.fa._getRandomPageToFetch = function(){
+	if (ds.fa._runtime.fetchedPages.length === ds.fa._runtime.availablePages) {
+		return undefined;
+	}
+	var result = Math.floor(Math.random() * (ds.fa._runtime.availablePages + 1));
+	if (ds.fa._runtime.fetchedPages.indexOf(result) >= 0) {
+		return ds.fa._getRandomPageToFetch();
+	} else {
+		return result;
+	}
 };
 
 ds.fa._selectPageSize = function (nbItems) {
@@ -117,6 +171,7 @@ ds.fa._selectPageSize = function (nbItems) {
 
 ds.fa._parseSubmissionsDocument = function (nbItems, doc, callback) {
 	var submissions = $(doc).find('b.t-image > u > s > a');
+	tools.shuffleArrayInPlace(submissions);
 	var lastPage = ds.fa._extractIsLastResultPage(doc);
 	if (lastPage) {
 		ds.fa._runtime.lastPageHit = true;
@@ -143,15 +198,19 @@ ds.fa._parseSubmissionsDocument = function (nbItems, doc, callback) {
 };
 
 ds.fa._extractIsLastResultPage = function(doc) {
+	var queryStats = ds.fa._extractQueryStats(doc);
+	return parseInt(queryStats[1]) >= parseInt(queryStats[2]);
+};
+
+ds.fa._extractQueryStats = function(doc) {
 	var faSkin = $(doc).find('fieldset#search-results').size() > 0 ? 'old' : 'new';
 	var rawQueryStats;
-	if (faSkin == 'old') {
+	if (faSkin === 'old') {
 		rawQueryStats = $($(doc).find('fieldset#search-results > legend').contents()[1]).text();
 	} else {
 		rawQueryStats = $($(doc).find('div#query-stats').contents().last()).text();
 	}
-	var queryStats = /.* - ([0-9]+) of ([0-9]+).*/.exec(rawQueryStats);
-	return parseInt(queryStats[1]) >= parseInt(queryStats[2]);
+	return /.* - ([0-9]+) of ([0-9]+).*/.exec(rawQueryStats);
 };
 
 ds.fa._addRawPost = function (post, callback) {

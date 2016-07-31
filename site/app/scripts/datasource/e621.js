@@ -37,6 +37,13 @@ ds.e621.showSettingsScreen = function(settingsPlaceHolder) {
 	});
 };
 
+ds.e621.buildQuery = function(settingsSelector) {
+	var container = $(settingsSelector);
+	return {
+		query: container.find('input[name=query]').val()
+	};
+};
+
 ds.e621._runtime = {
 	
 };
@@ -59,7 +66,7 @@ ds.e621.fetch = function(nbItems, query, callback) {
         jsonp: "callback",
         dataType: "jsonp",
         data: {
-            tags: query,
+            tags: query.query,
             limit: nbItems,
             page: ds.e621._runtime.fetchPage,
             format: "json"

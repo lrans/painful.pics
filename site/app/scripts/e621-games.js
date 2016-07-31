@@ -439,7 +439,8 @@ e621games.guessSpecies.launchNewGame = function() {
 	e621games.guessSpecies.config.NB_QUIZZ_ITEMS = parseInt($('.quizz-settings select[name=nbItems]').val());
 	e621games.guessSpecies.config.NB_ANSWERS_PER_ITEM = parseInt($('.quizz-settings select[name=nbAnswers]').val());
 	e621games.guessSpecies.config.TIMER = parseInt($('.quizz-settings select[name=timer]').val());
-	e621games.guessSpecies.config.QUERY = $('.quizz-settings input[name=query]').val();
+	e621games.guessSpecies.config.QUERY = e621games.guessSpecies.config.DATASOURCE.buildQuery('#datasource-settings-placeholder');
+
 	var targetTagType = $('.quizz-settings select[name=tags]').val();
 	if (targetTagType === 'all') {
 		e621games.guessSpecies.config.TARGET_TAGS_TYPES = e621games.guessSpecies.config.DATASOURCE.metadata.providedTags;
