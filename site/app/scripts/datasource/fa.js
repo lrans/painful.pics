@@ -55,7 +55,8 @@ ds.fa._showSettingsScreen = function(settingsPlaceHolder) {
 	tools.fetchTemplate('ds-settings-fa', {
 		choices_query: [
 			{value:'fox gay anal', label: 'Popular things'},
-			{value:'first fursuit', label: 'Where it all begins'}
+			{value:'first fursuit', label: 'Where it all begins'},
+			{value:'hyper taur', label: 'Excess, in general'}
 		],
 		choices_sorting: [
 			{value:'random', label: 'randomly'},
