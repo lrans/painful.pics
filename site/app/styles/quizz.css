@@ -41,6 +41,8 @@ img.main-kitty {
 
 .image-container > .vertical {
     min-height: 90%;
+	max-height: 100vh;
+	min-height: 90vh;
 }
 
 .image-container > .horizontal {
