@@ -7,7 +7,7 @@ ds.fa = {};
 ds.fa.metadata = {
 	id: 'fa',
 	label: "furaffinity.net",
-	providedTags : ["general", "artist", "species"]
+	providedTags : ["general", "artist", "species", "gender", "nbFavs"]
 };
 
 ds.fa.checkAvailability = function() {
@@ -243,23 +243,6 @@ ds.fa._extractTagsForNextPost = function () {
 	}
 };
 
-ds.fa._tagTypeFromInt = function (type) {
-	switch (type) {
-		case 0:
-			return "general";
-		case 1:
-			return "artist";
-		case 3:
-			return "copyright";
-		case 4:
-			return "character";
-		case 5:
-			return "species";
-		default :
-			return "other";
-	}
-};
-
 ds.fa._getRawArtist = function(xmlDoc, faSkin) {
 	if (faSkin === 'new') {
 		return $(xmlDoc).find('div.submission-title > span > a > strong').text();
@@ -295,6 +278,24 @@ ds.fa._getRawSpecies = function(xmlDoc, faSkin) {
 		return $(propertiesNode[5]).text().replace("\n",'');
 	} else if (faSkin === 'old') {
 		return ds.fa._extractFromStatsContainer(xmlDoc, 'Species:');
+	}
+};
+
+ds.fa._getRawGender = function(xmlDoc, faSkin) {
+	var propertiesNode;
+	if (faSkin === 'new') {
+		propertiesNode = $(xmlDoc).find('div.tags-row > div.p10b').contents();
+		return $(propertiesNode[7]).text().replace("\n",'');
+	} else if (faSkin === 'old') {
+		return ds.fa._extractFromStatsContainer(xmlDoc, 'Gender:');
+	}
+};
+
+ds.fa._getRawNbFavs = function(xmlDoc, faSkin) {
+	if (faSkin === 'new') {
+		return $(xmlDoc).find('div.flex-submission-counter-2 > span').text().replace("\n",'');
+	} else if (faSkin === 'old') {
+		return ds.fa._extractFromStatsContainer(xmlDoc, 'Favorites:');
 	}
 };
 
@@ -344,6 +345,7 @@ ds.fa._extractDetails = function (post, callback) {
 
 			var resolutionMatcher = /[^0-9]*([0-9]+)x([0-9]+)(px)?.*/g.exec(ds.fa._getRawResolution(xmlDoc, faSkin));
 			var speciesMatcher = / ?([^-|]*)( - ([^|]*))?( | )?/g.exec(ds.fa._getRawSpecies(xmlDoc, faSkin));
+			var genderMatcher = /.*/.exec(ds.fa._getRawGender(xmlDoc, faSkin));
 
 			var baseSpecie = speciesMatcher[1].trim();
 			if (baseSpecie !== 'Unspecified / Any') {
@@ -359,6 +361,19 @@ ds.fa._extractDetails = function (post, callback) {
 					});
 				}
 			}
+			
+			var gender = genderMatcher[0].trim();
+			if (gender !== 'Other / Not Specified' && gender !== 'Any') {
+				tags.gender = [{
+					type: 'gender',
+					name: gender
+				}];
+			}
+
+			tags.nbFavs = [{
+				type: 'nbFavs',
+				name: ds.fa._getRawNbFavs(xmlDoc, faSkin).trim()
+			}];
 
 			callback({
 				id: submissionIdMatcher[1],

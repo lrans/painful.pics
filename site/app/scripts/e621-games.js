@@ -554,6 +554,8 @@ e621games.guessSpecies.start = function() {
                 {value:'copyright', label: 'The intellectual property/licence (copyright)'},
                 {value:'character', label: 'The character name (original, do not steal)'},
                 {value:'species', label: 'The specie'},
+				{value:'gender', label: 'The gender (watch your pronouns !)'},
+				{value:'nbFavs', label: 'The popularity (nb of favs)'},
                 {value:'all', label: 'Any of the above !'}
             ],
             tags: e621games.guessSpecies.config.TARGET_TAGS_TYPES
