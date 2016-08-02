@@ -7,7 +7,7 @@ ds.fa = {};
 ds.fa.metadata = {
 	id: 'fa',
 	label: "furaffinity.net",
-	providedTags : ["general", "artist", "species", "gender", "nbFavs"]
+	providedTags : ["general", "artist", "species", "gender", "nbFavs", "comment"]
 };
 
 ds.fa.checkAvailability = function() {
@@ -299,6 +299,32 @@ ds.fa._getRawNbFavs = function(xmlDoc, faSkin) {
 	}
 };
 
+ds.fa._filterComment = function(commentElement, callback) {
+	var comment = $($(commentElement).contents()[0]).text().replace("\n",'').trim();
+	if (comment.length > 0 && comment.length <= 50) {
+		callback(comment);
+	}
+};
+
+ds.fa._getRawComments = function(xmlDoc, faSkin) {
+	var result = [];
+	var comment;
+	if (faSkin === 'new') {
+		$(xmlDoc).find('table.container-comment[width="100%"] div.user-comment-content').each(function(i, comment){
+			ds.fa._filterComment(comment, function(commentText){
+				result.push(commentText);
+			});
+		});
+	} else if (faSkin === 'old') {
+		$(xmlDoc).find('table.container-comment[width="100%"] td.replyto-message').each(function(i, comment){
+			ds.fa._filterComment(comment, function(commentText){
+				result.push(commentText);
+			});
+		});
+	}
+	return result;
+};
+
 ds.fa._extractDetails = function (post, callback) {
 	ds.fa._runtime.extractingTags = true;
 	proxy.get("https://www.furaffinity.net" + post, function(xmlDoc){
@@ -374,6 +400,16 @@ ds.fa._extractDetails = function (post, callback) {
 				type: 'nbFavs',
 				name: ds.fa._getRawNbFavs(xmlDoc, faSkin).trim()
 			}];
+		
+			var comments = ds.fa._getRawComments(xmlDoc, faSkin);
+			if (comments.length > 0) {
+				tags.comment = $.map(comments, function(comment){
+					return {
+						type: 'comment',
+						name: comment
+					};
+				});
+			}
 
 			callback({
 				id: submissionIdMatcher[1],
