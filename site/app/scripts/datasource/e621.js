@@ -5,7 +5,7 @@ ds.e621 = {};
 ds.e621.metadata = {
 	id: 'e621',
 	label: "e621.net",
-	providedTags : ["general", "artist", "copyright", "character", "species"]
+	providedTags : ["general", "artist", "copyright", "character", "species", "nbFavs", "score", "gender"]
 };
 
 ds.e621.checkAvailability = function() {
@@ -114,18 +114,42 @@ ds.e621._extractTagsForNextPost = function() {
                 tags: {}
             };
             $.each(tags, function(index, tag) {
-                var type = ds.e621._tagTypeFromInt(tag.type);
+                var type = ds.e621._tagTypeFromInt(tag.type, tag.name);
                 if (!(type in detailedPost.tags)) {
                     detailedPost.tags[type] = [];
                 }
                 detailedPost.tags[type].push(tag);
             });
+			detailedPost.tags.score = [{
+				type: 'score',
+				name: '' + post.score
+			}];
+			detailedPost.tags.nbFavs = [{
+				type: 'nbFavs',
+				name: '' + post.fav_count
+			}];
             callback(detailedPost);
         });
     }
 };
 
-ds.e621._tagTypeFromInt = function (type) {
+ds.e621._genderTags = [
+	'male',
+	'female',
+	'dickgirl',
+	'girly',
+	'cuntboy',
+	'herm',
+	'maleherm',
+	'ambiguous_gender',
+	'featureless_crotch',
+	'intersex'
+];
+
+ds.e621._tagTypeFromInt = function (type, label) {
+	if (ds.e621._genderTags.indexOf(label) >= 0) {
+		return 'gender';
+	}
     switch (type) {
         case 0: return "general";
         case 1: return "artist";
