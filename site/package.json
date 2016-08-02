@@ -24,6 +24,8 @@
     "handlebars": "^4.0.5",
     "gulp-util": "3.0.7",
 	"gulp-webserver": "0.9.1",
-	"tidy-html5": "0.1.1"
+	"tidy-html5": "0.1.1",
+	"git-rev": "0.2.1",
+	"gulp-replace": "0.5.4"
   }
 }

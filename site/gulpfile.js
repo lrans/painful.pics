@@ -2,7 +2,7 @@ var gulp = require('gulp');
 
 // Include plugins
 var g = require("gulp-load-plugins")({
-    pattern: ['gulp-*', 'gulp.*', 'main-bower-files', 'ordered-merge-stream'],
+    pattern: ['gulp-*', 'gulp.*', 'main-bower-files', 'ordered-merge-stream', 'git-rev'],
     replaceString: /\bgulp[\-.]/
 });
 
@@ -63,11 +63,12 @@ gulp.task('scripts', function() {
     var local = gulp.src(localOverrides);
     local.pause();
 
-    g.orderedMergeStream([libs, templates, app, local])
-        .pipe(uglifyIfNeeded())
-        .pipe(g.concat('app.min.js'))
-        .pipe(gulp.dest(bases.dist + 'js/'));
-
+	g.gitRev.short(function (rev) {
+		g.orderedMergeStream([libs, templates, app, local])
+			.pipe(uglifyIfNeeded())
+			.pipe(g.concat('app.' + rev + '.min.js'))
+			.pipe(gulp.dest(bases.dist + 'js/'));
+	});
 
     var mobileLibs = gulp.src([
         'tmp/bower_components/jquery/dist/jquery.js',
@@ -107,10 +108,12 @@ gulp.task('scripts', function() {
     var mobileLocal = gulp.src(mobileLocalOverrides);
     mobileLocal.pause();
 
-    g.orderedMergeStream([mobileLibs, mobileTemplates, mobileApp, mobileLocal])
-        .pipe(uglifyIfNeeded())
-        .pipe(g.concat('app-remote.min.js'))
-        .pipe(gulp.dest(bases.dist + 'js/'));
+	g.gitRev.short(function (rev) {
+		g.orderedMergeStream([mobileLibs, mobileTemplates, mobileApp, mobileLocal])
+			.pipe(uglifyIfNeeded())
+			.pipe(g.concat('app-remote.' + rev + '.min.js'))
+			.pipe(gulp.dest(bases.dist + 'js/'));
+	});
 });
 
 // Process styles and concatenate them into one output file
@@ -132,10 +135,12 @@ gulp.task('styles', function() {
     ]);
     app.pause();
 
-    g.orderedMergeStream([libs, app])
-        .pipe(g.cleanCss())
-        .pipe(g.concat('app.min.css'))
-        .pipe(gulp.dest(bases.dist + 'css/'));
+	g.gitRev.short(function (rev) {
+		g.orderedMergeStream([libs, app])
+			.pipe(g.cleanCss())
+			.pipe(g.concat('app.' + rev + '.min.css'))
+			.pipe(gulp.dest(bases.dist + 'css/'));
+	});
 
     var mobileLibs = gulp.src(vendorStyles);
     mobileLibs.pause();
@@ -148,10 +153,12 @@ gulp.task('styles', function() {
     ]);
     mobileApp.pause();
 
-    g.orderedMergeStream([mobileLibs, mobileApp])
-        .pipe(g.cleanCss())
-        .pipe(g.concat('app-remote.min.css'))
-        .pipe(gulp.dest(bases.dist + 'css/'));
+	g.gitRev.short(function (rev) {
+		g.orderedMergeStream([mobileLibs, mobileApp])
+			.pipe(g.cleanCss())
+			.pipe(g.concat('app-remote.' + rev + '.min.css'))
+			.pipe(gulp.dest(bases.dist + 'css/'));
+	});
 
 });
 
@@ -164,15 +171,14 @@ gulp.task('images', function() {
 
 // Copy all other files to dist directly
 gulp.task('copy', function() {
-    // Copy html
-    gulp.src(paths.html, {cwd: bases.app})
-        .pipe(gulp.dest(bases.dist));
+	g.gitRev.short(function (rev) {
+		// Copy html
+		gulp.src(paths.html, {cwd: bases.app})
+			.pipe(g.replace('#revision#', rev))
+			.pipe(gulp.dest(bases.dist));
+	});
 
-    // Copy images
-    gulp.src(paths.html, {cwd: bases.app})
-        .pipe(gulp.dest(bases.dist));
-
-    // Copy extra html5bp files
+    // Copy extra files
     gulp.src(paths.extras, {cwd: bases.app})
         .pipe(gulp.dest(bases.dist));
 
