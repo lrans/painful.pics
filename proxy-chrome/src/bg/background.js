@@ -15,7 +15,7 @@ function removeHeader(headers, name) {
 /**
  * Adds FA cookies to relevant requests.
  */
-var requestListener = function (details) {
+var FARequestListener = function (details) {
 	if (painfulPicsTabIDs.indexOf(details.tabId) > -1) {
 		chrome.extension.getBackgroundPage().console.log("request listener triggered");
 		details.requestHeaders.push({
@@ -33,7 +33,7 @@ var requestListener = function (details) {
 /**
  * Adds CORS headers to responses.
  */
-var responseListener = function (details) {
+var anyResponseListener = function (details) {
 	if (painfulPicsTabIDs.indexOf(details.tabId) > -1) {
 		chrome.extension.getBackgroundPage().console.log("response listener triggered");
 		var rule = {
@@ -72,17 +72,17 @@ function setupListeners() {
 	refreshFACookies();
 	
 	/*Remove Listeners*/
-	chrome.webRequest.onHeadersReceived.removeListener(responseListener);
-	chrome.webRequest.onBeforeSendHeaders.removeListener(requestListener);
+	chrome.webRequest.onHeadersReceived.removeListener(anyResponseListener);
+	chrome.webRequest.onBeforeSendHeaders.removeListener(FARequestListener);
 
 	//chrome.browserAction.setIcon({path: "on.png"});
 
 	/*Add Listeners*/
-	chrome.webRequest.onHeadersReceived.addListener(responseListener, {
-		urls: ["https://www.furaffinity.net/*", "https://*.facdn.net/*"]
+	chrome.webRequest.onHeadersReceived.addListener(anyResponseListener, {
+		urls: ["https://www.furaffinity.net/*", "https://*.facdn.net/*", "http://db.fursuit.me/*"]
 	}, ["blocking", "responseHeaders"]);
 
-	chrome.webRequest.onBeforeSendHeaders.addListener(requestListener, {
+	chrome.webRequest.onBeforeSendHeaders.addListener(FARequestListener, {
 		urls: ["https://www.furaffinity.net/*", "https://*.facdn.net/*"]
 	}, ["blocking", "requestHeaders"]);
 }
