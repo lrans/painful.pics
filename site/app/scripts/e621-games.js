@@ -248,10 +248,13 @@ e621games.guessSpecies.generateQuizzItems = function () {
             };
         });
 
-        tools.preload(quizzItem.imageUrl);
         e621games.guessSpecies.quizzItems.push(quizzItem);
     });
     tools.shuffleArrayInPlace(e621games.guessSpecies.quizzItems);
+
+	$.each(e621games.guessSpecies.quizzItems, function(i, quizzItem) {
+		tools.preload(quizzItem.imageUrl);
+	});
 
     e621games.guessSpecies.startGame();
 };

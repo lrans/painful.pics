@@ -1,3 +1,5 @@
+/* global createjs */
+
 var tools = tools || {};
 
 tools.lastProgress = {
@@ -122,7 +124,11 @@ tools.playSound = function(soundID) {
 
 tools.preload = function(url) {
     console.log('adding file to preload : ' + url);
-    tools.preloadQueue.loadFile(url);
+    tools.preloadQueue.loadFile({
+		src: url,
+		maintainOrder: true,
+		loadTimeout: 30 * 1000
+	});
 };
 
 tools.ensurePreloaded = function(url, callback) {
