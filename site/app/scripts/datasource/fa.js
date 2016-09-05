@@ -11,24 +11,7 @@ ds.fa.metadata = {
 };
 
 ds.fa.checkAvailability = function() {
-	if (typeof chrome === 'undefined' || typeof chrome.webstore === 'undefined') {
-		return {
-			status: 'error',
-			message: 'Unfortunately, FA compatibility is enabled on chrome/chromium only for now, sorry about that :('
-		};
-	} else {
-		if (proxy.isProxyAvailable()) {
-			return {
-				status: 'ok',
-				message: 'FA is available'
-			};
-		} else {
-			return {
-				status: 'warning',
-				message: 'Retrieving data on FA requires to install the painful.pics proxy extension, please click here to do so'
-			};
-		}
-	}
+	return proxy.checkAvailability('FA');
 };
 
 ds.fa.showSettingsScreen = function(settingsPlaceHolder) {
@@ -327,7 +310,7 @@ ds.fa._getRawComments = function(xmlDoc, faSkin) {
 
 ds.fa._extractDetails = function (post, callback) {
 	ds.fa._runtime.extractingTags = true;
-	proxy.get("https://www.furaffinity.net" + post, function(xmlDoc){
+	proxy.get("https://www.furaffinity.net" + post, {}, function(xmlDoc){
 		if (ds.fa._runtime.fetchDone) {
 			return;
 		}

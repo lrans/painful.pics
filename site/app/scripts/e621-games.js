@@ -557,6 +557,7 @@ e621games.guessSpecies.start = function() {
 				{value:'gender', label: 'The gender (watch your pronouns !)'},
 				{value:'nbFavs', label: 'The popularity (nb of favs)'},
 				{value:'score', label: 'The appreciation (score)'},
+				{value:'description', label: 'The uploader\'s description'},
 				{value:'comment', label: 'The comments'},
                 {value:'all', label: 'Any of the above !'}
             ],
