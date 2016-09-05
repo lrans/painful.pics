@@ -5,10 +5,10 @@
     "SoundJS": "0.6.2",
     "handlebars": "4.0.5",
     "jquery-easing-original": "1.4.1",
-    "jquery-modal": "0.7.0",
+    "jquery-modal": "0.7.1",
     "jqueryrotate": "latest",
     "jquery-qrcode": "latest",
-    "socket.io-client": "1.4.6",
-    "uikit": "2.26.4"
+    "socket.io-client": "1.4.8",
+    "uikit": "2.27.1"
   }
 }
