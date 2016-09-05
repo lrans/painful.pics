@@ -265,6 +265,10 @@ ds.fsdb._extractDetails = function (suitUrl, callback) {
 				} : null;
 			});
 
+			if (Object.keys(tags.species).length === 0) {
+				delete tags.species;
+			}
+
 			tags.gender = [{
 				type: 'gender',
 				name: ds.fsdb._getSingleRawField(xmlDoc, 'Gender:')
