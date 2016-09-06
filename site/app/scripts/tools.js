@@ -10,7 +10,7 @@ tools.lastProgress = {
 
 tools.templatesCache = {};
 tools.preloadQueue= typeof createjs !== 'undefined' ? new createjs.LoadQueue(false) : null;
-tools.preloadedItems= [];
+tools.preloadedItems= {};
 tools.preloadedItemsCallBacks= {};
 
 
@@ -92,14 +92,25 @@ tools.initTools = function () {
         var preloadCallback = function (event) {
             var item = event.item;
             var type = item.type;
-            console.log('preloaded item ' + item);
-            tools.preloadedItems.push(item.id);
-            if (item.id in tools.preloadedItemsCallBacks) {
-                var callbacks = tools.preloadedItemsCallBacks[item.id];
-                for (var i = 0; i < callbacks.length; i++) {
-                    callbacks[i]();
-                }
-            }
+            console.log('preloaded item ' + item.id);
+			
+			var newImg = new Image();
+
+			newImg.onload = function() {
+				var height = newImg.height;
+				var width = newImg.width;
+				tools.preloadedItems[item.id] = {
+					height: height,
+					width: width
+				};
+				if (item.id in tools.preloadedItemsCallBacks) {
+					var callbacks = tools.preloadedItemsCallBacks[item.id];
+					for (var i = 0; i < callbacks.length; i++) {
+						callbacks[i](tools.preloadedItems[item.id]);
+					}
+				}
+			};
+			newImg.src = item.id;
         };
 
         tools.preloadQueue.on('fileload', preloadCallback, this);
@@ -132,10 +143,10 @@ tools.preload = function(url) {
 };
 
 tools.ensurePreloaded = function(url, callback) {
-    if($.inArray(url, tools.preloadedItems) != -1) {
-        callback();
+    if($.inArray(url, Object.keys(tools.preloadedItems)) !== -1) {
+        callback(tools.preloadedItems[url]);
     } else if (url.endsWith('webm')) {
-        callback();
+        callback({});
     } else {
         if (!(url in tools.preloadedItemsCallBacks)) {
             tools.preloadedItemsCallBacks[url] = [];

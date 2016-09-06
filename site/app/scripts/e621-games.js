@@ -155,7 +155,10 @@ e621games.guessSpecies.showQuizzItem = function (number) {
         var quizzItem = e621games.guessSpecies.quizzItems[number];
         e621games.guessSpecies.currentQuizzItemNumber = number;
         e621games.guessSpecies.answers = [];
-        tools.ensurePreloaded(quizzItem.imageUrl, function(){
+        tools.ensurePreloaded(quizzItem.imageUrl, function(imageInfo){
+			if (imageInfo.height !== undefined && imageInfo.width !== undefined) {
+				quizzItem.ratio = imageInfo.height > imageInfo.width ? 'vertical' : 'horizontal';
+			}
             tools.fetchTemplate('quizz-item', quizzItem, function(page){
                 var question = $('.quizz .question');
                 question.html(page);
