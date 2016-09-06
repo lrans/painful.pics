@@ -588,10 +588,14 @@ e621games.guessSpecies.start = function() {
 			
             var settingsModal = UIkit.modal(".quizz-modal", {center:true, bgclose:false});
 
-            $('.quizz-modal button.start-game').click(function(event){
+            $('.quizz-modal form.quizz-settings').submit(function(event){
                 event.preventDefault();
 				e621games.guessSpecies.launchNewGame();
             });
+			
+			$('.quizz-modal button.start-game').click(function(event){
+				$('.quizz-modal form.quizz-settings').submit();
+			});
 
             settingsModal.show();
         });
