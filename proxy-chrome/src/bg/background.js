@@ -3,6 +3,8 @@
 var faCookiesString;
 var painfulPicsTabIDs = [];
 
+var imagesUrlPattern = /.*\.(png|gif|jpg|jpeg|bmp)$/i;
+
 function removeHeader(headers, name) {
 	for (var i = headers.length - 1; i >= 0; i--) {
 		if (headers[i].name.toLowerCase() === name.toLowerCase()) {
@@ -25,6 +27,63 @@ var FARequestListener = function (details) {
 		removeHeader(details.requestHeaders, 'origin');
 		removeHeader(details.requestHeaders, 'referer');
 		return {requestHeaders: details.requestHeaders};
+	} else {
+		return {};
+	}
+};
+
+function encode64(inputStr) {
+	var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+	var outputStr = "";
+	var i = 0;
+
+	while (i < inputStr.length) {
+		var byte1 = inputStr.charCodeAt(i++) & 0xff;
+		var byte2 = inputStr.charCodeAt(i++) & 0xff;
+		var byte3 = inputStr.charCodeAt(i++) & 0xff;
+
+		var enc1 = byte1 >> 2;
+		var enc2 = ((byte1 & 3) << 4) | (byte2 >> 4);
+
+		var enc3, enc4;
+		if (isNaN(byte2)) {
+			enc3 = enc4 = 64;
+		} else {
+			enc3 = ((byte2 & 15) << 2) | (byte3 >> 6);
+			if (isNaN(byte3)) {
+				enc4 = 64;
+			} else {
+				enc4 = byte3 & 63;
+			}
+		}
+		outputStr += b64.charAt(enc1) + b64.charAt(enc2) + b64.charAt(enc3) + b64.charAt(enc4);
+	}
+	return outputStr;
+}
+
+var FSDBRequestListener = function (details) {
+	if (painfulPicsTabIDs.indexOf(details.tabId) > -1) {
+		chrome.extension.getBackgroundPage().console.log("request listener triggered");
+		var isBinary = imagesUrlPattern.test(details.url);
+		var xhr = new XMLHttpRequest();
+		xhr.open(details.method, details.url.replace('https', 'http'), false);
+		
+		if (isBinary) {
+			xhr.overrideMimeType('text/plain; charset=x-user-defined');
+		}
+		xhr.send();
+		if (xhr.status >= 200 && xhr.status < 300) {
+			var contentType = xhr.getResponseHeader('content-type');
+			if (details.method === 'HEAD') {
+				return {redirectUrl: "data:" + contentType + ",OK"};
+			} else if (isBinary) {
+				return {redirectUrl: "data:image;base64," + encode64(xhr.responseText)};
+			} else {
+				return {redirectUrl: "data:" + contentType + "," + xhr.responseText};
+			}
+		} else {
+			return {blocked: true};
+		}
 	} else {
 		return {};
 	}
@@ -74,17 +133,22 @@ function setupListeners() {
 	/*Remove Listeners*/
 	chrome.webRequest.onHeadersReceived.removeListener(anyResponseListener);
 	chrome.webRequest.onBeforeSendHeaders.removeListener(FARequestListener);
+	chrome.webRequest.onBeforeRequest.removeListener(FSDBRequestListener);
 
 	//chrome.browserAction.setIcon({path: "on.png"});
 
 	/*Add Listeners*/
 	chrome.webRequest.onHeadersReceived.addListener(anyResponseListener, {
-		urls: ["https://www.furaffinity.net/*", "https://*.facdn.net/*", "http://db.fursuit.me/*"]
+		urls: ["https://www.furaffinity.net/*", "https://*.facdn.net/*", "*://db.fursuit.me/*"]
 	}, ["blocking", "responseHeaders"]);
 
 	chrome.webRequest.onBeforeSendHeaders.addListener(FARequestListener, {
 		urls: ["https://www.furaffinity.net/*", "https://*.facdn.net/*"]
 	}, ["blocking", "requestHeaders"]);
+	
+	chrome.webRequest.onBeforeRequest.addListener(FSDBRequestListener, {
+		urls: ["*://db.fursuit.me/*"]
+	}, ["blocking"]);
 }
 
 /**

@@ -105,7 +105,7 @@ ds.fsdb.fetch = function (nbItems, query, callback) {
 
 	console.log("fetching " + nbItems + " items... (page " + pageToFetch + ")");
 	ds.fsdb._runtime.fetchedPages.push(pageToFetch);
-	proxy.get("http://db.fursuit.me/index.php", getData, function (xmlDoc) {
+	proxy.get("https://db.fursuit.me/index.php", getData, function (xmlDoc) {
 		if (query.sorting === 'random' && ds.fsdb._runtime.availablePages === undefined) {
 			ds.fsdb._runtime.availablePages = ds.fsdb._getAvailableResultPages(xmlDoc);
 			ds.fsdb.fetch(nbItems, query, callback);
@@ -221,7 +221,7 @@ ds.fsdb._getMultiRawField = function(doc, key) {
 
 ds.fsdb._extractDetails = function (suitUrl, callback) {
 	ds.fsdb._runtime.extractingTags = true;
-	proxy.get("http://db.fursuit.me/index.php" + suitUrl, {}, function(xmlDoc){
+	proxy.get("https://db.fursuit.me/index.php" + suitUrl, {}, function(xmlDoc){
 		if (ds.fsdb._runtime.fetchDone) {
 			return;
 		}
@@ -241,7 +241,7 @@ ds.fsdb._extractDetails = function (suitUrl, callback) {
 		}
 		
 		tools.shuffleArrayInPlace(images);
-		var imageUrl = 'http://db.fursuit.me/' + images[0];
+		var imageUrl = 'https://db.fursuit.me/' + images[0];
 		
 		proxy.head(imageUrl, function(status) {
 			if (status !== "success" && status !== "nocontent") {
