@@ -1,4 +1,4 @@
-/* global proxy, tools */
+/* global proxy, tools, e621games */
 
 var ds = ds || {};
 
@@ -7,7 +7,12 @@ ds.fa = {};
 ds.fa.metadata = {
 	id: 'fa',
 	label: "furaffinity.net",
-	providedTags : ["general", "artist", "species", "gender", "nbFavs", "comment"]
+	providedTags : ["general", "artist", "species", "gender", "nbFavs", "comment"],
+	defaultQuery: {
+		cq: "fox gay anal",
+		query: "fox gay anal",
+		sorting: "random"
+	}
 };
 
 ds.fa.checkAvailability = function() {
@@ -57,16 +62,13 @@ ds.fa._showSettingsScreen = function(settingsPlaceHolder) {
 			} else {
 				$('input[name=query]').prop('readonly', true).prop('disabled', true).val(newValue);
 			}
+			e621games.guessSpecies.config.QUERY.query = $(settingsPlaceHolder).find('input[name=query]').val();
+			e621games.guessSpecies.serializeOptions();
 		});
+		if (e621games.guessSpecies.config.QUERY.cq === 'custom') {
+			$('input[name=query]').prop('readonly', false).prop('disabled', false);
+		}
 	});
-};
-
-ds.fa.buildQuery = function(settingsSelector) {
-	var container = $(settingsSelector);
-	return {
-		query: container.find('input[name=query]').val(),
-		sorting: container.find('select[name=sorting]').val()
-	};
 };
 
 ds.fa._runtime = {

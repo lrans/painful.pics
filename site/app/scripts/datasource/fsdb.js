@@ -7,7 +7,11 @@ ds.fsdb = {};
 ds.fsdb.metadata = {
 	id: 'fsdb',
 	label: "Fursuit Database",
-	providedTags : ["artist", "species", "gender", "description"]
+	providedTags : ["artist", "species", "gender", "description"],
+	defaultQuery: {
+		query: '',
+		sorting: 'random'
+	}
 };
 
 ds.fsdb.checkAvailability = function() {
@@ -50,15 +54,6 @@ ds.fsdb._showSettingsScreen = function(settingsPlaceHolder) {
 	});
 };
 
-ds.fsdb.buildQuery = function(settingsSelector) {
-	var container = $(settingsSelector);
-	return {
-		query: container.find('select[name=choices-query]').val(),
-		sorting: container.find('select[name=sorting]').val().split('_')[0],
-		sortdesc: container.find('select[name=sorting]').val().split('_')[1]
-	};
-};
-
 ds.fsdb._runtime = {
 };
 
@@ -80,7 +75,8 @@ ds.fsdb.fetch = function (nbItems, query, callback) {
 	if (ds.fsdb._runtime.lastPageHit === true) {
 		return;
 	}
-	var sorting = query.sorting;
+	var sorting = query.sorting.split('_')[0];
+	var sortdesc = query.sorting.split('_')[1];
 	var pageToFetch = ds.fsdb._runtime.fetchPage;
 	if (sorting === 'random') {
 		sorting = 6;
@@ -95,7 +91,7 @@ ds.fsdb.fetch = function (nbItems, query, callback) {
 		suitlist_start: pageToFetch * ds.fsdb._selectPageSize()
 	};
 	
-	if (query.sortdesc === '1') {
+	if (sortdesc === '1') {
 		getData.suitlist_sortdesc = '1';
 	}
 	
@@ -106,7 +102,7 @@ ds.fsdb.fetch = function (nbItems, query, callback) {
 	console.log("fetching " + nbItems + " items... (page " + pageToFetch + ")");
 	ds.fsdb._runtime.fetchedPages.push(pageToFetch);
 	proxy.get("https://db.fursuit.me/index.php", getData, function (xmlDoc) {
-		if (query.sorting === 'random' && ds.fsdb._runtime.availablePages === undefined) {
+		if (sorting === 'random' && ds.fsdb._runtime.availablePages === undefined) {
 			ds.fsdb._runtime.availablePages = ds.fsdb._getAvailableResultPages(xmlDoc);
 			ds.fsdb.fetch(nbItems, query, callback);
 		} else {

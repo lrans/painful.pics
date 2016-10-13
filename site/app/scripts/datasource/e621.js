@@ -1,3 +1,5 @@
+/* global e621games, tools */
+
 var ds = ds || {};
 
 ds.e621 = {};
@@ -5,7 +7,11 @@ ds.e621 = {};
 ds.e621.metadata = {
 	id: 'e621',
 	label: "e621.net",
-	providedTags : ["general", "artist", "copyright", "character", "species", "nbFavs", "score", "gender"]
+	providedTags : ["general", "artist", "copyright", "character", "species", "nbFavs", "score", "gender"],
+	defaultQuery: {
+		cq: "wtf order:random",
+		query: "wtf order:random"
+	}
 };
 
 ds.e621.checkAvailability = function() {
@@ -33,15 +39,13 @@ ds.e621.showSettingsScreen = function(settingsPlaceHolder) {
 			} else {
 				$('input[name=query]').prop('readonly', true).prop('disabled', true).val(newValue);
 			}
+			e621games.guessSpecies.config.QUERY.query = $(settingsPlaceHolder).find('input[name=query]').val();
+			e621games.guessSpecies.serializeOptions();
 		});
+		if (e621games.guessSpecies.config.QUERY.cq === 'custom') {
+			$('input[name=query]').prop('readonly', false).prop('disabled', false);
+		}
 	});
-};
-
-ds.e621.buildQuery = function(settingsSelector) {
-	var container = $(settingsSelector);
-	return {
-		query: container.find('input[name=query]').val()
-	};
 };
 
 ds.e621._runtime = {

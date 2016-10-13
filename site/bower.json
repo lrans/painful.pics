@@ -9,6 +9,8 @@
     "jqueryrotate": "latest",
     "jquery-qrcode": "latest",
     "socket.io-client": "1.4.8",
-    "uikit": "2.27.1"
+    "uikit": "2.27.1",
+	"databind": "0.4.1",
+	"lz-string": "1.4.4"
   }
 }

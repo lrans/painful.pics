@@ -10,13 +10,12 @@
         <div class="uk-modal-content">
             <div class="uk-flex">
                 <form class="uk-form uk-form-horizontal quizz-settings">
-					<input type="hidden" name="mode" value="{{ mode }}">
                     <div class="uk-form-row">
                         <label class="uk-form-label" for="nbItems">How many questions ?</label>
                         <div class="uk-form-controls">
-                            <select id="nbItems" name="nbItems">
+                            <select data-key="NB_QUIZZ_ITEMS" id="nbItems">
                                 {{#each choices_nbItems}}
-                                    <option value="{{ this.value }}" {{#test this.value "==" ../nbItems}}selected{{/test}}>{{ this.label }}</option>
+                                    <option value="{{ this.value }}">{{ this.label }}</option>
                                 {{/each}}
                             </select>
                         </div>
@@ -24,9 +23,9 @@
                     <div class="uk-form-row">
                         <label class="uk-form-label" for="nbAnswers">How many choices per question ?</label>
                         <div class="uk-form-controls">
-                            <select id="nbAnswers" name="nbAnswers">
+                            <select data-key="NB_ANSWERS_PER_ITEM" id="nbAnswers">
                                 {{#each choices_nbAnswers}}
-                                    <option value="{{ this.value }}" {{#test this.value "==" ../nbAnswers}}selected{{/test}}>{{ this.label }}</option>
+                                    <option value="{{ this.value }}">{{ this.label }}</option>
                                 {{/each}}
                             </select>
                         </div>
@@ -34,9 +33,9 @@
                     <div class="uk-form-row">
                         <label class="uk-form-label" for="timer">How long to answer ?</label>
                         <div class="uk-form-controls">
-                            <select id="timer" name="timer">
+                            <select data-key="TIMER" id="timer">
                                 {{#each choices_timer}}
-                                    <option value="{{ this.value }}" {{#test this.value "==" ../timer}}selected{{/test}}>{{ this.label }}</option>
+                                    <option value="{{ this.value }}">{{ this.label }}</option>
                                 {{/each}}
                             </select>
                         </div>
@@ -44,9 +43,9 @@
 					<div class="uk-form-row">
                         <label class="uk-form-label" for="tags">What will you have to guess ?</label>
                         <div class="uk-form-controls">
-                            <select id="tags" name="tags">
+                            <select data-key="TARGET_TAGS_TYPES" id="tags" name="tags">
                                 {{#each choices_tags}}
-                                    <option value="{{ this.value }}" {{#test this.value "==" ../tags}}selected{{/test}}>{{ this.label }}</option>
+                                    <option value="{{ this.value }}">{{ this.label }}</option>
                                 {{/each}}
                             </select>
                         </div>
