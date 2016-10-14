@@ -247,10 +247,8 @@ ds.fa._extractFromStatsContainer = function(xmlDoc, keyword) {
 };
 
 ds.fa._getRawResolution = function(xmlDoc, faSkin) {
-	var propertiesNode;
 	if (faSkin === 'new') {
-		propertiesNode = $(xmlDoc).find('div.tags-row > div.p10b').contents();
-		return $(propertiesNode[3]).text().replace("\n",'');
+		return $(xmlDoc).find('div.submission-sidebar a.myButton.download').text();
 	} else if (faSkin === 'old') {
 		return ds.fa._extractFromStatsContainer(xmlDoc, 'Resolution:');
 	}
@@ -259,8 +257,8 @@ ds.fa._getRawResolution = function(xmlDoc, faSkin) {
 ds.fa._getRawSpecies = function(xmlDoc, faSkin) {
 	var propertiesNode;
 	if (faSkin === 'new') {
-		propertiesNode = $(xmlDoc).find('div.tags-row > div.p10b').contents();
-		return $(propertiesNode[5]).text().replace("\n",'');
+		propertiesNode = $(xmlDoc).find('div.submission-sidebar div.tags-row div:nth(1)').contents();
+		return $(propertiesNode[1]).text().replace("\n",'');
 	} else if (faSkin === 'old') {
 		return ds.fa._extractFromStatsContainer(xmlDoc, 'Species:');
 	}
@@ -269,7 +267,7 @@ ds.fa._getRawSpecies = function(xmlDoc, faSkin) {
 ds.fa._getRawGender = function(xmlDoc, faSkin) {
 	var propertiesNode;
 	if (faSkin === 'new') {
-		propertiesNode = $(xmlDoc).find('div.tags-row > div.p10b').contents();
+		propertiesNode = $(xmlDoc).find('div.submission-sidebar div.tags-row div:nth(2)').contents();
 		return $(propertiesNode[7]).text().replace("\n",'');
 	} else if (faSkin === 'old') {
 		return ds.fa._extractFromStatsContainer(xmlDoc, 'Gender:');
