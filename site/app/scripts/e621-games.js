@@ -1,4 +1,4 @@
-/* global tools, UIkit, ds, DataBind, LZString */
+/* global tools, UIkit, ds, DataBind, LZString, UUID, sa */
 
 var e621games = {};
 
@@ -57,6 +57,7 @@ e621games.guessSpecies.startGame = function() {
 };
 
 e621games.guessSpecies.endOfGame = function () {
+	sa.trackGameFinished(e621games.guessSpecies.config.gameId);
     e621games.bgMusic.stop(); // todo fadeout
     $('.quizz').remove();
 
@@ -214,7 +215,7 @@ e621games.guessSpecies.generateQuizzItems = function () {
     console.log('Data fetched, generating quizz items');
     $.each(e621games.guessSpecies.detailedPosts, function(x, detailedPost) {
         var postTagsAndCounts = [];
-        $.each(e621games.guessSpecies.config.TARGET_TAGS_TYPES, function(i, item){
+        $.each(e621games.guessSpecies.expandTagTypes(), function(i, item){
 			if (detailedPost.tags[item] !== undefined) {
 				$.each(detailedPost.tags[item], function(i, tag) {
 					postTagsAndCounts.push(tag);
@@ -269,7 +270,7 @@ e621games.guessSpecies.addPost = function(detailedPost, lastPost) {
     e621games.guessSpecies.missingPosts--;
 
     var skip = true; // skip by default ...
-    $.each(e621games.guessSpecies.config.TARGET_TAGS_TYPES, function(i, targetTagType){
+    $.each(e621games.guessSpecies.expandTagTypes(), function(i, targetTagType){
         if (("tags" in detailedPost) && targetTagType in detailedPost.tags) {
             skip = false; // ... except if we have some relevant tag
         }
@@ -280,7 +281,7 @@ e621games.guessSpecies.addPost = function(detailedPost, lastPost) {
     }
     if (!skip) {
         console.log('fetched post : '+detailedPost.id);
-        $.each(e621games.guessSpecies.config.TARGET_TAGS_TYPES, function(i, targetTagType) {
+        $.each(e621games.guessSpecies.expandTagTypes(), function(i, targetTagType) {
 			if (detailedPost.tags[targetTagType] !== undefined) {
 				$.each(detailedPost.tags[targetTagType], function (i, targetTag) {
 					var tagName = targetTag.name;
@@ -425,6 +426,14 @@ e621games.guessSpecies.setMultiPlayerMode = function (active) {
     }
 };
 
+e621games.guessSpecies.expandTagTypes = function() {
+	if (e621games.guessSpecies.config.TARGET_TAGS_TYPES === 'all') {
+		return e621games.guessSpecies.config.DATASOURCE.metadata.providedTags;
+	} else {
+		return [e621games.guessSpecies.config.TARGET_TAGS_TYPES];
+	}
+};
+
 e621games.guessSpecies.launchNewGame = function() {
 	var settingsModal = UIkit.modal(".quizz-modal");
 	
@@ -432,6 +441,10 @@ e621games.guessSpecies.launchNewGame = function() {
 		return;
 	}
 
+	e621games.guessSpecies.config.gameId = UUID.genV1().hexString;
+	
+	sa.trackGameStart(e621games.guessSpecies.config);
+	
 	e621games.guessSpecies._gameInProgress = true;
 	tools.playSound('letsrock');
 
@@ -443,11 +456,6 @@ e621games.guessSpecies.launchNewGame = function() {
 		};
 	}
 
-	if (e621games.guessSpecies.config.TARGET_TAGS_TYPES === 'all') {
-		e621games.guessSpecies.config.TARGET_TAGS_TYPES = e621games.guessSpecies.config.DATASOURCE.metadata.providedTags;
-	} else {
-		e621games.guessSpecies.config.TARGET_TAGS_TYPES = [e621games.guessSpecies.config.TARGET_TAGS_TYPES];
-	}
 	settingsModal.hide();
 	UIkit.offcanvas.hide();
 	$('.quizz-modal').remove();
@@ -646,7 +654,6 @@ e621games.guessSpecies.start = function() {
 			});
 			
 			$('.uk-tab.datasource-chooser').on('change.uk.tab', function(evt, active, prev) {
-				console.log('.uk-tab.datasource-chooser triggered');
 				e621games.guessSpecies.datasourceChanged($(active).attr('name'));
 				$(".quizz-modal").data('modal').resize();
 			});

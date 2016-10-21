@@ -201,6 +201,9 @@ gulp.task('watch', function() {
 gulp.task('webserver', function() {
   gulp.src('dist')
     .pipe(g.webserver({
+		proxies: [
+			{source: '/game', target: 'http://localhost:3000/game'}
+		]
     }));
 });
 
