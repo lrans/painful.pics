@@ -6,6 +6,7 @@ sa._trimGame = function(config) {
 	var trimmedConfig = JSON.parse(JSON.stringify(config));
 	trimmedConfig.DS = trimmedConfig.DATASOURCE.metadata.id;
 	delete trimmedConfig.DATASOURCE;
+	delete trimmedConfig.session;
 	return trimmedConfig;
 };
 
