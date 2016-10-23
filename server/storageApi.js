@@ -48,7 +48,7 @@ module.exports = {
 						"patternProperties": {
 							"[a-z]+": {
 								"type": "string",
-								"pattern": /[a-z0-9-_:]+/i
+								"pattern": /[a-z0-9-_:]*/i
 							}
 						}
 					},
