@@ -1,7 +1,16 @@
-img.main-kitty {
+.main-kitty img {
 	display: block;
     margin-left: auto;
     margin-right: auto;
+	opacity: 0;
+}
+
+.main-kitty img.active {
+	opacity: 1;
+}
+
+.main-kitty img.shifted {
+	margin-top: -400px;
 }
 
 #qrcode {

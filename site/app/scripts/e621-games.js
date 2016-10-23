@@ -682,16 +682,18 @@ e621games.guessSpecies.welcome = function() {
 
 		$('.welcome-modal .start-game').click(function(event){
 			event.preventDefault();
-			e621games.guessSpecies.start();
+			$('.main-kitty .happy').animate({opacity: 0}, 1000);
+			$('.main-kitty .horrified').animate({opacity: 1}, 1000, function() {
+				$('.main-kitty .horrified').animate({opacity: 0}, 1000);
+				$('.main-kitty .sad').animate({opacity: 1}, 1000, function() {
+					e621games.guessSpecies.start();
+				});
+			});
 		});
-		$('.welcome-modal').on({
-			'show.uk.modal': function(){
-				setTimeout(function() {
-					$(".welcome-modal").data('modal').resize();
-				}, 100);
-			}
+		tools.preload('img/icon_happy400.png');
+		tools.ensurePreloaded('img/icon_happy400.png', function(){
+			welcomeModal.show();
 		});
-		welcomeModal.show();
     });
 };
 
