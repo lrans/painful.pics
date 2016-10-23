@@ -1,9 +1,9 @@
 [Unit]
 Description=Quizz remote server
-After=network.target
+After=mongod.service
 
 [Service]
-ExecStart=/var/lib/quizz-server/index.js
+ExecStart=/usr/bin/node /var/lib/quizz-server/index.js
 Restart=always
 User=nobody
 Group=nobody
