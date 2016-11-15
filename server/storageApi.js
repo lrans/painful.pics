@@ -2,10 +2,13 @@ module.exports = {
 	init: function (app) {
 		var bodyParser = require('body-parser');
 		var geoip = require('geoip-country');
+		var hash = require('object-hash');
 		var validate = require('jsonschema').validate;
 
 		const db = require('monk')('localhost/painful_pics');
 		const games = db.get('game');
+
+		games.index({"$**": "text"}, {name: "full-text-index"});
 
 		app.enable('trust proxy');
 		app.use(bodyParser.json());
@@ -79,18 +82,19 @@ module.exports = {
 			return data;
 		}
 
-		app.post('/game/:gameId', function (req, res) {
+		app.post('/api/game/:gameId', function (req, res) {
 			var config = validateGameConfig(req.body);
 			games.insert({
 				id: req.params.gameId,
 				location: getLocation(req.ip),
 				state: 'started',
-				config: config
+				config: config,
+				hash: hash(config, {unorderedArrays: true, unorderedSets: true})
 			});
 			res.status(201).send();
 		});
 
-		app.post('/game/:gameId/finished', function (req, res) {
+		app.post('/api/game/:gameId/finished', function (req, res) {
 			games.findOne({
 				id: req.params.gameId
 			}).then((game) => {
@@ -100,6 +104,110 @@ module.exports = {
 				}, game);
 			});
 			res.status(204).send();
+		});
+		
+		app.post('/api/theme/:gameId', function (req, res) {
+			var title = req.body.label;
+			games.findOne({
+				id: req.params.gameId
+			}).then((game) => {
+				game.title = title;
+				games.update({
+					id: req.params.gameId
+				}, game);
+			});
+			res.status(204).send();
+		});
+
+		app.get('/api/theme/search', function(req, res) {
+			var query = req.query.query;
+			var ds = req.query.ds;
+			console.log('theme search:' + query + ', ds:' + ds);
+			games.aggregate([
+				{
+					$match: {
+						'$text': {
+							'$search': query
+						}
+					}
+				},
+				{
+					$match: {
+						'config.DS': { $in: ds }
+					}
+				},
+				{
+					$group: {
+						_id: '$hash',
+						title: {
+							$addToSet: '$title'
+						},
+						datasource: {
+							$first: '$config.DS'
+						},
+						config: {
+							$first: '$config'
+						},
+						playCount: {
+							$sum: { $cond: { if: { $eq: [ '$state', 'finished' ] }, then: 1, else: 0 } }
+						}
+					}
+				},
+				{
+					$sort: {
+						score: { 
+							$meta: "textScore" 
+						},
+						playCount: -1 
+					}
+				}
+			]).then((theme) => {
+				res.write(JSON.stringify(theme));
+			}).then(() => {
+				res.end();
+			});
+		});
+
+		app.get('/api/theme/:themeHash', function(req, res) {
+			games.findOne({
+				hash: req.params.themeHash
+			}).then((theme) => {
+				res.write(JSON.stringify(theme));
+				res.end();
+			});
+		});
+		
+		app.get('/api/randomtheme', function(req, res) {
+			games.aggregate([
+				{
+					$group: {
+						_id: '$hash',
+						title: {
+							$addToSet: '$title'
+						},
+						config: {
+							$first: '$config'
+						},
+						playCount: {
+							$sum: { $cond: { if: { $eq: [ '$state', 'finished' ] }, then: 1, else: 0 } }
+						}
+					}
+				},
+				{
+					$sort: {
+						playCount: -1
+					}
+				},
+				{
+					$limit: 10
+				},
+				{
+					$sample: { size: 1 }
+				}
+			]).then((theme) => {
+				res.write(JSON.stringify(theme));
+				res.end();
+			});
 		});
 
 		app.use(function (err, req, res, next) {
