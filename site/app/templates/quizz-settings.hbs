@@ -3,63 +3,102 @@
         <div class="uk-modal-header">
             <h2 class="uk-display-inline-block">Game settings</h2>
 			<div class="uk-display-inline-block uk-button-group mode" data-uk-switcher="{connect:'#multi-panel-switcher'}">
-				<button class="uk-button {{#test mode "==" 'single'}}uk-active{{/test}}" name="single" type="button">Forever alone</button>
-				<button class="uk-button {{#test mode "==" 'multi'}}uk-active{{/test}}" name="multi" type="button">Party mode</button>
+				<button class="uk-button {{#test mode "==" 'single'}}uk-active{{/test}}" name="single" type="button">
+					<i class="uk-icon-laptop uk-icon-justify"></i>
+					<i class="uk-icon-user uk-icon-justify"></i>
+					Forever alone
+				</button>
+				<button class="uk-button {{#test mode "==" 'multi'}}uk-active{{/test}}" name="multi" type="button">
+					<i class="uk-icon-tv uk-icon-justify"></i>
+					<i class="uk-icon-mobile-phone uk-icon-justify"></i>
+					<i class="uk-icon-users uk-icon-justify"></i>
+					Party mode
+				</button>
 			</div>
         </div>
         <div class="uk-modal-content">
             <div class="uk-flex">
-                <form class="uk-form uk-form-horizontal quizz-settings">
-                    <div class="uk-form-row">
-                        <label class="uk-form-label" for="nbItems">How many questions ?</label>
-                        <div class="uk-form-controls">
-                            <select data-key="NB_QUIZZ_ITEMS" id="nbItems">
-                                {{#each choices_nbItems}}
-                                    <option value="{{ this.value }}">{{ this.label }}</option>
-                                {{/each}}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="uk-form-row">
-                        <label class="uk-form-label" for="nbAnswers">How many choices per question ?</label>
-                        <div class="uk-form-controls">
-                            <select data-key="NB_ANSWERS_PER_ITEM" id="nbAnswers">
-                                {{#each choices_nbAnswers}}
-                                    <option value="{{ this.value }}">{{ this.label }}</option>
-                                {{/each}}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="uk-form-row">
-                        <label class="uk-form-label" for="timer">How long to answer ?</label>
-                        <div class="uk-form-controls">
-                            <select data-key="TIMER" id="timer">
-                                {{#each choices_timer}}
-                                    <option value="{{ this.value }}">{{ this.label }}</option>
-                                {{/each}}
-                            </select>
-                        </div>
-                    </div>
-					<div class="uk-form-row">
-                        <label class="uk-form-label" for="tags">What will you have to guess ?</label>
-                        <div class="uk-form-controls">
-                            <select data-key="TARGET_TAGS_TYPES" id="tags" name="tags">
-                                {{#each choices_tags}}
-                                    <option value="{{ this.value }}">{{ this.label }}</option>
-                                {{/each}}
-                            </select>
-                        </div>
-                    </div>
-					<div class="uk-tab-center">
-						<ul class="uk-tab datasource-chooser" data-uk-tab>
-							{{#each choices_imageSource}}
-								<li class="{{#test this.value "==" ../imageSource}}uk-active{{/test}} {{#test this.availability.status "==" 'error'}}uk-disabled{{/test}}" name="{{ this.value }}">
-									<a data-uk-tooltip title="{{ this.availability.message }}"><i class="{{ this.availability.icon }}"></i>{{ this.label }}</a>
-								</li>
-							{{/each}}
-						</ul>
+                <form class="uk-form quizz-settings uk-width-1-1">
+					<fieldset data-uk-margin>
+						<p>
+							<span>Show me </span>
+							<select data-key="NB_QUIZZ_ITEMS" id="nbItems" class="uk-form-small uk-form-blank">
+								{{#each choices_nbItems}}
+									<option value="{{ this.value }}">{{ this.label }}</option>
+								{{/each}}
+							</select>
+							<span>pictures, each with </span>
+							<select data-key="NB_ANSWERS_PER_ITEM" id="nbAnswers" class="uk-form-small uk-form-blank">
+								{{#each choices_nbAnswers}}
+									<option value="{{ this.value }}">{{ this.label }}</option>
+								{{/each}}
+							</select>
+							<span>answers, and give me </span>
+							<select data-key="TIMER" id="timer" class="uk-form-small uk-form-blank">
+								{{#each choices_timer}}
+									<option value="{{ this.value }}">{{ this.label }}</option>
+								{{/each}}
+							</select>
+							<span>to answer.</span>
+						</p>
+						<p>
+							<span>Theme of the show : </span>
+							<span class="uk-display-inline-block uk-button-group" data-uk-switcher="{connect:'#custom-theme-switcher'}">
+								<button class="uk-button uk-active" name="single" type="button">From library</button>
+								<button class="uk-button" name="multi" type="button">Make my own</button>
+							</span>
+						</p>
+					</fieldset>
+					
+					
+					<div class="uk-switcher" id="custom-theme-switcher">
+						<div class="uk-width-1-1 uk-grid uk-grid-collapse">
+							<div class="uk-width-1-10">
+								<button title="Pick a random theme from library" class="uk-button uk-button-large random-theme-button">
+									<i class="uk-icon-medium uk-icon-random"></i>
+								</button>
+							</div>
+							<div class="uk-autocomplete uk-width-9-10" id="theme-library-autocomplete">
+								<input placeholder="Try any keyword" type="text" class="uk-width-1-1 uk-form-large">
+								<script type="text/autocomplete">
+									<ul class="uk-nav uk-nav-autocomplete uk-autocomplete-results">
+										\{{~items}}
+										<li data-value="\{{ $item.id }}">
+											<a>
+												<div class="uk-badge uk-badge-notification" title="This game has been played \{{ $item.playCount }} times">\{{ $item.playCount }}</div>
+												<strong>\{{ $item.title }}</strong>
+													<br/>
+												<small>\{{ $item.description }}</small>
+											</a>
+										</li>
+										\{{/items}}
+									</ul>
+								</script>
+							</div>
+						</div>
+						<div>
+							<div class="uk-form-row">
+								<label class="uk-form-label" for="tags">What will you have to guess ?</label>
+								<div class="uk-form-controls">
+									<select data-key="TARGET_TAGS_TYPES" id="tags" name="tags">
+										{{#each choices_tags}}
+											<option value="{{ this.value }}">{{ this.label }}</option>
+										{{/each}}
+									</select>
+								</div>
+							</div>
+							<div class="uk-tab-center">
+								<ul class="uk-tab datasource-chooser" data-uk-tab>
+									{{#each choices_imageSource}}
+										<li class="{{#test this.value "==" ../imageSource}}uk-active{{/test}} {{#test this.availability.status "==" 'error'}}uk-disabled{{/test}}" name="{{ this.value }}">
+											<a data-uk-tooltip title="{{ this.availability.message }}"><i class="{{ this.availability.icon }}"></i>{{ this.label }}</a>
+										</li>
+									{{/each}}
+								</ul>
+							</div>
+							<div id="datasource-settings-placeholder"></div>
+						</div>
 					</div>
-					<div id="datasource-settings-placeholder"></div>
                 </form>
             </div>
 			<div class="uk-switcher" id="multi-panel-switcher">

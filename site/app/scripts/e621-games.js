@@ -61,11 +61,56 @@ e621games.guessSpecies.endOfGame = function () {
     e621games.bgMusic.stop(); // todo fadeout
     $('.quizz').remove();
 
-    /*tools.fetchTemplate('players-list', {players : e621games.guessSpecies.players}, function(scoreBoard){
-        $('#show').html(scoreBoard);
-    });*/
 	e621games.guessSpecies._gameInProgress = false;
-	e621games.guessSpecies.start();
+
+	tools.fetchTemplate('quizz-fullpage', {}, function (page) {
+		$('#show').html(page);
+		tools.fetchTemplate('end-of-game-modal', {
+			posts: e621games.guessSpecies.detailedPosts
+		}, function (settings) {
+			$('body').append(settings);
+
+			tools.fetchTemplate('players-list', {
+				showScores: true,
+				players: e621games.guessSpecies.players
+			}, function (playersList) {
+				$('.players').html(playersList);
+				
+				var endOfGameModal = UIkit.modal(".end-of-game-modal", {center: true, bgclose: false});
+				
+				$('.end-of-game-modal button.reset').click(function (event) {
+					endOfGameModal.hide();
+					$('.end-of-game-modal').remove();
+					e621games.guessSpecies.start();
+				});
+				
+				$('.end-of-game-modal button.save').click(function (event) {
+					UIkit.modal.prompt("How would you best describe this theme ?", '', function(label){
+						sa.saveTheme(e621games.guessSpecies.config.gameId, label);
+					});
+				});
+
+				$('.end-of-game-modal button.play-again').click(function (event) {
+					endOfGameModal.hide();
+					$('.end-of-game-modal').remove();
+					e621games.guessSpecies.launchNewGame();
+				});
+				
+				endOfGameModal.show();
+				
+				var mosaic = $('.end-of-game-modal div.posts').mosaicflow({
+					itemSelector: '> *',
+					minColumns: 5,
+					minItemWidth: 200
+				});
+				
+				setTimeout(function(){
+					$(window).trigger('resize');
+				}, 1);
+			});
+		});
+	});
+
 	
     /*
      var finalScore = (e621games.guessSpecies.score.correct / e621games.guessSpecies.quizzItems.length) * 100;
@@ -596,6 +641,14 @@ e621games.guessSpecies.deSerializeOptions = function() {
 	}
 };
 
+e621games.guessSpecies.loadTheme = function(theme) {
+	$.each(Object.keys(theme.config), function(i, key) {
+		e621games.guessSpecies.config[key] = theme.config[key];
+	});
+	e621games.guessSpecies.config.DATASOURCE = ds[theme.config.DS];
+	$('#theme-library-autocomplete input').val(ds[theme.config.DS].describe(theme.config));
+};
+
 e621games.guessSpecies.start = function() {
 	e621games.guessSpecies._gameInProgress = false;
 	e621games.guessSpecies.defaultOptions();
@@ -658,6 +711,10 @@ e621games.guessSpecies.start = function() {
 				$(".quizz-modal").data('modal').resize();
 			});
 			
+			$('#custom-theme-switcher').on('show.uk.switcher', function(evt, active, prev) {
+				$(".quizz-modal").data('modal').resize();
+			});
+			
             var settingsModal = UIkit.modal(".quizz-modal", {center:true, bgclose:false});
 
             $('.quizz-modal form.quizz-settings').submit(function(event){
@@ -667,6 +724,20 @@ e621games.guessSpecies.start = function() {
 			
 			$('.quizz-modal button.start-game').click(function(event){
 				$('.quizz-modal form.quizz-settings').submit();
+			});
+			
+			UIkit.autocomplete($('#theme-library-autocomplete'), {
+				source: sa.themeCompletion
+			});
+			
+			$('#theme-library-autocomplete').on('selectitem.uk.autocomplete', function(event, data, acobject) {
+				event.preventDefault();
+				sa.getTheme(data.value, e621games.guessSpecies.loadTheme);
+			});
+			
+			$('.random-theme-button').click(function(event) {
+				event.preventDefault();
+				sa.getRandomTheme(e621games.guessSpecies.loadTheme);
 			});
 
             settingsModal.show();
@@ -682,6 +753,7 @@ e621games.guessSpecies.welcome = function() {
 
 		$('.welcome-modal .start-game').click(function(event){
 			event.preventDefault();
+			$('.welcome-modal .start-game').css('visibility', 'hidden');
 			$('.main-kitty .happy').animate({opacity: 0}, 1000);
 			$('.main-kitty .horrified').animate({opacity: 1}, 1000, function() {
 				$('.main-kitty .horrified').animate({opacity: 0}, 1000);

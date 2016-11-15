@@ -14,6 +14,10 @@ ds.e621.metadata = {
 	}
 };
 
+ds.e621.describe = function(config) {
+	return ds.e621.metadata.label + ' : ' + config.QUERY.query;
+};
+
 ds.e621.checkAvailability = function() {
 	return {
 		status: 'ok',
@@ -111,6 +115,7 @@ ds.e621._extractTagsForNextPost = function() {
             }
             var detailedPost = {
                 id: post.id,
+				postUrl: 'https://e621.net/post/show/' + post.id,
                 imageUrl: post.sample_url,
                 imageWidth: post.sample_width,
                 imageHeight: post.sample_height,

@@ -15,6 +15,10 @@ ds.fa.metadata = {
 	}
 };
 
+ds.fa.describe = function(config) {
+	return ds.fa.metadata.label + ' : ' + config.QUERY.query + ' sorted by ' + config.QUERY.sorting;
+};
+
 ds.fa.checkAvailability = function() {
 	return proxy.checkAvailability('FA');
 };
@@ -257,7 +261,7 @@ ds.fa._getRawResolution = function(xmlDoc, faSkin) {
 ds.fa._getRawSpecies = function(xmlDoc, faSkin) {
 	var propertiesNode;
 	if (faSkin === 'new') {
-		propertiesNode = $(xmlDoc).find('div.submission-sidebar div.tags-row div:nth(1)').contents();
+		propertiesNode = $(xmlDoc).find('div.submission-sidebar div.sidebar-section:nth(2) div:nth(1)').contents();
 		return $(propertiesNode[1]).text().replace("\n",'');
 	} else if (faSkin === 'old') {
 		return ds.fa._extractFromStatsContainer(xmlDoc, 'Species:');
@@ -267,8 +271,8 @@ ds.fa._getRawSpecies = function(xmlDoc, faSkin) {
 ds.fa._getRawGender = function(xmlDoc, faSkin) {
 	var propertiesNode;
 	if (faSkin === 'new') {
-		propertiesNode = $(xmlDoc).find('div.submission-sidebar div.tags-row div:nth(2)').contents();
-		return $(propertiesNode[7]).text().replace("\n",'');
+		propertiesNode = $(xmlDoc).find('div.submission-sidebar div.sidebar-section:nth(2) div:nth(2)').contents();
+		return $(propertiesNode[1]).text().replace("\n",'');
 	} else if (faSkin === 'old') {
 		return ds.fa._extractFromStatsContainer(xmlDoc, 'Gender:');
 	}
@@ -353,7 +357,7 @@ ds.fa._extractDetails = function (post, callback) {
 			});
 
 			var resolutionMatcher = /[^0-9]*([0-9]+)x([0-9]+)(px)?.*/g.exec(ds.fa._getRawResolution(xmlDoc, faSkin));
-			var speciesMatcher = / ?([^-|]*)( - ([^|]*))?( | )?/g.exec(ds.fa._getRawSpecies(xmlDoc, faSkin));
+			var speciesMatcher = / ?([^-|]*[^ -])( - ([^|]*))?/g.exec(ds.fa._getRawSpecies(xmlDoc, faSkin));
 			var genderMatcher = /.*/.exec(ds.fa._getRawGender(xmlDoc, faSkin));
 
 			var baseSpecie = speciesMatcher[1].trim();
@@ -398,8 +402,7 @@ ds.fa._extractDetails = function (post, callback) {
 				id: submissionIdMatcher[1],
 				tags: tags,
 				imageUrl: imageUrl,
-				imageWidth: parseInt(resolutionMatcher[1]),
-				imageHeight: parseInt(resolutionMatcher[2])
+				postUrl: "https://www.furaffinity.net" + post
 			});
 		});
 	});

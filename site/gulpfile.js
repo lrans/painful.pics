@@ -38,7 +38,11 @@ gulp.task('scripts', function() {
         'tmp/bower_components/socket.io-client/socket.io.js',
 		'node_modules/tidy-html5/tidy.js'
     ].concat(g.mainBowerFiles(['**/*.js', '!tmp/bower_components/jquery/dist/jquery.js']))
-	.concat(['tmp/bower_components/uikit/js/components/tooltip.js']);
+	.concat([
+		'tmp/bower_components/uikit/js/components/tooltip.js',
+		'tmp/bower_components/uikit/js/components/autocomplete.js',
+		'tmp/bower_components/uikit/js/components/form-select.js'
+	]);
     var libs = gulp.src(jQueryAndLibs)
         .pipe(g.debug({title: 'including lib:'}));
     libs.pause();
@@ -123,7 +127,9 @@ gulp.task('styles', function() {
         'tmp/bower_components/jquery-modal/jquery.modal.css',
         'tmp/bower_components/uikit/css/uikit.almost-flat.min.css',
         'tmp/bower_components/uikit/css/components/progress.almost-flat.min.css',
-		'tmp/bower_components/uikit/css/components/tooltip.almost-flat.min.css'
+		'tmp/bower_components/uikit/css/components/tooltip.almost-flat.min.css',
+		'tmp/bower_components/uikit/css/components/autocomplete.almost-flat.min.css',
+		'tmp/bower_components/uikit/css/components/form-select.almost-flat.min.css'
     ];
     var libs = gulp.src(vendorStyles);
     libs.pause();
@@ -201,8 +207,9 @@ gulp.task('watch', function() {
 gulp.task('webserver', function() {
   gulp.src('dist')
     .pipe(g.webserver({
+		host: '0.0.0.0',
 		proxies: [
-			{source: '/game', target: 'http://localhost:3000/game'}
+			{source: '/api', target: 'http://localhost:3000/api'}
 		]
     }));
 });

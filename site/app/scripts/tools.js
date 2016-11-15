@@ -1,4 +1,4 @@
-/* global createjs */
+/* global createjs, ds */
 
 var tools = tools || {};
 
@@ -192,4 +192,14 @@ tools.statusToIcon = function(statusText) {
 		'warning': 'uk-icon-warning',
 		'error': 'uk-icon-exclamation'
 	}[statusText];
+};
+
+tools.getAvailableDatasource = function() {
+	var result = [];
+	$.each(ds, function(name, datasource) {
+        if (datasource.checkAvailability().status === 'ok') {
+			result.push(name);
+		}
+    });
+	return result;
 };

@@ -14,6 +14,10 @@ ds.fsdb.metadata = {
 	}
 };
 
+ds.fsdb.describe = function(config) {
+	return ds.fsdb.metadata.label + ' : any fursuit, sorted by ' + config.QUERY.sorting;
+};
+
 ds.fsdb.checkAvailability = function() {
 	return proxy.checkAvailability('The Fursuit Database');
 };
@@ -281,7 +285,8 @@ ds.fsdb._extractDetails = function (suitUrl, callback) {
 			callback({
 				id: suitIdMatcher[1],
 				tags: tags,
-				imageUrl: imageUrl
+				imageUrl: imageUrl,
+				postUrl: "https://db.fursuit.me/index.php" + suitUrl
 			});
 		});
 	});

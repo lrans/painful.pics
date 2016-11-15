@@ -1,0 +1,34 @@
+<div class="uk-modal end-of-game-modal">
+    <div class="uk-modal-dialog uk-modal-dialog-large">
+		<div class="uk-modal-header uk-text-center">
+            <h1>End of game</h1>
+        </div>
+        <div class="uk-modal-content">
+			<div class="players"></div>			
+			<div class="posts uk-clearfix mosaicflow">
+				{{#each posts}}
+				<div class="mosaicflow__item">
+					<a href="{{this.postUrl}}" target="_blank">
+						<img src="{{this.imageUrl}}">
+					</a>
+				</div>
+				{{/each}}
+			</div>
+        </div>
+        <div class="uk-modal-footer uk-text-right">
+            <button class="uk-button uk-button-large reset">
+				<i class="uk-icon-fast-backward"></i>
+				Change settings
+			</button>
+			<button class="uk-button uk-button-success uk-button-large save">
+				<i class="uk-icon-thumbs-o-up"></i>
+				Save & share settings
+			</button>
+			<button class="uk-button uk-button-primary uk-button-large play-again">
+				<i class="uk-icon-plus"></i>
+				<i class="uk-icon-tint"></i>
+				Play again !
+			</button>
+        </div>
+    </div>
+</div>

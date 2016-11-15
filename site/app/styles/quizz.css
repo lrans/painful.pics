@@ -48,6 +48,20 @@
 	max-width: 350px;
 }
 
+#theme-library-autocomplete .uk-dropdown {
+	width: 100%;
+	overflow-y: auto;
+    max-height: 200px;
+}
+
+.quizz-modal form.quizz-settings span.uk-form-select > span {
+	border-bottom: 1px dotted grey;
+}
+
+button.random-theme-button > i {
+	vertical-align: -25%;
+}
+
 .image-container > .vertical {
     min-height: 90%;
 	max-height: 100vh;
@@ -91,3 +105,15 @@
     border-color: #da314b;
 }
 
+.uk-shownoitems .uk-dropdown:empty::before {
+    content: "No results";
+}
+
+.mosaicflow__column {
+  float: left;
+}
+.mosaicflow__item img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
