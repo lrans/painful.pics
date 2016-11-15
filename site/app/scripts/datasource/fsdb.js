@@ -287,7 +287,7 @@ ds.fsdb._extractDetails = function (suitUrl, callback) {
 				id: suitIdMatcher[1],
 				tags: tags,
 				imageUrl: imageUrl,
-				postUrl: "https://db.fursuit.me/index.php" + suitUrl
+				postUrl: "http://db.fursuit.me/index.php" + suitUrl
 			});
 		});
 	});
