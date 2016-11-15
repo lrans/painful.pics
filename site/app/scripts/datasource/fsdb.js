@@ -80,17 +80,18 @@ ds.fsdb.fetch = function (nbItems, query, callback) {
 		return;
 	}
 	var sorting = query.sorting.split('_')[0];
+	var querySorting = sorting;
 	var sortdesc = query.sorting.split('_')[1];
 	var pageToFetch = ds.fsdb._runtime.fetchPage;
 	if (sorting === 'random') {
-		sorting = 6;
+		querySorting = 6;
 		if (ds.fsdb._runtime.availablePages !== undefined) {
 			pageToFetch = ds.fsdb._getRandomPageToFetch();
 		}
 	}
 	var getData = {
 		c: 'browse',
-		suitlist_sort: sorting,
+		suitlist_sort: querySorting,
 		suitlist_limit: ds.fsdb._selectPageSize(),
 		suitlist_start: pageToFetch * ds.fsdb._selectPageSize()
 	};
