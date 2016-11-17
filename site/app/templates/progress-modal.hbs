@@ -1,2 +1,10 @@
-<div class="message">{{ message }}</div>
-<progress max="{{ max }}" value="{{ value }}"></progress>
+<div class="uk-modal-dialog">
+    <div class="uk-modal-content">
+		<div class="uk-text-center">
+			{{ message }}
+		</div>
+		<div class="uk-progress">
+			<div class="uk-progress-bar" style="width: {{ percents }}%;"></div>
+		</div>
+	</div>
+</div>

@@ -1,4 +1,4 @@
-/* global createjs, ds */
+/* global createjs, ds, UIkit */
 
 var tools = tools || {};
 
@@ -54,19 +54,29 @@ tools.showProgress = function(progressObject) {
     for (var attrname in progressObject) {
         tools.lastProgress[attrname] = progressObject[attrname];
     }
-    var progressModal = $("#progress-modal").length > 0 ? $("#progress-modal")[0] : null;
-    if (progressModal === null) {
-        $('body').append('<div id="progress-modal"></div>');
-        progressModal = $("#progress-modal")[0];
+	tools.lastProgress.percents = (tools.lastProgress.value / tools.lastProgress.max) * 100;
+    var progressModalElem = $("#progress-modal").length > 0 ? $("#progress-modal")[0] : null;
+	var shown = true;
+    if (progressModalElem === null) {
+		shown = false;
+        $('body').append('<div id="progress-modal" class="uk-modal"></div>');
+        progressModalElem = $("#progress-modal")[0];
     }
-    tools.fetchTemplate("progress-modal", tools.lastProgress, function(progress){
-        $(progressModal).html(progress);
-        $(progressModal).modal({
-            escapeClose: false,
-            clickClose: false,
-            showClose: false
-        });
-    });
+
+	if (shown) {
+		$('#progress-modal div.uk-progress-bar').css('width', tools.lastProgress.percents + '%');
+	} else {
+		tools.fetchTemplate("progress-modal", tools.lastProgress, function(progress){
+			$(progressModalElem).html(progress);
+			var progressModal = UIkit.modal("#progress-modal", {center: true, bgclose: false, keyboard: false});
+			progressModal.show();
+		});
+	}
+};
+
+tools.hideProgress = function() {
+	UIkit.modal("#progress-modal").hide();
+	$("#progress-modal").remove();
 };
 
 tools.message = function(message, callback, closeable) {
@@ -74,14 +84,11 @@ tools.message = function(message, callback, closeable) {
         closeable = false;
     }
     $("#message-modal").remove();
-    tools.fetchTemplate("message-modal", {message : message}, function(messageModal){
-        $('body').append(messageModal);
-        var modal = $("#message-modal").modal({
-            escapeClose: closeable,
-            clickClose: closeable,
-            showClose: closeable
-        });
-        callback();
+    tools.fetchTemplate("message-modal", {message : message}, function(modalTemplate){
+        $('body').append(modalTemplate);
+		var messageModal = UIkit.modal("#message-modal", {center: true, bgclose: closeable, keyboard: closeable});
+		messageModal.show();
+        callback(messageModal);
     });
 };
 

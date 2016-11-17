@@ -12,7 +12,6 @@ remote.randomName = function () {
 };
 
 remote.cleanScreen = function() {
-	$.modal.close();
 	$("#lobby-modal").remove();
 	$("#message-modal").remove();
 	$('#show').empty();

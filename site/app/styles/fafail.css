@@ -80,16 +80,3 @@ div.submission-infos {
     left: 5px;
     padding: 3px;
 }
-/*
-form > * {
-    padding: 2px;
-    margin: 5px;
-    display: block;
-    border: 1px solid gray;
-}*/
-
-#progress-modal > * {
-    width: 100%;
-    text-align: center;
-}
-

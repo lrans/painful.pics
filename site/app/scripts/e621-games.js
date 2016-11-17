@@ -45,6 +45,7 @@ e621games.guessSpecies.wrongAnswer = function (player, correctAnswer, wrongAnswe
 };
 
 e621games.guessSpecies.startGame = function() {
+	tools.hideProgress();
     e621games.guessSpecies.score = {
         answered: 0,
         nbItems: parseInt(e621games.guessSpecies.config.NB_QUIZZ_ITEMS)
@@ -76,7 +77,7 @@ e621games.guessSpecies.endOfGame = function () {
 			}, function (playersList) {
 				$('.players').html(playersList);
 				
-				var endOfGameModal = UIkit.modal(".end-of-game-modal", {center: true, bgclose: false});
+				var endOfGameModal = UIkit.modal(".end-of-game-modal", {center: true, bgclose: false, keyboard: false});
 				
 				$('.end-of-game-modal button.reset').click(function (event) {
 					endOfGameModal.hide();
@@ -197,7 +198,7 @@ e621games.guessSpecies.showQuizzItem = function (number) {
 		type: 'blocking',
 		message: 'Get ready...'
 	});
-    tools.message("Get ready !", function(){
+    tools.message("Get ready !", function(messageModal){
         var quizzItem = e621games.guessSpecies.quizzItems[number];
         e621games.guessSpecies.currentQuizzItemNumber = number;
         e621games.guessSpecies.answers = [];
@@ -224,7 +225,7 @@ e621games.guessSpecies.showQuizzItem = function (number) {
                     e621games.guessSpecies.broadcastQuizzItem(number);
                 }
 
-                $.modal.close();
+                messageModal.hide();
                 if (parseInt(e621games.guessSpecies.config.TIMER) > 0) {
                     $('div.timer').removeClass('uk-progress-danger').css("width", '100%');
                     $('div.timer-container').css('visibility', 'visible');
@@ -711,11 +712,11 @@ e621games.guessSpecies.start = function() {
 				$(".quizz-modal").data('modal').resize();
 			});
 			
-			$('#custom-theme-switcher').on('show.uk.switcher', function(evt, active, prev) {
+			$('#custom-theme-button').on('show.uk.switcher', function(evt, active, prev) {
 				$(".quizz-modal").data('modal').resize();
 			});
 			
-            var settingsModal = UIkit.modal(".quizz-modal", {center:true, bgclose:false});
+            var settingsModal = UIkit.modal(".quizz-modal", {center:true, bgclose:false, keyboard: false});
 
             $('.quizz-modal form.quizz-settings').submit(function(event){
                 event.preventDefault();
@@ -749,7 +750,7 @@ e621games.guessSpecies.start = function() {
 e621games.guessSpecies.welcome = function() {
     tools.fetchTemplate('welcome-modal', {}, function(page){
         $('#show').html(page);
-		var welcomeModal = UIkit.modal(".welcome-modal", {center:true, bgclose:false});
+		var welcomeModal = UIkit.modal(".welcome-modal", {center:true, bgclose:false, keyboard: false});
 
 		$('.welcome-modal .start-game').click(function(event){
 			event.preventDefault();
