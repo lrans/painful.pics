@@ -81,6 +81,15 @@ module.exports = {
 			}
 			return data;
 		}
+		
+		function computeHash(config) {
+			var configCopy = JSON.parse(JSON.stringify(config));
+			delete configCopy.NB_QUIZZ_ITEMS;
+			delete configCopy.MODE;
+			delete configCopy.gameId;
+			
+			return hash(configCopy, {unorderedArrays: true, unorderedSets: true});
+		}
 
 		app.post('/api/game/:gameId', function (req, res) {
 			var config = validateGameConfig(req.body);
@@ -89,10 +98,37 @@ module.exports = {
 				location: getLocation(req.ip),
 				state: 'started',
 				config: config,
-				hash: hash(config, {unorderedArrays: true, unorderedSets: true})
+				hash: computeHash(config)
 			});
 			res.status(201).send();
 		});
+
+		function updatePlayCount(gameHash) {
+			games.aggregate([
+				{
+					$match: {
+						hash: { $eq: gameHash }
+					}
+				},
+				{
+					$group: {
+						_id: '$hash',
+						playCount: {
+							$sum: { $cond: { if: { $eq: [ '$state', 'finished' ] }, then: 1, else: 0 } }
+						}
+					}
+				}
+			]).then((res) => {
+				games.update({
+					hash: res[0]._id
+				}, {
+					$set: {playCount: res[0].playCount}
+				}, {
+					w: 1,
+					multi: true
+				});
+			});
+		}
 
 		app.post('/api/game/:gameId/finished', function (req, res) {
 			games.findOne({
@@ -101,11 +137,13 @@ module.exports = {
 				game.state = 'finished';
 				games.update({
 					id: req.params.gameId
-				}, game);
+				}, game).then(() => {
+					updatePlayCount(game.hash);
+				});
 			});
 			res.status(204).send();
 		});
-		
+
 		app.post('/api/theme/:gameId', function (req, res) {
 			var title = req.body.label;
 			games.findOne({
@@ -149,20 +187,38 @@ module.exports = {
 							$first: '$config'
 						},
 						playCount: {
-							$sum: { $cond: { if: { $eq: [ '$state', 'finished' ] }, then: 1, else: 0 } }
+							$first: '$playCount'
 						}
 					}
 				},
 				{
 					$sort: {
-						score: { 
+						score: {
 							$meta: "textScore" 
 						},
 						playCount: -1 
 					}
 				}
-			]).then((theme) => {
-				res.write(JSON.stringify(theme));
+			]).then((themes) => {
+				res.write('[');
+				for(var i = 0; i < themes.length; i++) {
+					if (i > 0) {
+						res.write(',');
+					}
+					var theme = themes[i];
+					res.write(JSON.stringify({
+						title: theme.title,
+						playCount: theme.playCount,
+						config: {
+							NB_ANSWERS_PER_ITEM: theme.config.NB_ANSWERS_PER_ITEM,
+							TIMER: theme.config.TIMER,
+							TARGET_TAGS_TYPES: theme.config.TARGET_TAGS_TYPES,
+							QUERY: theme.config.QUERY,
+							DS: theme.config.DS
+						}
+					}));
+				}
+				res.write(']');
 			}).then(() => {
 				res.end();
 			});
