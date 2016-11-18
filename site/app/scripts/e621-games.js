@@ -697,6 +697,7 @@ e621games.guessSpecies.start = function() {
 				{value:'comment', label: 'The comments'},
                 {value:'all', label: 'Any of the above !'}
             ],
+			themeDescription: e621games.guessSpecies.config.DATASOURCE.describe(e621games.guessSpecies.config)
         }, function(settings) {
             $('body').append(settings);
 

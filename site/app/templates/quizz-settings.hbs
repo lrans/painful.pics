@@ -59,11 +59,11 @@
 								</button>
 							</div>
 							<div class="uk-autocomplete uk-width-9-10" id="theme-library-autocomplete">
-								<input placeholder="Try any keyword" type="text" class="uk-width-1-1 uk-form-large">
+								<input placeholder="Try any keyword" type="text" class="uk-width-1-1 uk-form-large" value="{{ themeDescription }}">
 								<script type="text/autocomplete">
 									<ul class="uk-nav uk-nav-autocomplete uk-autocomplete-results">
 										\{{~items}}
-										<li data-value="\{{ $item.id }}">
+										<li data-value="\{{ $item.hash }}">
 											<a>
 												<div class="uk-badge uk-badge-notification" title="This game has been played \{{ $item.playCount }} times">\{{ $item.playCount }}</div>
 												<strong>\{{ $item.title }}</strong>

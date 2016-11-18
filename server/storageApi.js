@@ -157,6 +157,21 @@ module.exports = {
 			res.status(204).send();
 		});
 
+		function themeToJson(theme) {
+			return JSON.stringify({
+				hash: theme._id,
+				title: theme.title,
+				playCount: theme.playCount,
+				config: {
+					NB_ANSWERS_PER_ITEM: theme.config.NB_ANSWERS_PER_ITEM,
+					TIMER: theme.config.TIMER,
+					TARGET_TAGS_TYPES: theme.config.TARGET_TAGS_TYPES,
+					QUERY: theme.config.QUERY,
+					DS: theme.config.DS
+				}
+			});
+		}
+
 		app.get('/api/theme/search', function(req, res) {
 			var query = req.query.query;
 			var ds = req.query.ds;
@@ -179,9 +194,6 @@ module.exports = {
 						_id: '$hash',
 						title: {
 							$addToSet: '$title'
-						},
-						datasource: {
-							$first: '$config.DS'
 						},
 						config: {
 							$first: '$config'
@@ -206,17 +218,7 @@ module.exports = {
 						res.write(',');
 					}
 					var theme = themes[i];
-					res.write(JSON.stringify({
-						title: theme.title,
-						playCount: theme.playCount,
-						config: {
-							NB_ANSWERS_PER_ITEM: theme.config.NB_ANSWERS_PER_ITEM,
-							TIMER: theme.config.TIMER,
-							TARGET_TAGS_TYPES: theme.config.TARGET_TAGS_TYPES,
-							QUERY: theme.config.QUERY,
-							DS: theme.config.DS
-						}
-					}));
+					res.write(themeToJson(theme));
 				}
 				res.write(']');
 			}).then(() => {
@@ -228,27 +230,13 @@ module.exports = {
 			games.findOne({
 				hash: req.params.themeHash
 			}).then((theme) => {
-				res.write(JSON.stringify(theme));
+				res.write(themeToJson(theme));
 				res.end();
 			});
 		});
 		
 		app.get('/api/randomtheme', function(req, res) {
 			games.aggregate([
-				{
-					$group: {
-						_id: '$hash',
-						title: {
-							$addToSet: '$title'
-						},
-						config: {
-							$first: '$config'
-						},
-						playCount: {
-							$sum: { $cond: { if: { $eq: [ '$state', 'finished' ] }, then: 1, else: 0 } }
-						}
-					}
-				},
 				{
 					$sort: {
 						playCount: -1
@@ -260,8 +248,8 @@ module.exports = {
 				{
 					$sample: { size: 1 }
 				}
-			]).then((theme) => {
-				res.write(JSON.stringify(theme));
+			]).then((themes) => {
+				res.write(themeToJson(themes[0]));
 				res.end();
 			});
 		});

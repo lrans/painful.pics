@@ -45,7 +45,7 @@ sa.themeCompletion = function(release) {
 	}, function(response) {
 		release($.map(response, function(theme) {
 			return {
-				id: theme._id,
+				hash: theme.hash,
 				title: theme.title,
 				datasource: ds[theme.config.DS].metadata.label,
 				playCount: theme.playCount,
@@ -55,13 +55,13 @@ sa.themeCompletion = function(release) {
 	});
 };
 
-sa.getTheme = function(themeId, callback) {
-	sa._apiGet('/api/theme/' + themeId, {}, callback);
+sa.getTheme = function(themeHash, callback) {
+	sa._apiGet('/api/theme/' + themeHash, {}, callback);
 };
 
 sa.getRandomTheme = function(callback) {
-	sa._apiGet('/api/randomtheme', {}, function(themes) {
-		callback(themes[0]);
+	sa._apiGet('/api/randomtheme', {}, function(theme) {
+		callback(theme);
 	});
 };
 
