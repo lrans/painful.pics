@@ -595,6 +595,7 @@ e621games.guessSpecies.ignoredConfigKeys = [
 ];
 
 e621games.guessSpecies.serializeOptions = function() {
+	$('#theme-library-autocomplete input').val(e621games.guessSpecies.config.DATASOURCE.describe(e621games.guessSpecies.config));
 	var optionsCopy = JSON.parse(JSON.stringify(e621games.guessSpecies.config));
 	
 	$.each(e621games.guessSpecies.ignoredConfigKeys, function(i, key) {
@@ -647,7 +648,7 @@ e621games.guessSpecies.loadTheme = function(theme) {
 		e621games.guessSpecies.config[key] = theme.config[key];
 	});
 	e621games.guessSpecies.config.DATASOURCE = ds[theme.config.DS];
-	$('#theme-library-autocomplete input').val(ds[theme.config.DS].describe(theme.config));
+	e621games.guessSpecies.serializeOptions();
 };
 
 e621games.guessSpecies.start = function() {
@@ -736,7 +737,11 @@ e621games.guessSpecies.start = function() {
 				event.preventDefault();
 				sa.getTheme(data.value, e621games.guessSpecies.loadTheme);
 			});
-			
+
+			$("#theme-library-autocomplete input").focus(function() {
+				$(this).select(); 
+			});
+
 			$('.random-theme-button').click(function(event) {
 				event.preventDefault();
 				sa.getRandomTheme(e621games.guessSpecies.loadTheme);
