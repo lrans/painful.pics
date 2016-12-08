@@ -8,7 +8,8 @@ var tidyOptions = {
 	'numeric-entities' : 'yes',
 	'doctype': 'omit',
 	'quiet': 'yes',
-	'show-warnings': 'no'
+	'show-warnings': 'no',
+	'force-output': 'yes'
 };
 
 proxy.get = function(url, data, callback) {
@@ -18,7 +19,8 @@ proxy.get = function(url, data, callback) {
 		method: 'GET',
 		data: data,
 		success: function(data) {
-			callback($.parseXML(tidy_html5(data, tidyOptions)));
+			var tidiedHtml = tidy_html5(data, tidyOptions);
+			callback($.parseXML(tidiedHtml));
 		}
 	});
 };

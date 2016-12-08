@@ -9,9 +9,9 @@ ds.fa.metadata = {
 	label: "furaffinity.net",
 	providedTags : ["general", "artist", "species", "gender", "nbFavs", "comment"],
 	defaultQuery: {
-		cq: "fox gay anal",
 		query: "fox gay anal",
-		sorting: "random"
+		sorting: "random",
+		mode: 'search'
 	}
 };
 
@@ -44,11 +44,14 @@ ds.fa.showSettingsScreen = function(settingsPlaceHolder) {
 };
 
 ds.fa._showSettingsScreen = function(settingsPlaceHolder) {
-	tools.fetchTemplate('ds-settings-fa', {
-		choices_query: [
-			{value:'fox gay anal', label: 'Popular things'},
-			{value:'first fursuit', label: 'Where it all begins'},
-			{value:'hyper taur', label: 'Excess, in general'}
+	var sortingsByMode = {
+		search : ['random', 'relevancy', 'date', 'popularity'],
+		favs: ['random', 'date']
+	};
+	var templateParams = {
+		choices_mode: [
+			{value:'search', label: 'Search', sortings: ['random', 'relevancy', 'date', 'popularity']},
+			{value:'favs', label: 'Favorites of', sortings: ['random', 'date']}
 		],
 		choices_sorting: [
 			{value:'random', label: 'randomly'},
@@ -56,22 +59,20 @@ ds.fa._showSettingsScreen = function(settingsPlaceHolder) {
 			{value:'date', label: 'most recent first'},
 			{value:'popularity', label: 'most popular first'}
 		]
-	}, function(settings){
-		$(settingsPlaceHolder).html(settings);
+	};
 
-		$('select[name=choices-query]').change(function(){
-			var newValue = $('select[name=choices-query]').val();
-			if('custom' === newValue) {
-				$('input[name=query]').prop('readonly', false).prop('disabled', false);
-			} else {
-				$('input[name=query]').prop('readonly', true).prop('disabled', true).val(newValue);
+	tools.fetchTemplate('ds-settings-fa', templateParams, function(settings){
+		$(settingsPlaceHolder).html(settings);
+		
+		$(settingsPlaceHolder).find('select#choices-mode').change(function() {
+			var sortings = sortingsByMode[this.value];
+			$(settingsPlaceHolder).find('#sorting option').each(function(i, option) {
+				$(option).prop('disabled', $.inArray($(option).attr('value'), sortings) < 0);
+			});
+			if ($(settingsPlaceHolder).find('#sorting option:selected').prop('disabled')) {
+				$(settingsPlaceHolder).find('select#sorting').val(sortings[0]);
 			}
-			e621games.guessSpecies.config.QUERY.query = $(settingsPlaceHolder).find('input[name=query]').val();
-			e621games.guessSpecies.serializeOptions();
 		});
-		if (e621games.guessSpecies.config.QUERY.cq === 'custom') {
-			$('input[name=query]').prop('readonly', false).prop('disabled', false);
-		}
 	});
 };
 
@@ -93,6 +94,39 @@ ds.fa.stop = function () {
 };
 
 ds.fa.fetch = function (nbItems, query, callback) {
+	if (query.mode === undefined) {
+		query.mode = 'search';
+	}
+	ds.fa['_fetch_'+ query.mode](nbItems, query, callback);
+};
+
+ds.fa._fetch_favs = function (nbItems, query, callback) {
+	if (ds.fa._runtime.availablePages === undefined) {
+		ds.fa._runtime.availablePages = 10000;
+	}
+	var sorting = query.sorting;
+	var pageToFetch = ds.fa._runtime.fetchPage;
+	if (sorting === 'random') {
+		pageToFetch = ds.fa._getRandomPageToFetch();
+	}
+	console.log("fetching " + nbItems + " items... (page " + pageToFetch + ")");
+	ds.fa._runtime.fetchedPages.push(pageToFetch);
+	proxy.get("https://www.furaffinity.net/favorites/" + query.query + '/' + pageToFetch, {}, function (xmlDoc) {
+		if (ds.fa._isPageEmpty(xmlDoc)) {
+			ds.fa._runtime.availablePages = pageToFetch - 1;
+			if (query.sorting === 'random') {
+				ds.fa.fetch(nbItems, query, callback);
+			} else {
+				// TODO sorted and no results anymore, abort!
+			}
+		} else {
+			ds.fa._parseSubmissionsDocument(query, nbItems, xmlDoc, callback);
+			ds.fa._runtime.fetchPage++;
+		}
+	});
+};
+
+ds.fa._fetch_search = function (nbItems, query, callback) {
 	if (ds.fa._runtime.lastPageHit === true) {
 		return;
 	}
@@ -128,10 +162,14 @@ ds.fa.fetch = function (nbItems, query, callback) {
 			ds.fa._runtime.availablePages = ds.fa._getAvailableResultPages(xmlDoc);
 			ds.fa.fetch(nbItems, query, callback);
 		} else {
-			ds.fa._parseSubmissionsDocument(nbItems, xmlDoc, callback);
+			ds.fa._parseSubmissionsDocument(query, nbItems, xmlDoc, callback);
 			ds.fa._runtime.fetchPage++;
 		}
 	});
+};
+
+ds.fa._isPageEmpty = function(xmlDoc) {
+	return $(xmlDoc).find('#no-images').size() > 0;
 };
 
 ds.fa._getAvailableResultPages = function(xmlDoc) {
@@ -159,8 +197,8 @@ ds.fa._selectPageSize = function (nbItems) {
 	return 72; // dynamic number of items in paged results would be a PITA
 };
 
-ds.fa._parseSubmissionsDocument = function (nbItems, doc, callback) {
-	var submissions = $(doc).find('b.t-image > u > s > a');
+ds.fa._parseSubmissionsDocument = function (query, nbItems, doc, callback) {
+	var submissions = $(doc).find('.t-image > b a');
 	tools.shuffleArrayInPlace(submissions);
 	var lastPage = ds.fa._extractIsLastResultPage(doc);
 	if (lastPage) {
@@ -175,9 +213,9 @@ ds.fa._parseSubmissionsDocument = function (nbItems, doc, callback) {
 	for (var i = 0 ; i < submissions.length ; i++) {
 		var lastItemInPage = (i === submissions.length - 1);
 		if (lastPage && lastItemInPage) {
-			ds.fa._addRawPost($(submissions[i]).attr('href'), lastItemCallBack);
+			ds.fa._addRawPost(query, $(submissions[i]).attr('href'), lastItemCallBack);
 		} else {
-			ds.fa._addRawPost($(submissions[i]).attr('href'), standardCallBack);
+			ds.fa._addRawPost(query, $(submissions[i]).attr('href'), standardCallBack);
 		}
 	}
 	if (!lastPage) {
@@ -188,8 +226,11 @@ ds.fa._parseSubmissionsDocument = function (nbItems, doc, callback) {
 };
 
 ds.fa._extractIsLastResultPage = function(doc) {
+	if (ds.fa._isPageEmpty(doc)) {
+		return true;
+	}
 	var queryStats = ds.fa._extractQueryStats(doc);
-	return parseInt(queryStats[1]) >= parseInt(queryStats[2]);
+	return queryStats !== null && parseInt(queryStats[1]) >= parseInt(queryStats[2]);
 };
 
 ds.fa._extractQueryStats = function(doc) {
@@ -203,13 +244,14 @@ ds.fa._extractQueryStats = function(doc) {
 	return /.* - ([0-9]+) of ([0-9]+).*/.exec(rawQueryStats);
 };
 
-ds.fa._addRawPost = function (post, callback) {
+ds.fa._addRawPost = function (query, post, callback) {
 	if (ds.fa._runtime.fetchDone) {
 		return;
 	}
 	ds.fa._runtime.rawPosts.push({
 		post: post,
-		callback: callback
+		callback: callback,
+		query: query
 	});
 	ds.fa._extractTagsForNextPost();
 };
@@ -219,7 +261,8 @@ ds.fa._extractTagsForNextPost = function () {
 		var postAndCallBack = ds.fa._runtime.rawPosts.shift();
 		var post = postAndCallBack.post;
 		var callback = postAndCallBack.callback;
-		ds.fa._extractDetails(post, function (details) {
+		var query = postAndCallBack.query;
+		ds.fa._extractDetails(query, post, function (details) {
 			if (typeof details.imageWidth !== 'undefined' && typeof details.imageHeight !== 'undefined') {
 				var ratio = details.imageWidth < details.imageHeight ? 'vertical' : 'horizontal';
 				if (!(/.+\.(jpg|png|gif)/i.exec(details.imageUrl))) {
@@ -261,7 +304,7 @@ ds.fa._getRawResolution = function(xmlDoc, faSkin) {
 ds.fa._getRawSpecies = function(xmlDoc, faSkin) {
 	var propertiesNode;
 	if (faSkin === 'new') {
-		propertiesNode = $(xmlDoc).find('div.submission-sidebar div.sidebar-section:nth(2) div:nth(1)').contents();
+		propertiesNode = $(xmlDoc).find('div.submission-sidebar div.sidebar-section-no-bottom div:nth(1)').contents();
 		return $(propertiesNode[1]).text().replace("\n",'');
 	} else if (faSkin === 'old') {
 		return ds.fa._extractFromStatsContainer(xmlDoc, 'Species:');
@@ -271,7 +314,7 @@ ds.fa._getRawSpecies = function(xmlDoc, faSkin) {
 ds.fa._getRawGender = function(xmlDoc, faSkin) {
 	var propertiesNode;
 	if (faSkin === 'new') {
-		propertiesNode = $(xmlDoc).find('div.submission-sidebar div.sidebar-section:nth(2) div:nth(2)').contents();
+		propertiesNode = $(xmlDoc).find('div.submission-sidebar div.sidebar-section-no-bottom div:nth(2)').contents();
 		return $(propertiesNode[1]).text().replace("\n",'');
 	} else if (faSkin === 'old') {
 		return ds.fa._extractFromStatsContainer(xmlDoc, 'Gender:');
@@ -293,26 +336,38 @@ ds.fa._filterComment = function(commentElement, callback) {
 	}
 };
 
-ds.fa._getRawComments = function(xmlDoc, faSkin) {
+ds.fa._getRawComments = function(xmlDoc, faSkin, query) {
 	var result = [];
 	var comment;
 	if (faSkin === 'new') {
-		$(xmlDoc).find('table.container-comment[width="100%"] div.user-comment-content').each(function(i, comment){
-			ds.fa._filterComment(comment, function(commentText){
-				result.push(commentText);
+		$(xmlDoc)
+			.find('div.comments-list div.comment_container[style="width:100%"]')
+			.filter(function(i, commentContainer) {
+				return query.Bfiltercomments === true && $(commentContainer).find('.comment_username').text() === query.commentsby;
+			})
+			.find('div.comment_text')
+			.each(function(i, comment){
+				ds.fa._filterComment(comment, function(commentText){
+					result.push(commentText);
+				});
 			});
-		});
 	} else if (faSkin === 'old') {
-		$(xmlDoc).find('table.container-comment[width="100%"] td.replyto-message').each(function(i, comment){
-			ds.fa._filterComment(comment, function(commentText){
-				result.push(commentText);
+		$(xmlDoc)
+			.find('table.container-comment[width="100%"]')
+			.filter(function(i, commentContainer) {
+				return query.Bfiltercomments === true && $(commentContainer).find('.replyto-name').text() === query.commentsby;
+			})
+			.find('td.replyto-message')
+			.each(function(i, comment){
+				ds.fa._filterComment(comment, function(commentText){
+					result.push(commentText);
+				});
 			});
-		});
 	}
 	return result;
 };
 
-ds.fa._extractDetails = function (post, callback) {
+ds.fa._extractDetails = function (query, post, callback) {
 	ds.fa._runtime.extractingTags = true;
 	proxy.get("https://www.furaffinity.net" + post, {}, function(xmlDoc){
 		if (ds.fa._runtime.fetchDone) {
@@ -362,16 +417,16 @@ ds.fa._extractDetails = function (post, callback) {
 
 			var baseSpecie = speciesMatcher[1].trim();
 			if (baseSpecie !== 'Unspecified / Any') {
-				tags.species = [{
-					type: 'species',
-					name: baseSpecie.replace(' (Other)', '')
-				}];
-
 				if (speciesMatcher[3] !== undefined) {
-					tags.species.push({
+					tags.species = [{
 						type: 'species',
 						name: speciesMatcher[3].trim()
-					});
+					}];
+				} else {
+					tags.species = [{
+						type: 'species',
+						name: baseSpecie.replace(' (Other)', '')
+					}];
 				}
 			}
 			
@@ -388,7 +443,7 @@ ds.fa._extractDetails = function (post, callback) {
 				name: ds.fa._getRawNbFavs(xmlDoc, faSkin).trim()
 			}];
 		
-			var comments = ds.fa._getRawComments(xmlDoc, faSkin);
+			var comments = ds.fa._getRawComments(xmlDoc, faSkin, query);
 			if (comments.length > 0) {
 				tags.comment = $.map(comments, function(comment){
 					return {

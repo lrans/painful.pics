@@ -49,7 +49,10 @@ module.exports = {
 					"QUERY": {
 						"type": "object",
 						"patternProperties": {
-							"[a-z]+": {
+							"^B[a-z]+$": {
+								"type": "boolean"
+							},
+							"^[^B][a-z]+$": {
 								"type": "string",
 								"pattern": /[a-z0-9-_:]*/i
 							}
