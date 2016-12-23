@@ -35,7 +35,7 @@ function uglifyIfNeeded() {
 gulp.task('scripts', function() {
     var jQueryAndLibs = [
         'tmp/bower_components/jquery/dist/jquery.js',
-        'tmp/bower_components/socket.io-client/socket.io.js',
+        'tmp/bower_components/socket.io-client/dist/socket.io.js',
 		'node_modules/tidy-html5/tidy.js'
     ].concat(g.mainBowerFiles(['**/*.js', '!tmp/bower_components/jquery/dist/jquery.js']))
 	.concat([
@@ -77,7 +77,7 @@ gulp.task('scripts', function() {
     var mobileLibs = gulp.src([
         'tmp/bower_components/jquery/dist/jquery.js',
 		'tmp/bower_components/jquery-modal/jquery.modal.js',
-        'tmp/bower_components/socket.io-client/socket.io.js',
+        'tmp/bower_components/socket.io-client/dist/socket.io.js',
         'tmp/bower_components/handlebars/handlebars.min.js',
         'tmp/bower_components/uikit/js/uikit.min.js',
         'tmp/bower_components/jquery-qrcode/jquery.qrcode.min.js'
