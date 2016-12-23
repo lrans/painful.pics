@@ -46,12 +46,16 @@ ds.fa.showSettingsScreen = function(settingsPlaceHolder) {
 ds.fa._showSettingsScreen = function(settingsPlaceHolder) {
 	var sortingsByMode = {
 		search : ['random', 'relevancy', 'date', 'popularity'],
-		favs: ['random', 'date']
+		favs: ['random', 'date'],
+		gall: ['random', 'date'],
+		scra: ['random', 'date']
 	};
 	var templateParams = {
 		choices_mode: [
-			{value:'search', label: 'Search', sortings: ['random', 'relevancy', 'date', 'popularity']},
-			{value:'favs', label: 'Favorites of', sortings: ['random', 'date']}
+			{value:'search', label: 'Search'},
+			{value:'favs', label: 'Favorites of'},
+			{value:'gall', label: 'Posts by'},
+			{value:'scra', label: 'Scraps of'}
 		],
 		choices_sorting: [
 			{value:'random', label: 'randomly'},
@@ -100,7 +104,19 @@ ds.fa.fetch = function (nbItems, query, callback) {
 	ds.fa['_fetch_'+ query.mode](nbItems, query, callback);
 };
 
+ds.fa._fetch_gall = function (nbItems, query, callback) {
+	ds.fa._fetch_list(nbItems, query, callback, '/gallery');
+};
+
+ds.fa._fetch_scra = function (nbItems, query, callback) {
+	ds.fa._fetch_list(nbItems, query, callback, '/scraps');
+};
+
 ds.fa._fetch_favs = function (nbItems, query, callback) {
+	ds.fa._fetch_list(nbItems, query, callback, '/favorites');
+};
+
+ds.fa._fetch_list = function (nbItems, query, callback, url) {
 	if (ds.fa._runtime.availablePages === undefined) {
 		ds.fa._runtime.availablePages = 10000;
 	}
@@ -111,7 +127,7 @@ ds.fa._fetch_favs = function (nbItems, query, callback) {
 	}
 	console.log("fetching " + nbItems + " items... (page " + pageToFetch + ")");
 	ds.fa._runtime.fetchedPages.push(pageToFetch);
-	proxy.get("https://www.furaffinity.net/favorites/" + query.query + '/' + pageToFetch, {}, function (xmlDoc) {
+	proxy.get("https://www.furaffinity.net" + url + "/" + query.query + '/' + pageToFetch, {}, function (xmlDoc) {
 		if (ds.fa._isPageEmpty(xmlDoc)) {
 			ds.fa._runtime.availablePages = pageToFetch - 1;
 			if (query.sorting === 'random') {
@@ -323,7 +339,7 @@ ds.fa._getRawGender = function(xmlDoc, faSkin) {
 
 ds.fa._getRawNbFavs = function(xmlDoc, faSkin) {
 	if (faSkin === 'new') {
-		return $(xmlDoc).find('div.flex-submission-counter-2 > span').text().replace("\n",'');
+		return $(xmlDoc).find('div.flex-submission-counter-2 > span:nth(0)').text().replace("\n",'');
 	} else if (faSkin === 'old') {
 		return ds.fa._extractFromStatsContainer(xmlDoc, 'Favorites:');
 	}
@@ -343,7 +359,11 @@ ds.fa._getRawComments = function(xmlDoc, faSkin, query) {
 		$(xmlDoc)
 			.find('div.comments-list div.comment_container[style="width:100%"]')
 			.filter(function(i, commentContainer) {
-				return query.Bfiltercomments === true && $(commentContainer).find('.comment_username').text() === query.commentsby;
+				if (query.Bfiltercomments === true) {
+					return $(commentContainer).find('.comment_username').text() === query.commentsby;
+				} else {
+					return true;
+				}
 			})
 			.find('div.comment_text')
 			.each(function(i, comment){
@@ -355,7 +375,11 @@ ds.fa._getRawComments = function(xmlDoc, faSkin, query) {
 		$(xmlDoc)
 			.find('table.container-comment[width="100%"]')
 			.filter(function(i, commentContainer) {
-				return query.Bfiltercomments === true && $(commentContainer).find('.replyto-name').text() === query.commentsby;
+				if (query.Bfiltercomments === true) {
+					return $(commentContainer).find('.replyto-name').text() === query.commentsby;
+				} else {
+					return true;
+				}
 			})
 			.find('td.replyto-message')
 			.each(function(i, comment){
